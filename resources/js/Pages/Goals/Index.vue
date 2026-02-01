@@ -1,8 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import GoalCard from '@/Components/GoalCard.vue';
+import OverviewProgressChart from '@/Components/Charts/OverviewProgressChart.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
+import draggable from 'vuedraggable';
 
 const props = defineProps({
     goals: Array,
@@ -14,15 +16,52 @@ const props = defineProps({
 
 const currentView = ref(props.view || 'board');
 const selectedCategory = ref(null);
+const drag = ref(false);
+
+// Local reactive copy of goals for drag & drop
+const localGoals = ref([...props.goals]);
+
+// Watch for prop changes
+watch(() => props.goals, (newGoals) => {
+    localGoals.value = [...newGoals];
+}, { deep: true });
+
+// Separate refs for pinned and unpinned goals to enable proper drag & drop
+const pinnedGoalsList = ref(props.goals.filter(g => g.is_pinned));
+const unpinnedGoalsList = ref(props.goals.filter(g => !g.is_pinned));
+
+watch(() => props.goals, (newGoals) => {
+    pinnedGoalsList.value = newGoals.filter(g => g.is_pinned);
+    unpinnedGoalsList.value = newGoals.filter(g => !g.is_pinned);
+}, { deep: true });
+
+const filteredPinnedGoals = computed(() => {
+    if (!selectedCategory.value) return pinnedGoalsList.value;
+    return pinnedGoalsList.value.filter(g => g.category_id === selectedCategory.value);
+});
+
+const filteredUnpinnedGoals = computed(() => {
+    if (!selectedCategory.value) return unpinnedGoalsList.value;
+    return unpinnedGoalsList.value.filter(g => g.category_id === selectedCategory.value);
+});
 
 const filteredGoals = computed(() => {
-    if (!selectedCategory.value) return props.goals;
-    return props.goals.filter(goal => goal.category_id === selectedCategory.value);
+    if (!selectedCategory.value) return localGoals.value;
+    return localGoals.value.filter(goal => goal.category_id === selectedCategory.value);
 });
 
 const filteredGoalsByCategory = computed(() => {
-    if (!selectedCategory.value) return props.goalsByCategory;
-    return { [selectedCategory.value]: props.goalsByCategory[selectedCategory.value] };
+    const result = {};
+    props.categories.forEach(cat => {
+        const goals = unpinnedGoalsList.value.filter(g => g.category_id === cat.id);
+        if (goals.length > 0) {
+            result[cat.id] = goals;
+        }
+    });
+    if (selectedCategory.value) {
+        return { [selectedCategory.value]: result[selectedCategory.value] || [] };
+    }
+    return result;
 });
 
 const switchView = (view) => {
@@ -32,6 +71,21 @@ const switchView = (view) => {
 
 const getCategoryById = (id) => {
     return props.categories.find(c => c.id === parseInt(id));
+};
+
+const saveOrder = () => {
+    drag.value = false;
+    // Combine pinned and unpinned goals and update sort_order
+    const allGoals = [...pinnedGoalsList.value, ...unpinnedGoalsList.value];
+    const goalsToUpdate = allGoals.map((goal, index) => ({
+        id: goal.id,
+        sort_order: index,
+    }));
+
+    router.post(route('goals.reorder'), { goals: goalsToUpdate }, {
+        preserveScroll: true,
+        preserveState: true,
+    });
 };
 </script>
 
@@ -144,52 +198,55 @@ const getCategoryById = (id) => {
                 <!-- Board View (Pinterest-like) -->
                 <div v-if="currentView === 'board'" class="space-y-8">
                     <!-- Pinned Goals -->
-                    <div v-if="filteredGoals.some(g => g.is_pinned)" class="mb-8">
+                    <div v-if="filteredPinnedGoals.length > 0" class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                             📍 Pinned Goals
+                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(drag to reorder)</span>
                         </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            <GoalCard
-                                v-for="goal in filteredGoals.filter(g => g.is_pinned)"
-                                :key="goal.id"
-                                :goal="goal"
-                            />
-                        </div>
+                        <draggable
+                            v-model="pinnedGoalsList"
+                            item-key="id"
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            ghost-class="opacity-50"
+                            drag-class="shadow-2xl"
+                            :animation="200"
+                            @start="drag = true"
+                            @end="saveOrder"
+                        >
+                            <template #item="{ element }">
+                                <GoalCard
+                                    v-if="!selectedCategory || element.category_id === selectedCategory"
+                                    :goal="element"
+                                    class="cursor-grab active:cursor-grabbing"
+                                />
+                            </template>
+                        </draggable>
                     </div>
 
-                    <!-- Goals by Category -->
-                    <div
-                        v-for="(categoryGoals, categoryId) in filteredGoalsByCategory"
-                        :key="categoryId"
-                        class="mb-8"
-                    >
-                        <div
-                            v-if="getCategoryById(categoryId)"
-                            class="flex items-center gap-3 mb-4"
+                    <!-- All Unpinned Goals (draggable across categories) -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                            🎯 All Goals
+                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(drag to reorder)</span>
+                        </h3>
+                        <draggable
+                            v-model="unpinnedGoalsList"
+                            item-key="id"
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            ghost-class="opacity-50"
+                            drag-class="shadow-2xl"
+                            :animation="200"
+                            @start="drag = true"
+                            @end="saveOrder"
                         >
-                            <span
-                                class="text-2xl w-10 h-10 flex items-center justify-center rounded-lg"
-                                :style="{ backgroundColor: `${getCategoryById(categoryId).color}20` }"
-                            >
-                                {{ getCategoryById(categoryId).icon }}
-                            </span>
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    {{ getCategoryById(categoryId).name }}
-                                </h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ categoryGoals.length }} goal{{ categoryGoals.length > 1 ? 's' : '' }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            <GoalCard
-                                v-for="goal in categoryGoals.filter(g => !g.is_pinned)"
-                                :key="goal.id"
-                                :goal="goal"
-                                :show-category="false"
-                            />
-                        </div>
+                            <template #item="{ element }">
+                                <GoalCard
+                                    v-if="!selectedCategory || element.category_id === selectedCategory"
+                                    :goal="element"
+                                    class="cursor-grab active:cursor-grabbing"
+                                />
+                            </template>
+                        </draggable>
                     </div>
 
                     <!-- Empty State -->
@@ -216,6 +273,9 @@ const getCategoryById = (id) => {
 
                 <!-- Dashboard View -->
                 <div v-else class="space-y-6">
+                    <!-- Progress Trend Chart -->
+                    <OverviewProgressChart :goals="filteredGoals" />
+
                     <!-- Progress Overview -->
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">

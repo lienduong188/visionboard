@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import GoalProgressChart from '@/Components/Charts/GoalProgressChart.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
@@ -358,10 +359,18 @@ const formatDate = (date) => {
                             </div>
                         </div>
 
+                        <!-- Progress Chart -->
+                        <div class="mb-6">
+                            <GoalProgressChart
+                                :goal="goal"
+                                :progress-logs="goal.progress_logs || []"
+                            />
+                        </div>
+
                         <!-- Progress History -->
                         <div v-if="goal.progress_logs?.length" class="mb-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                📈 Progress History
+                                📜 Progress History
                             </h3>
                             <div class="space-y-2">
                                 <div
