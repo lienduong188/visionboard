@@ -5,6 +5,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const props = defineProps({
     categories: Array,
@@ -14,7 +15,7 @@ const form = useForm({
     category_id: '',
     title: '',
     description: '',
-    cover_image: '',
+    cover_image: null,
     target_value: '',
     unit: '',
     start_date: new Date().toISOString().split('T')[0],
@@ -22,8 +23,29 @@ const form = useForm({
     priority: 'medium',
 });
 
+const imagePreview = ref(null);
+const fileInput = ref(null);
+
+const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.cover_image = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
+};
+
+const removeImage = () => {
+    form.cover_image = null;
+    imagePreview.value = null;
+    if (fileInput.value) {
+        fileInput.value.value = '';
+    }
+};
+
 const submit = () => {
-    form.post(route('goals.store'));
+    form.post(route('goals.store'), {
+        forceFormData: true,
+    });
 };
 </script>
 
@@ -97,22 +119,46 @@ const submit = () => {
                             <InputError :message="form.errors.description" class="mt-2" />
                         </div>
 
-                        <!-- Cover Image URL -->
+                        <!-- Cover Image Upload -->
                         <div>
-                            <InputLabel for="cover_image" value="Cover Image URL (optional)" />
-                            <TextInput
-                                id="cover_image"
-                                v-model="form.cover_image"
-                                type="url"
-                                class="mt-1 block w-full"
-                                placeholder="https://example.com/image.jpg"
-                            />
+                            <InputLabel for="cover_image" value="Cover Image (optional)" />
+                            <div class="mt-1">
+                                <input
+                                    ref="fileInput"
+                                    id="cover_image"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                                    @change="handleImageChange"
+                                    class="block w-full text-sm text-gray-500 dark:text-gray-400
+                                        file:mr-4 file:py-2 file:px-4
+                                        file:rounded-lg file:border-0
+                                        file:text-sm file:font-semibold
+                                        file:bg-indigo-50 file:text-indigo-700
+                                        hover:file:bg-indigo-100
+                                        dark:file:bg-indigo-900 dark:file:text-indigo-300
+                                        dark:hover:file:bg-indigo-800"
+                                />
+                            </div>
                             <InputError :message="form.errors.cover_image" class="mt-2" />
-                            <div
-                                v-if="form.cover_image"
-                                class="mt-2 h-32 bg-cover bg-center rounded-lg"
-                                :style="{ backgroundImage: `url(${form.cover_image})` }"
-                            ></div>
+                            <div v-if="imagePreview" class="mt-3 relative">
+                                <img
+                                    :src="imagePreview"
+                                    alt="Preview"
+                                    class="h-32 w-full object-cover rounded-lg"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeImage"
+                                    class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Max 2MB. Formats: JPEG, PNG, GIF, WebP
+                            </p>
                         </div>
 
                         <!-- Target Value & Unit -->

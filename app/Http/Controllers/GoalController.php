@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Goal;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class GoalController extends Controller
@@ -69,7 +70,7 @@ class GoalController extends Controller
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'cover_image' => 'nullable|string|max:500',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'target_value' => 'nullable|numeric',
             'unit' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
@@ -80,6 +81,14 @@ class GoalController extends Controller
         $validated['user_id'] = $request->user()->id;
         $validated['status'] = 'not_started';
         $validated['progress'] = 0;
+
+        // Handle cover image upload
+        if ($request->hasFile('cover_image')) {
+            $path = $request->file('cover_image')->store('goals', 'public');
+            $validated['cover_image'] = '/storage/' . $path;
+        } else {
+            unset($validated['cover_image']);
+        }
 
         Goal::create($validated);
 
@@ -127,7 +136,8 @@ class GoalController extends Controller
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'cover_image' => 'nullable|string|max:500',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'remove_cover_image' => 'nullable|boolean',
             'target_value' => 'nullable|numeric',
             'current_value' => 'nullable|numeric',
             'unit' => 'nullable|string|max:50',
@@ -137,6 +147,27 @@ class GoalController extends Controller
             'status' => 'required|in:not_started,in_progress,completed,paused,cancelled',
             'is_pinned' => 'boolean',
         ]);
+
+        // Handle cover image upload
+        if ($request->hasFile('cover_image')) {
+            // Delete old image if exists
+            if ($goal->cover_image && str_starts_with($goal->cover_image, '/storage/')) {
+                $oldPath = str_replace('/storage/', '', $goal->cover_image);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $path = $request->file('cover_image')->store('goals', 'public');
+            $validated['cover_image'] = '/storage/' . $path;
+        } elseif ($request->boolean('remove_cover_image')) {
+            // Delete old image
+            if ($goal->cover_image && str_starts_with($goal->cover_image, '/storage/')) {
+                $oldPath = str_replace('/storage/', '', $goal->cover_image);
+                Storage::disk('public')->delete($oldPath);
+            }
+            $validated['cover_image'] = null;
+        } else {
+            unset($validated['cover_image']);
+        }
+        unset($validated['remove_cover_image']);
 
         // Calculate progress if target_value exists
         if (isset($validated['target_value']) && $validated['target_value'] > 0) {
@@ -184,6 +215,12 @@ class GoalController extends Controller
     public function destroy(Goal $goal)
     {
         $this->authorize('delete', $goal);
+
+        // Delete cover image if exists
+        if ($goal->cover_image && str_starts_with($goal->cover_image, '/storage/')) {
+            $oldPath = str_replace('/storage/', '', $goal->cover_image);
+            Storage::disk('public')->delete($oldPath);
+        }
 
         $goal->delete();
 

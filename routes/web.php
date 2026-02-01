@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GoalController;
+use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     Route::patch('/goals/{goal}/progress', [GoalController::class, 'updateProgress'])->name('goals.progress');
     Route::patch('/goals/{goal}/pin', [GoalController::class, 'togglePin'])->name('goals.pin');
+
+    // Milestones
+    Route::post('/goals/{goal}/milestones', [MilestoneController::class, 'store'])->name('milestones.store');
+    Route::put('/goals/{goal}/milestones/{milestone}', [MilestoneController::class, 'update'])->name('milestones.update');
+    Route::patch('/goals/{goal}/milestones/{milestone}/toggle', [MilestoneController::class, 'toggle'])->name('milestones.toggle');
+    Route::post('/goals/{goal}/milestones/reorder', [MilestoneController::class, 'reorder'])->name('milestones.reorder');
+    Route::delete('/goals/{goal}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('milestones.destroy');
 });
 
 Route::middleware('auth')->group(function () {
