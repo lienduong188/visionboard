@@ -11,6 +11,8 @@ Personal vision board web application to track 2026 goals.
 ## Features
 - Authentication (Login/Register)
 - Board View (Pinterest-like) & Dashboard View
+- **Orbit View (Default)** - Goals orbit around "Vision Board 2026" title with auto-rotate animation
+- **View Toggle in Navigation** - Switch between Orbit, Board, and Dashboard views from the navigation bar
 - Goal CRUD with categories
 - Progress tracking
 - Pin goals to top
@@ -19,6 +21,7 @@ Personal vision board web application to track 2026 goals.
 - Milestone management
 - Drag & Drop - Reorder goals by dragging
 - Progress Chart - Visual progress tracking over time
+- **Orbit Scale** - Adjust goal card size (1-5) to prioritize important goals
 
 ## Local Development
 ```bash

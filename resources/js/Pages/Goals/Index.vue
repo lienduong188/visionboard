@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import GoalCard from '@/Components/GoalCard.vue';
+import OrbitGoalCard from '@/Components/OrbitGoalCard.vue';
 import OverviewProgressChart from '@/Components/Charts/OverviewProgressChart.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
@@ -14,9 +15,10 @@ const props = defineProps({
     view: String,
 });
 
-const currentView = ref(props.view || 'board');
+const currentView = computed(() => props.view || 'orbit');
 const selectedCategory = ref(null);
 const drag = ref(false);
+const orbitPaused = ref(false);
 
 // Local reactive copy of goals for drag & drop
 const localGoals = ref([...props.goals]);
@@ -63,11 +65,6 @@ const filteredGoalsByCategory = computed(() => {
     }
     return result;
 });
-
-const switchView = (view) => {
-    currentView.value = view;
-    router.get(route('goals.index'), { view }, { preserveState: true, preserveScroll: true });
-};
 
 const getCategoryById = (id) => {
     return props.categories.find(c => c.id === parseInt(id));
@@ -145,53 +142,105 @@ const saveOrder = () => {
                     </div>
                 </div>
 
-                <!-- View Toggle & Filters -->
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <!-- Category Filter -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button
-                            @click="selectedCategory = null"
-                            class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-                            :class="selectedCategory === null
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+                <!-- Category Filter -->
+                <div class="flex flex-wrap items-center gap-2 mb-6">
+                    <button
+                        @click="selectedCategory = null"
+                        class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                        :class="selectedCategory === null
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+                    >
+                        All
+                    </button>
+                    <button
+                        v-for="category in categories"
+                        :key="category.id"
+                        @click="selectedCategory = category.id"
+                        class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+                        :class="selectedCategory === category.id
+                            ? 'text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+                        :style="selectedCategory === category.id ? { backgroundColor: category.color } : {}"
+                    >
+                        {{ category.icon }} {{ category.name }}
+                    </button>
+                </div>
+
+                <!-- Orbit View -->
+                <div v-if="currentView === 'orbit'" class="relative">
+                    <!-- Orbit Container -->
+                    <div
+                        class="relative mx-auto"
+                        style="width: 900px; height: 900px;"
+                        @mouseenter="orbitPaused = true"
+                        @mouseleave="orbitPaused = false"
+                    >
+                        <!-- Orbit Rings (decorative) -->
+                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div class="absolute w-[720px] h-[720px] rounded-full border border-gray-200 dark:border-gray-700 opacity-50"></div>
+                            <div class="absolute w-[560px] h-[560px] rounded-full border border-gray-200 dark:border-gray-700 opacity-40"></div>
+                            <div class="absolute w-[400px] h-[400px] rounded-full border border-gray-200 dark:border-gray-700 opacity-30"></div>
+                        </div>
+
+                        <!-- Center Title -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center z-0">
+                                <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
+                                    VISION
+                                </h1>
+                                <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
+                                    BOARD
+                                </h1>
+                                <h2 class="text-6xl font-black text-gray-900 dark:text-white mt-2">
+                                    2026
+                                </h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
+                                    {{ filteredGoals.length }} goals
+                                </p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                    Hover to pause
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Orbiting Goals -->
+                        <div
+                            class="absolute inset-0 flex items-center justify-center orbit-container"
+                            :class="{ 'orbit-paused': orbitPaused }"
                         >
-                            All
-                        </button>
-                        <button
-                            v-for="category in categories"
-                            :key="category.id"
-                            @click="selectedCategory = category.id"
-                            class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-                            :class="selectedCategory === category.id
-                                ? 'text-white'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
-                            :style="selectedCategory === category.id ? { backgroundColor: category.color } : {}"
-                        >
-                            {{ category.icon }} {{ category.name }}
-                        </button>
+                            <OrbitGoalCard
+                                v-for="(goal, index) in filteredGoals"
+                                :key="goal.id"
+                                :goal="goal"
+                                :index="index"
+                                :total="filteredGoals.length"
+                                :radius="280"
+                            />
+                        </div>
                     </div>
 
-                    <!-- View Toggle -->
-                    <div class="flex items-center bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
-                        <button
-                            @click="switchView('board')"
-                            class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                            :class="currentView === 'board'
-                                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                        >
-                            🎨 Board
-                        </button>
-                        <button
-                            @click="switchView('dashboard')"
-                            class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                            :class="currentView === 'dashboard'
-                                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                        >
-                            📊 Dashboard
-                        </button>
+                    <!-- Empty State -->
+                    <div
+                        v-if="filteredGoals.length === 0"
+                        class="absolute inset-0 flex items-center justify-center"
+                    >
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🪐</div>
+                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                No goals in orbit yet
+                            </h3>
+                            <p class="text-gray-500 dark:text-gray-400 mb-6">
+                                Add goals to see them orbit around your vision!
+                            </p>
+                            <Link
+                                :href="route('goals.create')"
+                                class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+                            >
+                                <span>+</span>
+                                <span>Add Your First Goal</span>
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
@@ -460,3 +509,26 @@ const saveOrder = () => {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.orbit-container {
+    animation: orbit-rotate 60s linear infinite;
+}
+
+.orbit-container.orbit-paused {
+    animation-play-state: paused;
+}
+
+.orbit-container.orbit-paused :deep(.card-inner) {
+    animation-play-state: paused;
+}
+
+@keyframes orbit-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>

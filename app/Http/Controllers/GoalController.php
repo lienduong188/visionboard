@@ -20,8 +20,8 @@ class GoalController extends Controller
         $goals = Goal::with(['category', 'milestones'])
             ->where('user_id', $user->id)
             ->orderBy('is_pinned', 'desc')
-            ->orderBy('priority', 'desc')
-            ->orderBy('target_date', 'asc')
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         $categories = Category::ordered()->get();
@@ -45,7 +45,7 @@ class GoalController extends Controller
             'goalsByCategory' => $goalsByCategory,
             'categories' => $categories,
             'stats' => $stats,
-            'view' => $request->get('view', 'board'), // default to board view
+            'view' => $request->get('view', 'orbit'), // default to orbit view
         ]);
     }
 
@@ -205,6 +205,44 @@ class GoalController extends Controller
         $this->authorize('update', $goal);
 
         $goal->update(['is_pinned' => !$goal->is_pinned]);
+
+        return back();
+    }
+
+    /**
+     * Update orbit scale for a goal.
+     */
+    public function updateOrbitScale(Request $request, Goal $goal)
+    {
+        $this->authorize('update', $goal);
+
+        $validated = $request->validate([
+            'orbit_scale' => 'required|integer|min:1|max:5',
+        ]);
+
+        $goal->update($validated);
+
+        return back();
+    }
+
+    /**
+     * Reorder goals via drag & drop.
+     */
+    public function reorder(Request $request)
+    {
+        $validated = $request->validate([
+            'goals' => 'required|array',
+            'goals.*.id' => 'required|integer|exists:goals,id',
+            'goals.*.sort_order' => 'required|integer|min:0',
+        ]);
+
+        $user = $request->user();
+
+        foreach ($validated['goals'] as $goalData) {
+            Goal::where('id', $goalData['id'])
+                ->where('user_id', $user->id)
+                ->update(['sort_order' => $goalData['sort_order']]);
+        }
 
         return back();
     }

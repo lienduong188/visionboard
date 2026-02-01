@@ -3,17 +3,11 @@
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
+// Redirect home to Vision Board
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('goals.index');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -32,6 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/goals/{goal}', [GoalController::class, 'destroy'])->name('goals.destroy');
     Route::patch('/goals/{goal}/progress', [GoalController::class, 'updateProgress'])->name('goals.progress');
     Route::patch('/goals/{goal}/pin', [GoalController::class, 'togglePin'])->name('goals.pin');
+    Route::patch('/goals/{goal}/orbit-scale', [GoalController::class, 'updateOrbitScale'])->name('goals.orbit-scale');
+    Route::post('/goals/reorder', [GoalController::class, 'reorder'])->name('goals.reorder');
 
     // Milestones
     Route::post('/goals/{goal}/milestones', [MilestoneController::class, 'store'])->name('milestones.store');

@@ -1,13 +1,26 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const page = usePage();
+
+const isGoalsPage = computed(() => {
+    return route().current('goals.index');
+});
+
+const currentView = computed(() => {
+    return page.props.view || 'orbit';
+});
+
+const switchView = (view) => {
+    router.get(route('goals.index'), { view }, { preserveState: true, preserveScroll: true });
+};
 </script>
 
 <template>
@@ -43,6 +56,37 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                            <!-- View Toggle (only on Goals page) -->
+                            <div v-if="isGoalsPage" class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 me-4">
+                                <button
+                                    @click="switchView('orbit')"
+                                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+                                    :class="currentView === 'orbit'
+                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                                >
+                                    Orbit
+                                </button>
+                                <button
+                                    @click="switchView('board')"
+                                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+                                    :class="currentView === 'board'
+                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                                >
+                                    Board
+                                </button>
+                                <button
+                                    @click="switchView('dashboard')"
+                                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+                                    :class="currentView === 'dashboard'
+                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                                >
+                                    Dashboard
+                                </button>
+                            </div>
+
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
@@ -146,6 +190,40 @@ const showingNavigationDropdown = ref(false);
                         >
                             Dashboard
                         </ResponsiveNavLink>
+
+                        <!-- Responsive View Toggle (only on Goals page) -->
+                        <div v-if="isGoalsPage" class="px-4 py-2">
+                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">View Mode</div>
+                            <div class="flex gap-2">
+                                <button
+                                    @click="switchView('orbit')"
+                                    class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    :class="currentView === 'orbit'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                                >
+                                    Orbit
+                                </button>
+                                <button
+                                    @click="switchView('board')"
+                                    class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    :class="currentView === 'board'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                                >
+                                    Board
+                                </button>
+                                <button
+                                    @click="switchView('dashboard')"
+                                    class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                    :class="currentView === 'dashboard'
+                                        ? 'bg-indigo-600 text-white'
+                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
+                                >
+                                    Dashboard
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Responsive Settings Options -->

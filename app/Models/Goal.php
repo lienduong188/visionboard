@@ -27,6 +27,8 @@ class Goal extends Model
         'priority',
         'status',
         'is_pinned',
+        'sort_order',
+        'orbit_scale',
     ];
 
     protected $casts = [
@@ -37,6 +39,7 @@ class Goal extends Model
         'target_date' => 'date',
         'completed_at' => 'datetime',
         'is_pinned' => 'boolean',
+        'orbit_scale' => 'integer',
     ];
 
     /**
