@@ -1,0 +1,259 @@
+<script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import InputError from '@/Components/InputError.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+
+const props = defineProps({
+    goal: Object,
+    categories: Array,
+});
+
+const form = useForm({
+    category_id: props.goal.category_id,
+    title: props.goal.title,
+    description: props.goal.description || '',
+    cover_image: props.goal.cover_image || '',
+    target_value: props.goal.target_value || '',
+    current_value: props.goal.current_value || 0,
+    unit: props.goal.unit || '',
+    start_date: props.goal.start_date || '',
+    target_date: props.goal.target_date || '',
+    priority: props.goal.priority,
+    status: props.goal.status,
+    is_pinned: props.goal.is_pinned,
+});
+
+const submit = () => {
+    form.put(route('goals.update', props.goal.id));
+};
+</script>
+
+<template>
+    <Head :title="`Edit: ${goal.title}`" />
+
+    <AuthenticatedLayout>
+        <template #header>
+            <div class="flex items-center gap-4">
+                <Link
+                    :href="route('goals.show', goal.id)"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                    ← Back
+                </Link>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                    Edit Goal
+                </h2>
+            </div>
+        </template>
+
+        <div class="py-6">
+            <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <form @submit.prevent="submit" class="space-y-6">
+                        <!-- Category -->
+                        <div>
+                            <InputLabel for="category_id" value="Category" />
+                            <select
+                                id="category_id"
+                                v-model="form.category_id"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                required
+                            >
+                                <option
+                                    v-for="category in categories"
+                                    :key="category.id"
+                                    :value="category.id"
+                                >
+                                    {{ category.icon }} {{ category.name }}
+                                </option>
+                            </select>
+                            <InputError :message="form.errors.category_id" class="mt-2" />
+                        </div>
+
+                        <!-- Title -->
+                        <div>
+                            <InputLabel for="title" value="Title" />
+                            <TextInput
+                                id="title"
+                                v-model="form.title"
+                                type="text"
+                                class="mt-1 block w-full"
+                                required
+                            />
+                            <InputError :message="form.errors.title" class="mt-2" />
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <InputLabel for="description" value="Description" />
+                            <textarea
+                                id="description"
+                                v-model="form.description"
+                                rows="3"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            ></textarea>
+                            <InputError :message="form.errors.description" class="mt-2" />
+                        </div>
+
+                        <!-- Cover Image URL -->
+                        <div>
+                            <InputLabel for="cover_image" value="Cover Image URL" />
+                            <TextInput
+                                id="cover_image"
+                                v-model="form.cover_image"
+                                type="url"
+                                class="mt-1 block w-full"
+                            />
+                            <InputError :message="form.errors.cover_image" class="mt-2" />
+                            <div
+                                v-if="form.cover_image"
+                                class="mt-2 h-32 bg-cover bg-center rounded-lg"
+                                :style="{ backgroundImage: `url(${form.cover_image})` }"
+                            ></div>
+                        </div>
+
+                        <!-- Target Value & Current Value & Unit -->
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <InputLabel for="target_value" value="Target Value" />
+                                <TextInput
+                                    id="target_value"
+                                    v-model="form.target_value"
+                                    type="number"
+                                    step="any"
+                                    class="mt-1 block w-full"
+                                />
+                                <InputError :message="form.errors.target_value" class="mt-2" />
+                            </div>
+                            <div>
+                                <InputLabel for="current_value" value="Current Value" />
+                                <TextInput
+                                    id="current_value"
+                                    v-model="form.current_value"
+                                    type="number"
+                                    step="any"
+                                    class="mt-1 block w-full"
+                                />
+                                <InputError :message="form.errors.current_value" class="mt-2" />
+                            </div>
+                            <div>
+                                <InputLabel for="unit" value="Unit" />
+                                <TextInput
+                                    id="unit"
+                                    v-model="form.unit"
+                                    type="text"
+                                    class="mt-1 block w-full"
+                                />
+                                <InputError :message="form.errors.unit" class="mt-2" />
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <InputLabel for="start_date" value="Start Date" />
+                                <TextInput
+                                    id="start_date"
+                                    v-model="form.start_date"
+                                    type="date"
+                                    class="mt-1 block w-full"
+                                />
+                                <InputError :message="form.errors.start_date" class="mt-2" />
+                            </div>
+                            <div>
+                                <InputLabel for="target_date" value="Target Date" />
+                                <TextInput
+                                    id="target_date"
+                                    v-model="form.target_date"
+                                    type="date"
+                                    class="mt-1 block w-full"
+                                />
+                                <InputError :message="form.errors.target_date" class="mt-2" />
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <InputLabel for="status" value="Status" />
+                            <select
+                                id="status"
+                                v-model="form.status"
+                                class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                            >
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="paused">Paused</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <InputError :message="form.errors.status" class="mt-2" />
+                        </div>
+
+                        <!-- Priority -->
+                        <div>
+                            <InputLabel value="Priority" />
+                            <div class="mt-2 flex gap-4">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        v-model="form.priority"
+                                        value="low"
+                                        class="text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span class="text-gray-700 dark:text-gray-300">📌 Low</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        v-model="form.priority"
+                                        value="medium"
+                                        class="text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span class="text-gray-700 dark:text-gray-300">⭐ Medium</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        v-model="form.priority"
+                                        value="high"
+                                        class="text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span class="text-gray-700 dark:text-gray-300">🔥 High</span>
+                                </label>
+                            </div>
+                            <InputError :message="form.errors.priority" class="mt-2" />
+                        </div>
+
+                        <!-- Pinned -->
+                        <div>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    v-model="form.is_pinned"
+                                    class="rounded text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <span class="text-gray-700 dark:text-gray-300">📍 Pin this goal</span>
+                            </label>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="flex justify-end gap-4">
+                            <Link
+                                :href="route('goals.show', goal.id)"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            >
+                                Cancel
+                            </Link>
+                            <PrimaryButton :disabled="form.processing">
+                                Save Changes
+                            </PrimaryButton>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
+</template>
