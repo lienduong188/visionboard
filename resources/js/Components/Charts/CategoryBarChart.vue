@@ -4,39 +4,31 @@ import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
-    PointElement,
-    LineElement,
+    BarElement,
     Title,
     Tooltip,
-    Legend,
-    Filler
+    Legend
 } from 'chart.js';
-import { Line } from 'vue-chartjs';
+import { Bar } from 'vue-chartjs';
 
 // Register Chart.js components
 ChartJS.register(
     CategoryScale,
     LinearScale,
-    PointElement,
-    LineElement,
+    BarElement,
     Title,
     Tooltip,
-    Legend,
-    Filler
+    Legend
 );
 
 const props = defineProps({
-    chartData: {
-        type: Object,
+    data: {
+        type: Array,
         required: true,
-    },
-    title: {
-        type: String,
-        default: '',
     },
     height: {
         type: Number,
-        default: 250,
+        default: 300,
     },
 });
 
@@ -51,7 +43,6 @@ let observer = null;
 
 onMounted(() => {
     checkDarkMode();
-    // Watch for dark mode changes
     observer = new MutationObserver(checkDarkMode);
     observer.observe(document.documentElement, {
         attributes: true,
@@ -65,24 +56,30 @@ onUnmounted(() => {
     }
 });
 
+const chartData = computed(() => {
+    const categories = props.data.filter(c => c.goalCount > 0);
+
+    return {
+        labels: categories.map(c => `${c.icon} ${c.name}`),
+        datasets: [{
+            label: 'Tiến độ trung bình',
+            data: categories.map(c => c.avgProgress),
+            backgroundColor: categories.map(c => c.color + 'CC'), // Add alpha
+            borderColor: categories.map(c => c.color),
+            borderWidth: 2,
+            borderRadius: 8,
+            borderSkipped: false,
+        }]
+    };
+});
+
 const chartOptions = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
+    indexAxis: 'y', // Horizontal bar chart
     plugins: {
         legend: {
             display: false,
-        },
-        title: {
-            display: !!props.title,
-            text: props.title,
-            color: isDarkMode.value ? '#F9FAFB' : '#111827',
-            font: {
-                size: 14,
-                weight: 'bold',
-            },
-            padding: {
-                bottom: 16,
-            },
         },
         tooltip: {
             backgroundColor: isDarkMode.value ? '#374151' : '#FFFFFF',
@@ -92,94 +89,58 @@ const chartOptions = computed(() => ({
             borderWidth: 1,
             cornerRadius: 8,
             padding: 12,
-            displayColors: false,
             callbacks: {
                 label: (context) => {
-                    return `Tiến độ: ${context.parsed.y}%`;
+                    const category = props.data.find(c => `${c.icon} ${c.name}` === context.label);
+                    return [
+                        `Tiến độ: ${context.parsed.x}%`,
+                        `Mục tiêu: ${category?.goalCount || 0}`,
+                        `Hoàn thành: ${category?.completedCount || 0}`,
+                    ];
                 },
             },
         },
     },
     scales: {
         x: {
-            ticks: {
-                color: isDarkMode.value ? '#9CA3AF' : '#6B7280',
-                maxTicksLimit: 7,
-                font: {
-                    size: 11,
-                },
-            },
-            grid: {
-                color: isDarkMode.value ? '#374151' : '#F3F4F6',
-                drawBorder: false,
-            },
-            border: {
-                display: false,
-            },
-        },
-        y: {
             min: 0,
             max: 100,
             ticks: {
                 color: isDarkMode.value ? '#9CA3AF' : '#6B7280',
                 stepSize: 25,
                 callback: (value) => `${value}%`,
-                font: {
-                    size: 11,
-                },
+                font: { size: 11 },
             },
             grid: {
                 color: isDarkMode.value ? '#374151' : '#F3F4F6',
                 drawBorder: false,
             },
-            border: {
+            border: { display: false },
+        },
+        y: {
+            ticks: {
+                color: isDarkMode.value ? '#9CA3AF' : '#6B7280',
+                font: { size: 12 },
+            },
+            grid: {
                 display: false,
             },
-        },
-    },
-    interaction: {
-        intersect: false,
-        mode: 'index',
-    },
-    elements: {
-        line: {
-            tension: 0.4,
-        },
-        point: {
-            radius: 4,
-            hoverRadius: 6,
+            border: { display: false },
         },
     },
 }));
 
-// Apply theme colors to datasets
-const themedChartData = computed(() => {
-    const data = { ...props.chartData };
-    if (data.datasets) {
-        data.datasets = data.datasets.map(dataset => ({
-            ...dataset,
-            borderColor: dataset.borderColor || '#6366F1',
-            backgroundColor: dataset.backgroundColor || 'rgba(99, 102, 241, 0.1)',
-            pointBackgroundColor: dataset.borderColor || '#6366F1',
-            pointBorderColor: isDarkMode.value ? '#1F2937' : '#FFFFFF',
-            pointBorderWidth: 2,
-            fill: true,
-        }));
-    }
-    return data;
-});
-
 const hasData = computed(() => {
-    return props.chartData?.labels?.length > 0 && props.chartData?.datasets?.[0]?.data?.length > 0;
+    return props.data.some(c => c.goalCount > 0);
 });
 </script>
 
 <template>
     <div :style="{ height: `${height}px` }">
-        <Line
+        <Bar
             v-if="hasData"
             :key="isDarkMode"
-            :data="themedChartData"
+            :data="chartData"
             :options="chartOptions"
         />
         <div
@@ -187,8 +148,8 @@ const hasData = computed(() => {
             class="h-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400"
         >
             <div class="text-4xl mb-2">📊</div>
-            <p class="font-medium">Chưa có dữ liệu tiến độ</p>
-            <p class="text-sm">Cập nhật tiến độ để xem biểu đồ</p>
+            <p class="font-medium">Chưa có mục tiêu</p>
+            <p class="text-sm">Tạo mục tiêu để xem so sánh danh mục</p>
         </div>
     </div>
 </template>

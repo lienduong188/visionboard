@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\ReviewSettingController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect home to Vision Board
@@ -42,6 +44,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
     Route::patch('/goals/{goal}/reminders/{reminder}/toggle', [ReminderController::class, 'toggle'])->name('reminders.toggle');
     Route::delete('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'destroy'])->name('reminders.destroy');
+
+    // Analytics
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // Review Settings
+    Route::get('/settings/reviews', [ReviewSettingController::class, 'show'])->name('settings.reviews');
+    Route::put('/settings/reviews', [ReviewSettingController::class, 'update'])->name('settings.reviews.update');
 });
 
 Route::middleware('auth')->group(function () {

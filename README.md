@@ -26,6 +26,11 @@ Personal vision board web application to track 2026 goals.
 - **Reminder System** - Set reminders for goals (daily/weekly/monthly/custom)
 - **Email Reminders** - Automatic email notifications via background job
 - **Responsive Orbit** - Mobile-friendly orbit view with touch support
+- **Analytics Dashboard** - Comprehensive analytics with multiple chart types
+- **Category Comparison** - Bar Chart and Radar Chart comparing progress across categories
+- **Completion Trend** - Track completion trends over 7/30/90 days
+- **Monthly Stats** - Goals completed per month visualization
+- **Weekly/Monthly Review** - Scheduled email reports with progress summaries
 
 ## Local Development
 ```bash

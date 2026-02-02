@@ -56,6 +56,12 @@ const switchView = (view) => {
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    :href="route('analytics.index')"
+                                    :active="route().current('analytics.index')"
+                                >
+                                    Analytics
+                                </NavLink>
                             </div>
                         </div>
 
@@ -123,6 +129,11 @@ const switchView = (view) => {
                                             :href="route('profile.edit')"
                                         >
                                             Profile
+                                        </DropdownLink>
+                                        <DropdownLink
+                                            :href="route('settings.reviews')"
+                                        >
+                                            Review Settings
                                         </DropdownLink>
                                         <DropdownLink
                                             :href="route('logout')"
@@ -194,6 +205,12 @@ const switchView = (view) => {
                         >
                             Dashboard
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('analytics.index')"
+                            :active="route().current('analytics.index')"
+                        >
+                            Analytics
+                        </ResponsiveNavLink>
 
                         <!-- Responsive View Toggle (only on Goals page) -->
                         <div v-if="isGoalsPage" class="px-4 py-2">
@@ -248,6 +265,9 @@ const switchView = (view) => {
                         <div class="mt-3 space-y-1">
                             <ResponsiveNavLink :href="route('profile.edit')">
                                 Profile
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('settings.reviews')">
+                                Review Settings
                             </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('logout')"

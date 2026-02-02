@@ -1,6 +1,8 @@
 <?php
 
 use App\Jobs\SendGoalReminders;
+use App\Jobs\SendWeeklyReviews;
+use App\Jobs\SendMonthlyReviews;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +17,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         // Send goal reminders every 5 minutes
         $schedule->job(new SendGoalReminders)->everyFiveMinutes();
+
+        // Send weekly reviews (check every 5 minutes)
+        $schedule->job(new SendWeeklyReviews)->everyFiveMinutes();
+
+        // Send monthly reviews (check every 5 minutes)
+        $schedule->job(new SendMonthlyReviews)->everyFiveMinutes();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
