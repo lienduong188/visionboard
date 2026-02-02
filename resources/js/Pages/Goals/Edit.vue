@@ -17,13 +17,14 @@ const form = useForm({
     category_id: props.goal.category_id,
     title: props.goal.title,
     description: props.goal.description || '',
+    slogan: props.goal.slogan || '',
     cover_image: null,
     remove_cover_image: false,
     target_value: props.goal.target_value || '',
     current_value: props.goal.current_value || 0,
     unit: props.goal.unit || '',
-    start_date: props.goal.start_date || '',
-    target_date: props.goal.target_date || '',
+    start_date: props.goal.start_date || '2026-01-01',
+    target_date: props.goal.target_date || '2026-12-31',
     priority: props.goal.priority,
     status: props.goal.status,
     is_pinned: props.goal.is_pinned,
@@ -121,16 +122,36 @@ const submit = () => {
                             <InputError :message="form.errors.title" class="mt-2" />
                         </div>
 
-                        <!-- Description -->
+                        <!-- Description (Thuyết minh mục tiêu) -->
                         <div>
-                            <InputLabel for="description" value="Description" />
+                            <InputLabel for="description" value="Thuyết minh mục tiêu" />
                             <textarea
                                 id="description"
                                 v-model="form.description"
-                                rows="3"
+                                rows="4"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
+                                placeholder="Mô tả theo công thức: Trạng thái + Hình ảnh + Hành động&#10;Ví dụ: Tôi cảm thấy tràn đầy năng lượng khi đứng trên vạch đích marathon, với đôi chân khỏe mạnh chạy đều đặn mỗi sáng..."
                             ></textarea>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                💡 Gợi ý: Mô tả theo công thức <strong>Trạng thái + Hình ảnh + Hành động</strong> để hình dung rõ ràng mục tiêu
+                            </p>
                             <InputError :message="form.errors.description" class="mt-2" />
+                        </div>
+
+                        <!-- Slogan (Câu dẫn đường) -->
+                        <div>
+                            <InputLabel for="slogan" value="Câu dẫn đường (Slogan)" />
+                            <TextInput
+                                id="slogan"
+                                v-model="form.slogan"
+                                type="text"
+                                class="mt-1 block w-full"
+                                placeholder="Ví dụ: Chạy để sống, sống để chạy!"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                ✨ Một câu ngắn gọn truyền cảm hứng cho mục tiêu này
+                            </p>
+                            <InputError :message="form.errors.slogan" class="mt-2" />
                         </div>
 
                         <!-- Cover Image Upload -->
@@ -184,7 +205,7 @@ const submit = () => {
                                     id="target_value"
                                     v-model="form.target_value"
                                     type="number"
-                                    step="any"
+                                    step="1"
                                     class="mt-1 block w-full"
                                 />
                                 <InputError :message="form.errors.target_value" class="mt-2" />
@@ -195,7 +216,7 @@ const submit = () => {
                                     id="current_value"
                                     v-model="form.current_value"
                                     type="number"
-                                    step="any"
+                                    step="1"
                                     class="mt-1 block w-full"
                                 />
                                 <InputError :message="form.errors.current_value" class="mt-2" />

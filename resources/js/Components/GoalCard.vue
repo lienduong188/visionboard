@@ -1,5 +1,4 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -12,6 +11,8 @@ const props = defineProps({
         default: true,
     },
 });
+
+const emit = defineEmits(['click']);
 
 const progressColor = computed(() => {
     if (props.goal.progress >= 100) return 'bg-green-500';
@@ -60,9 +61,9 @@ const daysRemaining = computed(() => {
 </script>
 
 <template>
-    <Link
-        :href="route('goals.show', goal.id)"
-        class="block group"
+    <div
+        @click="emit('click', goal)"
+        class="block group cursor-pointer"
     >
         <div
             class="relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
@@ -206,5 +207,5 @@ const daysRemaining = computed(() => {
                 </div>
             </div>
         </div>
-    </Link>
+    </div>
 </template>

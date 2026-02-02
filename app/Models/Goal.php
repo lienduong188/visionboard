@@ -16,6 +16,7 @@ class Goal extends Model
         'category_id',
         'title',
         'description',
+        'slogan',
         'cover_image',
         'target_value',
         'current_value',
@@ -33,8 +34,8 @@ class Goal extends Model
     ];
 
     protected $casts = [
-        'target_value' => 'decimal:2',
-        'current_value' => 'decimal:2',
+        'target_value' => 'integer',
+        'current_value' => 'integer',
         'progress' => 'integer',
         'start_date' => 'date',
         'target_date' => 'date',
@@ -106,7 +107,7 @@ class Goal extends Model
     /**
      * Update progress and log the change.
      */
-    public function updateProgress(float $newValue, ?string $note = null): void
+    public function updateProgress(int $newValue, ?string $note = null): void
     {
         $previousValue = $this->current_value;
         $previousProgress = $this->progress;

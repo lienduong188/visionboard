@@ -1,5 +1,5 @@
 <script setup>
-import { Link, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
@@ -24,6 +24,8 @@ const props = defineProps({
         default: false,
     },
 });
+
+const emit = defineEmits(['click']);
 
 const isHovered = ref(false);
 
@@ -92,8 +94,8 @@ const updateScale = (newScale) => {
         @mouseleave="isHovered = false"
     >
         <div class="card-inner">
-            <Link
-                :href="route('goals.show', goal.id)"
+            <div
+                @click="emit('click', goal)"
                 class="block cursor-pointer"
             >
                 <div
@@ -160,7 +162,7 @@ const updateScale = (newScale) => {
                     </div>
                 </div>
                 </div>
-            </Link>
+            </div>
 
             <!-- Scale Slider (shows on hover) - hidden on mobile -->
             <div

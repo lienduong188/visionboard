@@ -16,11 +16,12 @@ const form = useForm({
     category_id: '',
     title: '',
     description: '',
+    slogan: '',
     cover_image: null,
     target_value: '',
     unit: '',
-    start_date: new Date().toISOString().split('T')[0],
-    target_date: '',
+    start_date: '2026-01-01',
+    target_date: '2026-12-31',
     priority: 'medium',
     is_core_goal: false,
 });
@@ -110,17 +111,36 @@ const submit = () => {
                             <InputError :message="form.errors.title" class="mt-2" />
                         </div>
 
-                        <!-- Description -->
+                        <!-- Description (Thuyết minh mục tiêu) -->
                         <div>
-                            <InputLabel for="description" value="Description" />
+                            <InputLabel for="description" value="Thuyết minh mục tiêu" />
                             <textarea
                                 id="description"
                                 v-model="form.description"
-                                rows="3"
+                                rows="4"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Describe your goal..."
+                                placeholder="Mô tả theo công thức: Trạng thái + Hình ảnh + Hành động&#10;Ví dụ: Tôi cảm thấy tràn đầy năng lượng khi đứng trên vạch đích marathon, với đôi chân khỏe mạnh chạy đều đặn mỗi sáng..."
                             ></textarea>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                💡 Gợi ý: Mô tả theo công thức <strong>Trạng thái + Hình ảnh + Hành động</strong> để hình dung rõ ràng mục tiêu
+                            </p>
                             <InputError :message="form.errors.description" class="mt-2" />
+                        </div>
+
+                        <!-- Slogan (Câu dẫn đường) -->
+                        <div>
+                            <InputLabel for="slogan" value="Câu dẫn đường (Slogan)" />
+                            <TextInput
+                                id="slogan"
+                                v-model="form.slogan"
+                                type="text"
+                                class="mt-1 block w-full"
+                                placeholder="Ví dụ: Chạy để sống, sống để chạy!"
+                            />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                ✨ Một câu ngắn gọn truyền cảm hứng cho mục tiêu này
+                            </p>
+                            <InputError :message="form.errors.slogan" class="mt-2" />
                         </div>
 
                         <!-- Cover Image Upload -->
@@ -173,7 +193,7 @@ const submit = () => {
                                     id="target_value"
                                     v-model="form.target_value"
                                     type="number"
-                                    step="any"
+                                    step="1"
                                     class="mt-1 block w-full"
                                     placeholder="e.g., 2000000"
                                 />

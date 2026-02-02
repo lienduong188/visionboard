@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import GoalCard from '@/Components/GoalCard.vue';
 import OrbitGoalCard from '@/Components/OrbitGoalCard.vue';
-import OverviewProgressChart from '@/Components/Charts/OverviewProgressChart.vue';
+import GoalEditModal from '@/Components/GoalEditModal.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import draggable from 'vuedraggable';
@@ -24,6 +24,38 @@ const expandedCoreGoals = ref({});
 const selectedCategory = ref(null);
 const drag = ref(false);
 const orbitPaused = ref(false);
+
+// Modal state
+const showEditModal = ref(false);
+const selectedGoal = ref(null);
+
+// Calculate core goals count excluding selected goal
+const modalCoreGoalsCount = computed(() => {
+    if (!selectedGoal.value) return props.coreGoals?.length || 0;
+    // If selected goal is already a core goal, don't count it
+    if (selectedGoal.value.is_core_goal) {
+        return (props.coreGoals?.length || 0) - 1;
+    }
+    return props.coreGoals?.length || 0;
+});
+
+const openGoalModal = (goal) => {
+    selectedGoal.value = goal;
+    showEditModal.value = true;
+};
+
+const closeGoalModal = () => {
+    showEditModal.value = false;
+    selectedGoal.value = null;
+};
+
+const onGoalSaved = () => {
+    router.reload({ preserveScroll: true });
+};
+
+const onGoalDeleted = () => {
+    router.reload({ preserveScroll: true });
+};
 
 // Responsive orbit size
 const orbitSize = ref(900);
@@ -103,6 +135,22 @@ const filteredGoalsByCategory = computed(() => {
 
 const getCategoryById = (id) => {
     return props.categories.find(c => c.id === parseInt(id));
+};
+
+// Vietnamese tooltips for categories
+const categoryTooltips = {
+    'career-finance': 'Sự nghiệp, thu nhập, đầu tư, quản lý nợ',
+    'health-fitness': 'Sức khỏe thể chất, tập luyện, dinh dưỡng',
+    'relationships': 'Gia đình, bạn bè, tình yêu, mối quan hệ',
+    'personal-growth': 'Học hỏi, kỹ năng, chứng chỉ, phát triển bản thân',
+    'travel-experiences': 'Du lịch, phiêu lưu, trải nghiệm mới',
+    'creativity-hobbies': 'Dự án sáng tạo, sở thích, side projects',
+    'mindfulness-spirituality': 'Thiền định, biết ơn, sức khỏe tinh thần',
+    'giving-back': 'Từ thiện, tình nguyện, đóng góp cộng đồng',
+};
+
+const getCategoryTooltip = (category) => {
+    return categoryTooltips[category.slug] || category.description || '';
 };
 
 // Toggle expanded state for core goal milestones
@@ -219,6 +267,7 @@ const saveOrder = () => {
                         :class="selectedCategory === null
                             ? 'bg-indigo-600 text-white'
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
+                        title="Hiển thị tất cả goals"
                     >
                         All
                     </button>
@@ -231,6 +280,7 @@ const saveOrder = () => {
                             ? 'text-white'
                             : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
                         :style="selectedCategory === category.id ? { backgroundColor: category.color } : {}"
+                        :title="getCategoryTooltip(category)"
                     >
                         {{ category.icon }} {{ category.name }}
                     </button>
@@ -294,6 +344,7 @@ const saveOrder = () => {
                                 :total="filteredCoreGoals.length"
                                 :radius="orbitRadius"
                                 :is-mobile="orbitSize < 500"
+                                @click="openGoalModal"
                             />
                         </div>
                     </div>
@@ -449,6 +500,7 @@ const saveOrder = () => {
                                     v-if="!selectedCategory || element.category_id === selectedCategory"
                                     :goal="element"
                                     class="cursor-grab active:cursor-grabbing"
+                                    @click="openGoalModal"
                                 />
                             </template>
                         </draggable>
@@ -484,6 +536,17 @@ const saveOrder = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Goal Edit Modal -->
+        <GoalEditModal
+            :show="showEditModal"
+            :goal="selectedGoal"
+            :categories="categories"
+            :core-goals-count="modalCoreGoalsCount"
+            @close="closeGoalModal"
+            @saved="onGoalSaved"
+            @deleted="onGoalDeleted"
+        />
     </AuthenticatedLayout>
 </template>
 

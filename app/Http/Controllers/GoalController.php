@@ -86,8 +86,9 @@ class GoalController extends Controller
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'slogan' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'target_value' => 'nullable|numeric',
+            'target_value' => 'nullable|integer',
             'unit' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
             'target_date' => 'nullable|date',
@@ -171,10 +172,11 @@ class GoalController extends Controller
             'category_id' => 'required|exists:categories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'slogan' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'remove_cover_image' => 'nullable|boolean',
-            'target_value' => 'nullable|numeric',
-            'current_value' => 'nullable|numeric',
+            'target_value' => 'nullable|integer',
+            'current_value' => 'nullable|integer',
             'unit' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
             'target_date' => 'nullable|date',
@@ -238,7 +240,7 @@ class GoalController extends Controller
         $this->authorize('update', $goal);
 
         $validated = $request->validate([
-            'current_value' => 'required|numeric',
+            'current_value' => 'required|integer',
             'note' => 'nullable|string',
         ]);
 

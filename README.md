@@ -14,8 +14,12 @@ Personal vision board web application to track 2026 goals.
 - **Plan View** - Todo list showing Core Goals with expandable milestones + regular goals with drag & drop
 - **Core Goals System** - Mark up to 3 goals as "Core Goals" (trục trung tâm) to display in VisionBoard
 - **View Toggle** - Switch between VisionBoard and Plan views from the navigation bar
+- **Goal Edit Popup** - Click any goal to open edit popup (Save/Delete buttons, ESC or X to close)
+- **Slogan (Câu dẫn đường)** - Each goal can have an inspirational slogan
+- **Goal Description Formula** - Describe goals with: Status + Image + Action format
+- **Category Tooltips** - Vietnamese tooltips for category filter buttons
 - Goal CRUD with categories
-- Progress tracking
+- Progress tracking (integer values)
 - Pin goals to top
 - Category filter
 - Image upload for goals
@@ -31,6 +35,7 @@ Personal vision board web application to track 2026 goals.
 - **Completion Trend** - Track completion trends over 7/30/90 days
 - **Monthly Stats** - Goals completed per month visualization
 - **Weekly/Monthly Review** - Scheduled email reports with progress summaries
+- **Default Dates** - Goals default to Start: 2026/1/1, Target: 2026/12/31
 
 ## Local Development
 ```bash
