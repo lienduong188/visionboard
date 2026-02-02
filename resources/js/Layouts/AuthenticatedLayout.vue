@@ -16,7 +16,7 @@ const isGoalsPage = computed(() => {
 });
 
 const currentView = computed(() => {
-    return page.props.view || 'orbit';
+    return page.props.view || 'visionboard';
 });
 
 const switchView = (view) => {
@@ -69,31 +69,22 @@ const switchView = (view) => {
                             <!-- View Toggle (only on Goals page) -->
                             <div v-if="isGoalsPage" class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 me-4">
                                 <button
-                                    @click="switchView('orbit')"
+                                    @click="switchView('visionboard')"
                                     class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'orbit'
+                                    :class="currentView === 'visionboard'
                                         ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                                 >
-                                    Orbit
+                                    VisionBoard
                                 </button>
                                 <button
-                                    @click="switchView('board')"
+                                    @click="switchView('plan')"
                                     class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'board'
+                                    :class="currentView === 'plan'
                                         ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                                 >
-                                    Board
-                                </button>
-                                <button
-                                    @click="switchView('dashboard')"
-                                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'dashboard'
-                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                                >
-                                    Dashboard
+                                    Plan
                                 </button>
                             </div>
 
@@ -217,31 +208,22 @@ const switchView = (view) => {
                             <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">View Mode</div>
                             <div class="flex gap-2">
                                 <button
-                                    @click="switchView('orbit')"
+                                    @click="switchView('visionboard')"
                                     class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'orbit'
+                                    :class="currentView === 'visionboard'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
                                 >
-                                    Orbit
+                                    VisionBoard
                                 </button>
                                 <button
-                                    @click="switchView('board')"
+                                    @click="switchView('plan')"
                                     class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'board'
+                                    :class="currentView === 'plan'
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
                                 >
-                                    Board
-                                </button>
-                                <button
-                                    @click="switchView('dashboard')"
-                                    class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'dashboard'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                                >
-                                    Dashboard
+                                    Plan
                                 </button>
                             </div>
                         </div>

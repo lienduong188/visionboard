@@ -27,6 +27,7 @@ class Goal extends Model
         'priority',
         'status',
         'is_pinned',
+        'is_core_goal',
         'sort_order',
         'orbit_scale',
     ];
@@ -39,6 +40,7 @@ class Goal extends Model
         'target_date' => 'date',
         'completed_at' => 'datetime',
         'is_pinned' => 'boolean',
+        'is_core_goal' => 'boolean',
         'orbit_scale' => 'integer',
     ];
 
@@ -134,6 +136,22 @@ class Goal extends Model
     public function scopePinned($query)
     {
         return $query->where('is_pinned', true);
+    }
+
+    /**
+     * Scope for core goals (3 trục trung tâm).
+     */
+    public function scopeCoreGoals($query)
+    {
+        return $query->where('is_core_goal', true);
+    }
+
+    /**
+     * Scope for regular goals (non-core).
+     */
+    public function scopeRegularGoals($query)
+    {
+        return $query->where('is_core_goal', false);
     }
 
     /**

@@ -10,22 +10,22 @@ Personal vision board web application to track 2026 goals.
 
 ## Features
 - Authentication (Login/Register)
-- Board View (Pinterest-like) & Dashboard View
-- **Orbit View (Default)** - Goals orbit around "Vision Board 2026" title with auto-rotate animation
-- **View Toggle in Navigation** - Switch between Orbit, Board, and Dashboard views from the navigation bar
+- **VisionBoard View (Default)** - 3 Core Goals orbit around "Vision Board 2026" title with auto-rotate animation
+- **Plan View** - Todo list showing Core Goals with expandable milestones + regular goals with drag & drop
+- **Core Goals System** - Mark up to 3 goals as "Core Goals" (trục trung tâm) to display in VisionBoard
+- **View Toggle** - Switch between VisionBoard and Plan views from the navigation bar
 - Goal CRUD with categories
 - Progress tracking
 - Pin goals to top
 - Category filter
 - Image upload for goals
-- Milestone management
-- Drag & Drop - Reorder goals by dragging
+- Milestone management with checkbox toggle directly from Plan view
+- Drag & Drop - Reorder regular goals by dragging
 - Progress Chart - Visual progress tracking over time
-- **Orbit Scale** - Adjust goal card size (1-5) to prioritize important goals
 - **Toast Notifications** - Visual feedback for all actions (success/error)
 - **Reminder System** - Set reminders for goals (daily/weekly/monthly/custom)
 - **Email Reminders** - Automatic email notifications via background job
-- **Responsive Orbit** - Mobile-friendly orbit view with touch support
+- **Responsive VisionBoard** - Mobile-friendly orbit view with touch support
 - **Analytics Dashboard** - Comprehensive analytics with multiple chart types
 - **Category Comparison** - Bar Chart and Radar Chart comparing progress across categories
 - **Completion Trend** - Track completion trends over 7/30/90 days

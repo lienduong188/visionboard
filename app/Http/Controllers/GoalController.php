@@ -26,6 +26,10 @@ class GoalController extends Controller
 
         $categories = Category::ordered()->get();
 
+        // Separate core goals and regular goals
+        $coreGoals = $goals->where('is_core_goal', true)->values();
+        $regularGoals = $goals->where('is_core_goal', false)->values();
+
         // Calculate stats
         $stats = [
             'total' => $goals->count(),
@@ -37,27 +41,39 @@ class GoalController extends Controller
                 : 0,
         ];
 
-        // Group goals by category for board view
+        // Group goals by category for plan view
         $goalsByCategory = $goals->groupBy('category_id');
+
+        // Handle view parameter - redirect dashboard to analytics
+        $view = $request->get('view', 'visionboard');
+        if ($view === 'dashboard') {
+            return redirect()->route('analytics.index');
+        }
 
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
+            'coreGoals' => $coreGoals,
+            'regularGoals' => $regularGoals,
             'goalsByCategory' => $goalsByCategory,
             'categories' => $categories,
             'stats' => $stats,
-            'view' => $request->get('view', 'orbit'), // default to orbit view
+            'view' => $view,
         ]);
     }
 
     /**
      * Show the form for creating a new goal.
      */
-    public function create()
+    public function create(Request $request)
     {
         $categories = Category::ordered()->get();
+        $coreGoalsCount = Goal::where('user_id', $request->user()->id)
+            ->where('is_core_goal', true)
+            ->count();
 
         return Inertia::render('Goals/Create', [
             'categories' => $categories,
+            'coreGoalsCount' => $coreGoalsCount,
         ]);
     }
 
@@ -76,11 +92,25 @@ class GoalController extends Controller
             'start_date' => 'nullable|date',
             'target_date' => 'nullable|date',
             'priority' => 'required|in:low,medium,high',
+            'is_core_goal' => 'boolean',
         ]);
 
         $validated['user_id'] = $request->user()->id;
         $validated['status'] = 'not_started';
         $validated['progress'] = 0;
+
+        // Check core goals limit (max 3)
+        if ($request->boolean('is_core_goal')) {
+            $coreGoalsCount = Goal::where('user_id', $request->user()->id)
+                ->where('is_core_goal', true)
+                ->count();
+
+            if ($coreGoalsCount >= 3) {
+                return back()->withErrors([
+                    'is_core_goal' => 'Bạn chỉ có thể có tối đa 3 Core Goals (trục trung tâm).',
+                ])->withInput();
+            }
+        }
 
         // Handle cover image upload
         if ($request->hasFile('cover_image')) {
@@ -113,15 +143,20 @@ class GoalController extends Controller
     /**
      * Show the form for editing the specified goal.
      */
-    public function edit(Goal $goal)
+    public function edit(Request $request, Goal $goal)
     {
         $this->authorize('update', $goal);
 
         $categories = Category::ordered()->get();
+        $coreGoalsCount = Goal::where('user_id', $request->user()->id)
+            ->where('is_core_goal', true)
+            ->where('id', '!=', $goal->id)
+            ->count();
 
         return Inertia::render('Goals/Edit', [
             'goal' => $goal,
             'categories' => $categories,
+            'coreGoalsCount' => $coreGoalsCount,
         ]);
     }
 
@@ -146,7 +181,22 @@ class GoalController extends Controller
             'priority' => 'required|in:low,medium,high',
             'status' => 'required|in:not_started,in_progress,completed,paused,cancelled',
             'is_pinned' => 'boolean',
+            'is_core_goal' => 'boolean',
         ]);
+
+        // Check core goals limit (max 3)
+        if ($request->boolean('is_core_goal') && !$goal->is_core_goal) {
+            $coreGoalsCount = Goal::where('user_id', $request->user()->id)
+                ->where('is_core_goal', true)
+                ->where('id', '!=', $goal->id)
+                ->count();
+
+            if ($coreGoalsCount >= 3) {
+                return back()->withErrors([
+                    'is_core_goal' => 'Bạn chỉ có thể có tối đa 3 Core Goals (trục trung tâm).',
+                ])->withInput();
+            }
+        }
 
         // Handle cover image upload
         if ($request->hasFile('cover_image')) {

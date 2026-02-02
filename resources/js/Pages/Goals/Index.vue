@@ -9,13 +9,18 @@ import draggable from 'vuedraggable';
 
 const props = defineProps({
     goals: Array,
+    coreGoals: Array,
+    regularGoals: Array,
     goalsByCategory: Object,
     categories: Array,
     stats: Object,
     view: String,
 });
 
-const currentView = computed(() => props.view || 'orbit');
+const currentView = computed(() => props.view || 'visionboard');
+
+// Expanded state for core goals milestones
+const expandedCoreGoals = ref({});
 const selectedCategory = ref(null);
 const drag = ref(false);
 const orbitPaused = ref(false);
@@ -100,6 +105,40 @@ const getCategoryById = (id) => {
     return props.categories.find(c => c.id === parseInt(id));
 };
 
+// Toggle expanded state for core goal milestones
+const toggleCoreGoal = (goalId) => {
+    expandedCoreGoals.value[goalId] = !expandedCoreGoals.value[goalId];
+};
+
+// Toggle milestone completion
+const toggleMilestone = (goalId, milestone) => {
+    router.patch(route('milestones.toggle', [goalId, milestone.id]), {}, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
+// Filter core goals based on selected category
+const filteredCoreGoals = computed(() => {
+    const goals = props.coreGoals || [];
+    if (!selectedCategory.value) return goals;
+    return goals.filter(goal => goal.category_id === selectedCategory.value);
+});
+
+// Filter regular goals based on selected category
+const filteredRegularGoals = computed(() => {
+    const goals = props.regularGoals || [];
+    if (!selectedCategory.value) return goals;
+    return goals.filter(goal => goal.category_id === selectedCategory.value);
+});
+
+// Local reactive copy of regular goals for drag & drop in Plan view
+const regularGoalsList = ref([...(props.regularGoals || [])]);
+
+watch(() => props.regularGoals, (newGoals) => {
+    regularGoalsList.value = [...(newGoals || [])];
+}, { deep: true });
+
 const saveOrder = () => {
     drag.value = false;
     // Combine pinned and unpinned goals and update sort_order
@@ -142,8 +181,8 @@ const saveOrder = () => {
 
         <div class="py-6">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- Stats Cards -->
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <!-- Stats Cards (only in Plan view) -->
+                <div v-if="currentView === 'plan'" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
                         <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">Total Goals</div>
@@ -172,8 +211,8 @@ const saveOrder = () => {
                     </div>
                 </div>
 
-                <!-- Category Filter -->
-                <div class="flex flex-wrap items-center gap-2 mb-6">
+                <!-- Category Filter (only in Plan view) -->
+                <div v-if="currentView === 'plan'" class="flex flex-wrap items-center gap-2 mb-6">
                     <button
                         @click="selectedCategory = null"
                         class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
@@ -197,8 +236,8 @@ const saveOrder = () => {
                     </button>
                 </div>
 
-                <!-- Orbit View -->
-                <div v-if="currentView === 'orbit'" class="relative overflow-hidden">
+                <!-- VisionBoard View (3 Core Goals) -->
+                <div v-if="currentView === 'visionboard'" class="relative overflow-hidden">
                     <!-- Orbit Container -->
                     <div
                         class="relative mx-auto transition-all duration-300"
@@ -236,29 +275,23 @@ const saveOrder = () => {
                                 <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mt-2">
                                     2026
                                 </h2>
-                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 sm:mt-4">
-                                    {{ filteredGoals.length }} goals
-                                </p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 hidden sm:block">
-                                    Hover to pause
-                                </p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 sm:hidden">
-                                    Tap to pause
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-4 sm:mt-6 max-w-xs mx-auto italic">
+                                    "Mỗi ngày đi một đoạn nhỏ, <br>đủ bền để đi xa, <br>đủ chậm để không bỏ quên mình."
                                 </p>
                             </div>
                         </div>
 
-                        <!-- Orbiting Goals -->
+                        <!-- Orbiting Core Goals (3 trục trung tâm) -->
                         <div
                             class="absolute inset-0 flex items-center justify-center orbit-container"
                             :class="{ 'orbit-paused': orbitPaused }"
                         >
                             <OrbitGoalCard
-                                v-for="(goal, index) in filteredGoals"
+                                v-for="(goal, index) in filteredCoreGoals"
                                 :key="goal.id"
                                 :goal="goal"
                                 :index="index"
-                                :total="filteredGoals.length"
+                                :total="filteredCoreGoals.length"
                                 :radius="orbitRadius"
                                 :is-mobile="orbitSize < 500"
                             />
@@ -267,64 +300,142 @@ const saveOrder = () => {
 
                     <!-- Empty State -->
                     <div
-                        v-if="filteredGoals.length === 0"
+                        v-if="filteredCoreGoals.length === 0"
                         class="absolute inset-0 flex items-center justify-center"
                     >
                         <div class="text-center">
-                            <div class="text-6xl mb-4">🪐</div>
+                            <div class="text-6xl mb-4">🎯</div>
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                                No goals in orbit yet
+                                Chưa có Core Goals
                             </h3>
                             <p class="text-gray-500 dark:text-gray-400 mb-6">
-                                Add goals to see them orbit around your vision!
+                                Thêm 3 trục trung tâm để xoay quanh Vision Board!
                             </p>
                             <Link
                                 :href="route('goals.create')"
                                 class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
                             >
                                 <span>+</span>
-                                <span>Add Your First Goal</span>
+                                <span>Thêm Core Goal</span>
                             </Link>
                         </div>
                     </div>
                 </div>
 
-                <!-- Board View (Pinterest-like) -->
-                <div v-if="currentView === 'board'" class="space-y-8">
-                    <!-- Pinned Goals -->
-                    <div v-if="filteredPinnedGoals.length > 0" class="mb-8">
+                <!-- Plan View -->
+                <div v-if="currentView === 'plan'" class="space-y-8">
+                    <!-- Core Goals Section (with Milestones) -->
+                    <div v-if="filteredCoreGoals.length > 0" class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            📍 Pinned Goals
-                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(drag to reorder)</span>
+                            🎯 Core Goals - Trục Trung Tâm
+                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(click để xem milestones)</span>
                         </h3>
-                        <draggable
-                            v-model="pinnedGoalsList"
-                            item-key="id"
-                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                            ghost-class="opacity-50"
-                            drag-class="shadow-2xl"
-                            :animation="200"
-                            @start="drag = true"
-                            @end="saveOrder"
-                        >
-                            <template #item="{ element }">
-                                <GoalCard
-                                    v-if="!selectedCategory || element.category_id === selectedCategory"
-                                    :goal="element"
-                                    class="cursor-grab active:cursor-grabbing"
-                                />
-                            </template>
-                        </draggable>
+                        <div class="space-y-4">
+                            <div
+                                v-for="goal in filteredCoreGoals"
+                                :key="goal.id"
+                                class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden"
+                            >
+                                <!-- Goal Header (clickable to expand) -->
+                                <div
+                                    @click="toggleCoreGoal(goal.id)"
+                                    class="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-2xl">{{ goal.category?.icon }}</span>
+                                            <div>
+                                                <h4 class="font-semibold text-gray-900 dark:text-white">{{ goal.title }}</h4>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                    {{ goal.milestones?.length || 0 }} milestones
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-right">
+                                                <div class="font-bold text-lg" :class="goal.progress >= 100 ? 'text-green-500' : 'text-indigo-600 dark:text-indigo-400'">
+                                                    {{ goal.progress }}%
+                                                </div>
+                                                <div class="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                                    <div
+                                                        class="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                                                        :style="{ width: `${goal.progress}%` }"
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                            <svg
+                                                class="w-5 h-5 text-gray-400 transition-transform"
+                                                :class="{ 'rotate-180': expandedCoreGoals[goal.id] }"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Milestones (expandable) -->
+                                <div
+                                    v-show="expandedCoreGoals[goal.id]"
+                                    class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
+                                >
+                                    <div class="p-4 space-y-2">
+                                        <div
+                                            v-for="milestone in goal.milestones"
+                                            :key="milestone.id"
+                                            class="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                                        >
+                                            <button
+                                                @click.stop="toggleMilestone(goal.id, milestone)"
+                                                class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
+                                                :class="milestone.is_completed
+                                                    ? 'bg-green-500 border-green-500 text-white'
+                                                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500'"
+                                            >
+                                                <svg v-if="milestone.is_completed" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                </svg>
+                                            </button>
+                                            <span
+                                                class="flex-1"
+                                                :class="milestone.is_completed ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-gray-300'"
+                                            >
+                                                {{ milestone.title }}
+                                            </span>
+                                            <span
+                                                v-if="milestone.target_date"
+                                                class="text-xs text-gray-500 dark:text-gray-400"
+                                            >
+                                                {{ new Date(milestone.target_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) }}
+                                            </span>
+                                        </div>
+                                        <div v-if="!goal.milestones?.length" class="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+                                            Chưa có milestones. <Link :href="route('goals.show', goal.id)" class="text-indigo-600 hover:underline">Thêm milestones</Link>
+                                        </div>
+                                    </div>
+                                    <div class="px-4 pb-4">
+                                        <Link
+                                            :href="route('goals.show', goal.id)"
+                                            class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+                                        >
+                                            Xem chi tiết goal →
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- All Unpinned Goals (draggable across categories) -->
+                    <!-- Other Goals Section -->
                     <div class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            🎯 All Goals
+                            📋 Other Goals
                             <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(drag to reorder)</span>
                         </h3>
                         <draggable
-                            v-model="unpinnedGoalsList"
+                            v-model="regularGoalsList"
                             item-key="id"
                             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                             ghost-class="opacity-50"
@@ -341,213 +452,34 @@ const saveOrder = () => {
                                 />
                             </template>
                         </draggable>
+                        <div
+                            v-if="filteredRegularGoals.length === 0"
+                            class="text-center py-8 text-gray-500 dark:text-gray-400"
+                        >
+                            <div class="text-4xl mb-2">📝</div>
+                            <p>Chưa có goals thường. Tất cả goals đều là Core Goals!</p>
+                        </div>
                     </div>
 
-                    <!-- Empty State -->
+                    <!-- Empty State (no goals at all) -->
                     <div
-                        v-if="filteredGoals.length === 0"
+                        v-if="filteredCoreGoals.length === 0 && filteredRegularGoals.length === 0"
                         class="text-center py-16"
                     >
                         <div class="text-6xl mb-4">🎯</div>
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                            No goals yet
+                            Chưa có goals
                         </h3>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">
-                            Start building your vision board by adding your first goal!
+                            Bắt đầu bằng việc thêm goal đầu tiên!
                         </p>
                         <Link
                             :href="route('goals.create')"
                             class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
                         >
                             <span>+</span>
-                            <span>Add Your First Goal</span>
+                            <span>Thêm Goal</span>
                         </Link>
-                    </div>
-                </div>
-
-                <!-- Dashboard View -->
-                <div v-else class="space-y-6">
-                    <!-- Progress Trend Chart -->
-                    <OverviewProgressChart :goals="filteredGoals" />
-
-                    <!-- Progress Overview -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            📈 Progress Overview
-                        </h3>
-                        <div class="space-y-4">
-                            <div
-                                v-for="goal in filteredGoals"
-                                :key="goal.id"
-                                class="group"
-                            >
-                                <Link
-                                    :href="route('goals.show', goal.id)"
-                                    class="block"
-                                >
-                                    <div class="flex items-center justify-between mb-1">
-                                        <div class="flex items-center gap-2">
-                                            <span>{{ goal.category?.icon }}</span>
-                                            <span class="font-medium text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                                {{ goal.title }}
-                                            </span>
-                                            <span v-if="goal.is_pinned" class="text-sm">📍</span>
-                                        </div>
-                                        <div class="flex items-center gap-4">
-                                            <span
-                                                v-if="goal.target_value && goal.unit"
-                                                class="text-sm text-gray-500 dark:text-gray-400"
-                                            >
-                                                {{ goal.current_value?.toLocaleString() || 0 }}/{{ goal.target_value?.toLocaleString() }} {{ goal.unit }}
-                                            </span>
-                                            <span
-                                                class="font-bold"
-                                                :class="goal.progress >= 100 ? 'text-green-500' : 'text-gray-900 dark:text-white'"
-                                            >
-                                                {{ goal.progress }}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                        <div
-                                            class="h-full rounded-full transition-all duration-500"
-                                            :class="{
-                                                'bg-green-500': goal.progress >= 100,
-                                                'bg-emerald-500': goal.progress >= 75 && goal.progress < 100,
-                                                'bg-yellow-500': goal.progress >= 50 && goal.progress < 75,
-                                                'bg-orange-500': goal.progress >= 25 && goal.progress < 50,
-                                                'bg-red-500': goal.progress < 25,
-                                            }"
-                                            :style="{ width: `${goal.progress}%` }"
-                                        ></div>
-                                    </div>
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Goals by Status -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- In Progress -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
-                            <h3 class="text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2">
-                                🚀 In Progress
-                            </h3>
-                            <div class="space-y-3">
-                                <Link
-                                    v-for="goal in filteredGoals.filter(g => g.status === 'in_progress')"
-                                    :key="goal.id"
-                                    :href="route('goals.show', goal.id)"
-                                    class="block p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-                                >
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span>{{ goal.category?.icon }}</span>
-                                        <span class="font-medium text-gray-900 dark:text-white">{{ goal.title }}</span>
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ goal.progress }}% complete
-                                    </div>
-                                </Link>
-                                <div
-                                    v-if="!filteredGoals.some(g => g.status === 'in_progress')"
-                                    class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"
-                                >
-                                    No goals in progress
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Not Started -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
-                            <h3 class="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-4 flex items-center gap-2">
-                                📋 Not Started
-                            </h3>
-                            <div class="space-y-3">
-                                <Link
-                                    v-for="goal in filteredGoals.filter(g => g.status === 'not_started')"
-                                    :key="goal.id"
-                                    :href="route('goals.show', goal.id)"
-                                    class="block p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                >
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span>{{ goal.category?.icon }}</span>
-                                        <span class="font-medium text-gray-900 dark:text-white">{{ goal.title }}</span>
-                                    </div>
-                                    <div
-                                        v-if="goal.target_date"
-                                        class="text-sm text-gray-500 dark:text-gray-400"
-                                    >
-                                        Target: {{ new Date(goal.target_date).toLocaleDateString('ja-JP') }}
-                                    </div>
-                                </Link>
-                                <div
-                                    v-if="!filteredGoals.some(g => g.status === 'not_started')"
-                                    class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"
-                                >
-                                    All goals have been started!
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Completed -->
-                        <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
-                            <h3 class="text-lg font-semibold text-green-600 mb-4 flex items-center gap-2">
-                                ✅ Completed
-                            </h3>
-                            <div class="space-y-3">
-                                <Link
-                                    v-for="goal in filteredGoals.filter(g => g.status === 'completed')"
-                                    :key="goal.id"
-                                    :href="route('goals.show', goal.id)"
-                                    class="block p-3 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-                                >
-                                    <div class="flex items-center gap-2">
-                                        <span>{{ goal.category?.icon }}</span>
-                                        <span class="font-medium text-gray-900 dark:text-white">{{ goal.title }}</span>
-                                        <span class="text-green-500">✓</span>
-                                    </div>
-                                </Link>
-                                <div
-                                    v-if="!filteredGoals.some(g => g.status === 'completed')"
-                                    class="text-sm text-gray-500 dark:text-gray-400 text-center py-4"
-                                >
-                                    No completed goals yet
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Upcoming Deadlines -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            📅 Upcoming Deadlines
-                        </h3>
-                        <div class="space-y-3">
-                            <Link
-                                v-for="goal in filteredGoals
-                                    .filter(g => g.target_date && g.status !== 'completed')
-                                    .sort((a, b) => new Date(a.target_date) - new Date(b.target_date))
-                                    .slice(0, 5)"
-                                :key="goal.id"
-                                :href="route('goals.show', goal.id)"
-                                class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <span>{{ goal.category?.icon }}</span>
-                                    <span class="font-medium text-gray-900 dark:text-white">{{ goal.title }}</span>
-                                </div>
-                                <div
-                                    class="text-sm font-medium"
-                                    :class="{
-                                        'text-red-500': new Date(goal.target_date) < new Date(),
-                                        'text-orange-500': new Date(goal.target_date) - new Date() < 7 * 24 * 60 * 60 * 1000,
-                                        'text-gray-500 dark:text-gray-400': new Date(goal.target_date) - new Date() >= 7 * 24 * 60 * 60 * 1000,
-                                    }"
-                                >
-                                    {{ new Date(goal.target_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) }}
-                                </div>
-                            </Link>
-                        </div>
                     </div>
                 </div>
             </div>

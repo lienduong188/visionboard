@@ -5,10 +5,11 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     categories: Array,
+    coreGoalsCount: Number,
 });
 
 const form = useForm({
@@ -21,7 +22,10 @@ const form = useForm({
     start_date: new Date().toISOString().split('T')[0],
     target_date: '',
     priority: 'medium',
+    is_core_goal: false,
 });
+
+const canSetCoreGoal = computed(() => props.coreGoalsCount < 3);
 
 const imagePreview = ref(null);
 const fileInput = ref(null);
@@ -245,6 +249,29 @@ const submit = () => {
                                 </label>
                             </div>
                             <InputError :message="form.errors.priority" class="mt-2" />
+                        </div>
+
+                        <!-- Core Goal Toggle -->
+                        <div class="p-4 rounded-lg" :class="form.is_core_goal ? 'bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-500' : 'bg-gray-50 dark:bg-gray-700/50'">
+                            <label class="flex items-start gap-3 cursor-pointer" :class="{ 'opacity-50': !canSetCoreGoal && !form.is_core_goal }">
+                                <input
+                                    type="checkbox"
+                                    v-model="form.is_core_goal"
+                                    :disabled="!canSetCoreGoal && !form.is_core_goal"
+                                    class="mt-1 rounded text-indigo-600 focus:ring-indigo-500"
+                                />
+                                <div>
+                                    <span class="font-semibold text-gray-900 dark:text-white">🎯 Core Goal - Trục Trung Tâm</span>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                        Đánh dấu goal này là 1 trong 3 trục trung tâm của Vision Board.
+                                        Core goals sẽ hiển thị xoay quanh trong VisionBoard view.
+                                    </p>
+                                    <p v-if="!canSetCoreGoal" class="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                                        ⚠️ Bạn đã có {{ coreGoalsCount }}/3 Core Goals. Hãy bỏ chọn một goal khác để thêm mới.
+                                    </p>
+                                </div>
+                            </label>
+                            <InputError :message="form.errors.is_core_goal" class="mt-2" />
                         </div>
 
                         <!-- Submit -->
