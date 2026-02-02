@@ -20,6 +20,36 @@ const selectedCategory = ref(null);
 const drag = ref(false);
 const orbitPaused = ref(false);
 
+// Responsive orbit size
+const orbitSize = ref(900);
+const orbitRadius = ref(280);
+
+const updateOrbitSize = () => {
+    const width = window.innerWidth;
+    if (width < 480) {
+        orbitSize.value = 320;
+        orbitRadius.value = 100;
+    } else if (width < 640) {
+        orbitSize.value = 400;
+        orbitRadius.value = 130;
+    } else if (width < 768) {
+        orbitSize.value = 500;
+        orbitRadius.value = 160;
+    } else if (width < 1024) {
+        orbitSize.value = 650;
+        orbitRadius.value = 200;
+    } else {
+        orbitSize.value = 900;
+        orbitRadius.value = 280;
+    }
+};
+
+// Initialize and listen for resize
+if (typeof window !== 'undefined') {
+    updateOrbitSize();
+    window.addEventListener('resize', updateOrbitSize);
+}
+
 // Local reactive copy of goals for drag & drop
 const localGoals = ref([...props.goals]);
 
@@ -168,38 +198,52 @@ const saveOrder = () => {
                 </div>
 
                 <!-- Orbit View -->
-                <div v-if="currentView === 'orbit'" class="relative">
+                <div v-if="currentView === 'orbit'" class="relative overflow-hidden">
                     <!-- Orbit Container -->
                     <div
-                        class="relative mx-auto"
-                        style="width: 900px; height: 900px;"
+                        class="relative mx-auto transition-all duration-300"
+                        :style="{ width: orbitSize + 'px', height: orbitSize + 'px' }"
                         @mouseenter="orbitPaused = true"
                         @mouseleave="orbitPaused = false"
+                        @touchstart="orbitPaused = true"
+                        @touchend="orbitPaused = false"
                     >
-                        <!-- Orbit Rings (decorative) -->
+                        <!-- Orbit Rings (decorative) - responsive -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div class="absolute w-[720px] h-[720px] rounded-full border border-gray-200 dark:border-gray-700 opacity-50"></div>
-                            <div class="absolute w-[560px] h-[560px] rounded-full border border-gray-200 dark:border-gray-700 opacity-40"></div>
-                            <div class="absolute w-[400px] h-[400px] rounded-full border border-gray-200 dark:border-gray-700 opacity-30"></div>
+                            <div
+                                class="absolute rounded-full border border-gray-200 dark:border-gray-700 opacity-50"
+                                :style="{ width: (orbitSize * 0.8) + 'px', height: (orbitSize * 0.8) + 'px' }"
+                            ></div>
+                            <div
+                                class="absolute rounded-full border border-gray-200 dark:border-gray-700 opacity-40"
+                                :style="{ width: (orbitSize * 0.62) + 'px', height: (orbitSize * 0.62) + 'px' }"
+                            ></div>
+                            <div
+                                class="absolute rounded-full border border-gray-200 dark:border-gray-700 opacity-30"
+                                :style="{ width: (orbitSize * 0.44) + 'px', height: (orbitSize * 0.44) + 'px' }"
+                            ></div>
                         </div>
 
-                        <!-- Center Title -->
+                        <!-- Center Title - responsive text -->
                         <div class="absolute inset-0 flex items-center justify-center">
                             <div class="text-center z-0">
-                                <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
+                                <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
                                     VISION
                                 </h1>
-                                <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
+                                <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
                                     BOARD
                                 </h1>
-                                <h2 class="text-6xl font-black text-gray-900 dark:text-white mt-2">
+                                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mt-2">
                                     2026
                                 </h2>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
+                                <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-2 sm:mt-4">
                                     {{ filteredGoals.length }} goals
                                 </p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 hidden sm:block">
                                     Hover to pause
+                                </p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 sm:hidden">
+                                    Tap to pause
                                 </p>
                             </div>
                         </div>
@@ -215,7 +259,8 @@ const saveOrder = () => {
                                 :goal="goal"
                                 :index="index"
                                 :total="filteredGoals.length"
-                                :radius="280"
+                                :radius="orbitRadius"
+                                :is-mobile="orbitSize < 500"
                             />
                         </div>
                     </div>

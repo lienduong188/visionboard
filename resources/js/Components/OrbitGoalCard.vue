@@ -19,6 +19,10 @@ const props = defineProps({
         type: Number,
         default: 280,
     },
+    isMobile: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const isHovered = ref(false);
@@ -31,9 +35,11 @@ const angle = computed(() => {
 // Dynamic radius based on scale - higher scale = further out
 const dynamicRadius = computed(() => {
     const scale = props.goal.orbit_scale || 3;
-    // Scale 1: 200px, Scale 2: 240px, Scale 3: 280px, Scale 4: 320px, Scale 5: 360px
-    const baseRadius = 200;
-    return baseRadius + (scale - 1) * 40;
+    // Adjust base radius based on prop radius (for responsive)
+    const radiusMultiplier = props.radius / 280;
+    const baseRadius = 200 * radiusMultiplier;
+    const increment = 40 * radiusMultiplier;
+    return baseRadius + (scale - 1) * increment;
 });
 
 const position = computed(() => {
@@ -47,9 +53,12 @@ const position = computed(() => {
 // Scale size based on orbit_scale (1-5) - more dramatic difference
 const cardSize = computed(() => {
     const scale = props.goal.orbit_scale || 3;
-    // Scale 1: 70px, Scale 2: 100px, Scale 3: 130px, Scale 4: 170px, Scale 5: 220px
-    const sizes = [70, 100, 130, 170, 220];
-    return sizes[scale - 1] || 130;
+    // Desktop sizes: Scale 1: 70px, Scale 2: 100px, Scale 3: 130px, Scale 4: 170px, Scale 5: 220px
+    // Mobile sizes: Scale 1: 45px, Scale 2: 55px, Scale 3: 65px, Scale 4: 80px, Scale 5: 95px
+    const desktopSizes = [70, 100, 130, 170, 220];
+    const mobileSizes = [45, 55, 65, 80, 95];
+    const sizes = props.isMobile ? mobileSizes : desktopSizes;
+    return sizes[scale - 1] || (props.isMobile ? 65 : 130);
 });
 
 const progressColor = computed(() => {
@@ -153,9 +162,9 @@ const updateScale = (newScale) => {
                 </div>
             </Link>
 
-            <!-- Scale Slider (shows on hover) - inside card-inner to counter-rotate -->
+            <!-- Scale Slider (shows on hover) - hidden on mobile -->
             <div
-                v-if="isHovered"
+                v-if="isHovered && !isMobile"
                 class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 z-50"
                 @click.prevent.stop
             >

@@ -3,6 +3,7 @@
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReminderController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect home to Vision Board
@@ -35,6 +36,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/goals/{goal}/milestones/{milestone}/toggle', [MilestoneController::class, 'toggle'])->name('milestones.toggle');
     Route::post('/goals/{goal}/milestones/reorder', [MilestoneController::class, 'reorder'])->name('milestones.reorder');
     Route::delete('/goals/{goal}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('milestones.destroy');
+
+    // Reminders
+    Route::post('/goals/{goal}/reminders', [ReminderController::class, 'store'])->name('reminders.store');
+    Route::put('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
+    Route::patch('/goals/{goal}/reminders/{reminder}/toggle', [ReminderController::class, 'toggle'])->name('reminders.toggle');
+    Route::delete('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'destroy'])->name('reminders.destroy');
 });
 
 Route::middleware('auth')->group(function () {

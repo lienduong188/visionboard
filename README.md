@@ -22,6 +22,10 @@ Personal vision board web application to track 2026 goals.
 - Drag & Drop - Reorder goals by dragging
 - Progress Chart - Visual progress tracking over time
 - **Orbit Scale** - Adjust goal card size (1-5) to prioritize important goals
+- **Toast Notifications** - Visual feedback for all actions (success/error)
+- **Reminder System** - Set reminders for goals (daily/weekly/monthly/custom)
+- **Email Reminders** - Automatic email notifications via background job
+- **Responsive Orbit** - Mobile-friendly orbit view with touch support
 
 ## Local Development
 ```bash
