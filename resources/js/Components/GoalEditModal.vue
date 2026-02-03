@@ -48,8 +48,8 @@ watch(() => props.goal, (newGoal) => {
         form.current_value = newGoal.current_value || 0;
         form.start_value = newGoal.start_value || '';
         form.unit = newGoal.unit || '';
-        form.start_date = newGoal.start_date || '2026-01-01';
-        form.target_date = newGoal.target_date || '2026-12-31';
+        form.start_date = formatDateForInput(newGoal.start_date) || '2026-01-01';
+        form.target_date = formatDateForInput(newGoal.target_date) || '2026-12-31';
         form.priority = newGoal.priority;
         form.status = newGoal.status;
         form.is_pinned = newGoal.is_pinned;
@@ -74,6 +74,21 @@ const processing = ref(false);
 const newChecklistItem = ref('');
 const editingChecklistId = ref(null);
 const editingChecklistTitle = ref('');
+
+// Helper function to format date for input type="date" (YYYY-MM-DD)
+const formatDateForInput = (dateValue) => {
+    if (!dateValue) return '';
+    // Handle ISO string like "2026-01-01T00:00:00.000000Z" or "2026-01-01"
+    const dateStr = String(dateValue);
+    if (dateStr.includes('T')) {
+        return dateStr.split('T')[0];
+    }
+    // Handle date string that might have time
+    if (dateStr.includes(' ')) {
+        return dateStr.split(' ')[0];
+    }
+    return dateStr;
+};
 
 const handleImageChange = (e) => {
     const file = e.target.files[0];

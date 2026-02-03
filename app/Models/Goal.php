@@ -137,6 +137,29 @@ class Goal extends Model
     }
 
     /**
+     * Calculate progress for a given value (without saving).
+     */
+    public function calculateProgressForValue(float $value): int
+    {
+        if (!$this->target_value || $this->target_value == 0) {
+            return 0;
+        }
+
+        // Decrease goal: progress = (start - value) / (start - target) * 100
+        if ($this->isDecreaseGoal()) {
+            $totalDecrease = $this->start_value - $this->target_value;
+            if ($totalDecrease == 0) {
+                return 100;
+            }
+            $currentDecrease = $this->start_value - $value;
+            return max(0, min(100, (int) round(($currentDecrease / $totalDecrease) * 100)));
+        }
+
+        // Increase goal: progress = value / target * 100
+        return min(100, (int) round(($value / $this->target_value) * 100));
+    }
+
+    /**
      * Update progress and log the change.
      */
     public function updateProgress(float $newValue, ?string $note = null): void

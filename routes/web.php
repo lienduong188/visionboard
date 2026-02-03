@@ -6,6 +6,7 @@ use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\MilestoneTodoController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProgressLogController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReviewSettingController;
 use App\Http\Controllers\ThemeWordController;
@@ -62,6 +63,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
     Route::patch('/goals/{goal}/reminders/{reminder}/toggle', [ReminderController::class, 'toggle'])->name('reminders.toggle');
     Route::delete('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'destroy'])->name('reminders.destroy');
+
+    // Progress Logs
+    Route::post('/goals/{goal}/progress-logs', [ProgressLogController::class, 'store'])->name('progress-logs.store');
+    Route::put('/goals/{goal}/progress-logs/{progressLog}', [ProgressLogController::class, 'update'])->name('progress-logs.update');
+    Route::delete('/goals/{goal}/progress-logs/{progressLog}', [ProgressLogController::class, 'destroy'])->name('progress-logs.destroy');
 
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
