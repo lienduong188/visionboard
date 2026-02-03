@@ -6,6 +6,7 @@ use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReviewSettingController;
+use App\Http\Controllers\ThemeWordController;
 use Illuminate\Support\Facades\Route;
 
 // Redirect home to Vision Board
@@ -51,6 +52,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Review Settings
     Route::get('/settings/reviews', [ReviewSettingController::class, 'show'])->name('settings.reviews');
     Route::put('/settings/reviews', [ReviewSettingController::class, 'update'])->name('settings.reviews.update');
+
+    // Theme Words
+    Route::post('/theme-words', [ThemeWordController::class, 'store'])->name('theme-words.store');
+    Route::put('/theme-words/{themeWord}', [ThemeWordController::class, 'update'])->name('theme-words.update');
+    Route::delete('/theme-words/{themeWord}', [ThemeWordController::class, 'destroy'])->name('theme-words.destroy');
+    Route::post('/theme-words/reorder', [ThemeWordController::class, 'reorder'])->name('theme-words.reorder');
+    Route::patch('/theme-words/effect', [ThemeWordController::class, 'updateEffect'])->name('theme-words.effect');
 });
 
 Route::middleware('auth')->group(function () {

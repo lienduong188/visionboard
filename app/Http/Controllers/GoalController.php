@@ -50,6 +50,10 @@ class GoalController extends Controller
             return redirect()->route('analytics.index');
         }
 
+        // Theme words for VisionBoard
+        $themeWords = $user->themeWords()->get();
+        $themeWordsEffect = $user->theme_words_effect ?? 'orbit';
+
         return Inertia::render('Goals/Index', [
             'goals' => $goals,
             'coreGoals' => $coreGoals,
@@ -58,6 +62,8 @@ class GoalController extends Controller
             'categories' => $categories,
             'stats' => $stats,
             'view' => $view,
+            'themeWords' => $themeWords,
+            'themeWordsEffect' => $themeWordsEffect,
         ]);
     }
 

@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'theme_words_effect',
     ];
 
     /**
@@ -62,5 +63,13 @@ class User extends Authenticatable
     public function reviewSetting(): HasOne
     {
         return $this->hasOne(ReviewSetting::class);
+    }
+
+    /**
+     * Get all theme words for this user.
+     */
+    public function themeWords(): HasMany
+    {
+        return $this->hasMany(ThemeWord::class)->orderBy('sort_order');
     }
 }

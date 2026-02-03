@@ -10,7 +10,7 @@ Personal vision board web application to track 2026 goals.
 
 ## Features
 - Authentication (Login/Register)
-- **VisionBoard View (Default)** - 3 Core Goals orbit around "Vision Board 2026" title with auto-rotate animation
+- **VisionBoard View (Default)** - 3 Core Goals float around "Vision Board 2026" title with physics-based animation
 - **Plan View** - Todo list showing Core Goals with expandable milestones + regular goals with drag & drop
 - **Core Goals System** - Mark up to 3 goals as "Core Goals" (trục trung tâm) to display in VisionBoard
 - **View Toggle** - Switch between VisionBoard and Plan views from the navigation bar
@@ -29,13 +29,17 @@ Personal vision board web application to track 2026 goals.
 - **Toast Notifications** - Visual feedback for all actions (success/error)
 - **Reminder System** - Set reminders for goals (daily/weekly/monthly/custom)
 - **Email Reminders** - Automatic email notifications via background job
-- **Responsive VisionBoard** - Mobile-friendly orbit view with touch support
+- **Responsive VisionBoard** - Mobile-friendly floating view with touch support
 - **Analytics Dashboard** - Comprehensive analytics with multiple chart types
 - **Category Comparison** - Bar Chart and Radar Chart comparing progress across categories
 - **Completion Trend** - Track completion trends over 7/30/90 days
 - **Monthly Stats** - Goals completed per month visualization
 - **Weekly/Monthly Review** - Scheduled email reports with progress summaries
 - **Default Dates** - Goals default to Start: 2026/1/1, Target: 2026/12/31
+- **Theme Words** - Add inspirational keywords for 2026 with two display effects:
+  - **Floating Effect** - Words float around with physics-based animation (bounce off walls, avoid center)
+  - **Waterfall Effect** - Words fall from top like rain/waterfall with random speed and opacity
+- **Collision System** - Goals and Theme Words automatically push each other away when getting close
 
 ## Local Development
 ```bash

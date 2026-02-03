@@ -1,8 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import GoalCard from '@/Components/GoalCard.vue';
-import OrbitGoalCard from '@/Components/OrbitGoalCard.vue';
+import UnifiedFloating from '@/Components/UnifiedFloating.vue';
 import GoalEditModal from '@/Components/GoalEditModal.vue';
+import ThemeWordsWaterfall from '@/Components/ThemeWordsWaterfall.vue';
+import ThemeWordsManager from '@/Components/ThemeWordsManager.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import draggable from 'vuedraggable';
@@ -15,6 +17,8 @@ const props = defineProps({
     categories: Array,
     stats: Object,
     view: String,
+    themeWords: Array,
+    themeWordsEffect: String,
 });
 
 const currentView = computed(() => props.view || 'visionboard');
@@ -23,11 +27,16 @@ const currentView = computed(() => props.view || 'visionboard');
 const expandedCoreGoals = ref({});
 const selectedCategory = ref(null);
 const drag = ref(false);
-const orbitPaused = ref(false);
 
 // Modal state
 const showEditModal = ref(false);
 const selectedGoal = ref(null);
+
+// Theme Words Manager state
+const showThemeWordsManager = ref(false);
+
+// Theme Words radius (between center text and core goals)
+const themeWordsRadius = computed(() => orbitRadius.value * 0.62);
 
 // Calculate core goals count excluding selected goal
 const modalCoreGoalsCount = computed(() => {
@@ -57,27 +66,33 @@ const onGoalDeleted = () => {
     router.reload({ preserveScroll: true });
 };
 
-// Responsive orbit size
-const orbitSize = ref(900);
-const orbitRadius = ref(280);
+// Responsive floating container size - full viewport
+const floatingWidth = ref(900);
+const floatingHeight = ref(700);
+const orbitSize = ref(900); // For backwards compat
+const orbitRadius = ref(300);
 
 const updateOrbitSize = () => {
     const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    // Use FULL viewport for floating area (minus navbar only)
+    floatingWidth.value = width - 20;
+    floatingHeight.value = height - 100; // Only navbar, no header in VisionBoard
+
+    // orbitSize is the smaller dimension (for center area calculations)
+    orbitSize.value = Math.min(floatingWidth.value, floatingHeight.value);
+
     if (width < 480) {
-        orbitSize.value = 320;
-        orbitRadius.value = 100;
+        orbitRadius.value = 110;
     } else if (width < 640) {
-        orbitSize.value = 400;
-        orbitRadius.value = 130;
+        orbitRadius.value = 150;
     } else if (width < 768) {
-        orbitSize.value = 500;
-        orbitRadius.value = 160;
+        orbitRadius.value = 180;
     } else if (width < 1024) {
-        orbitSize.value = 650;
-        orbitRadius.value = 200;
+        orbitRadius.value = 230;
     } else {
-        orbitSize.value = 900;
-        orbitRadius.value = 280;
+        orbitRadius.value = 300;
     }
 };
 
@@ -207,7 +222,8 @@ const saveOrder = () => {
     <Head title="Vision Board 2026" />
 
     <AuthenticatedLayout>
-        <template #header>
+        <!-- Header only shown in Plan view -->
+        <template v-if="currentView === 'plan'" #header>
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">
@@ -227,8 +243,8 @@ const saveOrder = () => {
             </div>
         </template>
 
-        <div class="py-6">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div :class="currentView === 'visionboard' ? 'py-2' : 'py-6'">
+            <div :class="currentView === 'visionboard' ? 'px-2' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'">
                 <!-- Stats Cards (only in Plan view) -->
                 <div v-if="currentView === 'plan'" class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
@@ -288,14 +304,10 @@ const saveOrder = () => {
 
                 <!-- VisionBoard View (3 Core Goals) -->
                 <div v-if="currentView === 'visionboard'" class="relative overflow-hidden">
-                    <!-- Orbit Container -->
+                    <!-- Floating Container - Full viewport width -->
                     <div
                         class="relative mx-auto transition-all duration-300"
-                        :style="{ width: orbitSize + 'px', height: orbitSize + 'px' }"
-                        @mouseenter="orbitPaused = true"
-                        @mouseleave="orbitPaused = false"
-                        @touchstart="orbitPaused = true"
-                        @touchend="orbitPaused = false"
+                        :style="{ width: floatingWidth + 'px', height: floatingHeight + 'px' }"
                     >
                         <!-- Orbit Rings (decorative) - responsive -->
                         <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -314,39 +326,46 @@ const saveOrder = () => {
                         </div>
 
                         <!-- Center Title - responsive text -->
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="text-center z-0">
+                        <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
+                            <div class="text-center sparkle-container">
                                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
                                     VISION
                                 </h1>
                                 <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
                                     BOARD
                                 </h1>
-                                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 dark:text-white mt-2">
+                                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mt-2 sparkle-year">
                                     2026
                                 </h2>
+                                <!-- Sparkle stars -->
+                                <span class="star star-1">✦</span>
+                                <span class="star star-2">★</span>
+                                <span class="star star-3">✦</span>
+                                <span class="star star-4">★</span>
+                                <span class="star star-5">✦</span>
                                 <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-4 sm:mt-6 max-w-xs mx-auto italic">
                                     "Mỗi ngày đi một đoạn nhỏ, <br>đủ bền để đi xa, <br>đủ chậm để không bỏ quên mình."
                                 </p>
                             </div>
                         </div>
 
-                        <!-- Orbiting Core Goals (3 trục trung tâm) -->
-                        <div
-                            class="absolute inset-0 flex items-center justify-center orbit-container"
-                            :class="{ 'orbit-paused': orbitPaused }"
-                        >
-                            <OrbitGoalCard
-                                v-for="(goal, index) in filteredCoreGoals"
-                                :key="goal.id"
-                                :goal="goal"
-                                :index="index"
-                                :total="filteredCoreGoals.length"
-                                :radius="orbitRadius"
-                                :is-mobile="orbitSize < 500"
-                                @click="openGoalModal"
-                            />
-                        </div>
+                        <!-- Unified Floating (Goals + Theme Words Orbit) -->
+                        <UnifiedFloating
+                            v-if="themeWordsEffect === 'orbit' || filteredCoreGoals.length > 0"
+                            :goals="filteredCoreGoals"
+                            :words="themeWordsEffect === 'orbit' ? (themeWords || []) : []"
+                            :container-width="floatingWidth"
+                            :container-height="floatingHeight"
+                            :is-mobile="floatingWidth < 500"
+                            @goal-click="openGoalModal"
+                        />
+
+                        <!-- Theme Words Waterfall Effect (random 100 positive words from system) - renders above goals -->
+                        <ThemeWordsWaterfall
+                            v-if="themeWordsEffect === 'waterfall'"
+                            :container-width="floatingWidth"
+                            :container-height="floatingHeight"
+                        />
                     </div>
 
                     <!-- Empty State -->
@@ -371,6 +390,39 @@ const saveOrder = () => {
                             </Link>
                         </div>
                     </div>
+
+                    <!-- Theme Words Manager Toggle Button -->
+                    <button
+                        @click="showThemeWordsManager = !showThemeWordsManager"
+                        class="absolute bottom-4 right-4 p-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-110 z-10"
+                        :class="{ 'ring-2 ring-indigo-500': showThemeWordsManager }"
+                        title="Theme Words"
+                    >
+                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Theme Words Manager Panel -->
+                    <Transition
+                        enter-active-class="transition ease-out duration-200"
+                        enter-from-class="opacity-0 translate-y-2"
+                        enter-to-class="opacity-100 translate-y-0"
+                        leave-active-class="transition ease-in duration-150"
+                        leave-from-class="opacity-100 translate-y-0"
+                        leave-to-class="opacity-0 translate-y-2"
+                    >
+                        <div
+                            v-if="showThemeWordsManager"
+                            class="absolute bottom-16 right-4 z-20"
+                        >
+                            <ThemeWordsManager
+                                :words="themeWords || []"
+                                :current-effect="themeWordsEffect || 'orbit'"
+                                @close="showThemeWordsManager = false"
+                            />
+                        </div>
+                    </Transition>
                 </div>
 
                 <!-- Plan View -->
@@ -551,24 +603,69 @@ const saveOrder = () => {
 </template>
 
 <style scoped>
-.orbit-container {
-    animation: orbit-rotate 60s linear infinite;
+/* Sparkle effect for center text */
+.sparkle-container {
+    position: relative;
 }
 
-.orbit-container.orbit-paused {
-    animation-play-state: paused;
+.sparkle-year {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
-.orbit-container.orbit-paused :deep(.card-inner) {
-    animation-play-state: paused;
+.star {
+    position: absolute;
+    color: #a5b4fc;
+    opacity: 0;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(167, 139, 250, 0.8);
 }
 
-@keyframes orbit-rotate {
-    from {
-        transform: rotate(0deg);
+.star-1 {
+    top: 0%;
+    left: 20%;
+    font-size: 16px;
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+.star-2 {
+    top: 20%;
+    right: 5%;
+    font-size: 12px;
+    animation: twinkle 2.5s ease-in-out infinite 0.5s;
+}
+
+.star-3 {
+    top: 55%;
+    left: 0%;
+    font-size: 10px;
+    animation: twinkle 1.8s ease-in-out infinite 1s;
+}
+
+.star-4 {
+    bottom: 25%;
+    right: 10%;
+    font-size: 14px;
+    animation: twinkle 2.2s ease-in-out infinite 0.3s;
+}
+
+.star-5 {
+    bottom: 5%;
+    left: 30%;
+    font-size: 8px;
+    animation: twinkle 2s ease-in-out infinite 1.5s;
+}
+
+@keyframes twinkle {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0.5) rotate(0deg);
     }
-    to {
-        transform: rotate(360deg);
+    50% {
+        opacity: 1;
+        transform: scale(1.2) rotate(180deg);
     }
 }
 </style>
