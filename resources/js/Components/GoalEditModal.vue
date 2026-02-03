@@ -32,6 +32,7 @@ const form = useForm({
     status: 'not_started',
     is_pinned: false,
     is_core_goal: false,
+    progress_mode: 'value',
 });
 
 // Watch for goal changes to update form
@@ -53,6 +54,7 @@ watch(() => props.goal, (newGoal) => {
         form.status = newGoal.status;
         form.is_pinned = newGoal.is_pinned;
         form.is_core_goal = newGoal.is_core_goal || false;
+        form.progress_mode = newGoal.progress_mode || 'value';
         currentImage.value = newGoal.cover_image;
         imagePreview.value = null;
     }
@@ -495,6 +497,44 @@ const progressColor = computed(() => {
                                             <option value="cancelled">Cancelled</option>
                                         </select>
                                         <InputError :message="form.errors.status" class="mt-2" />
+                                    </div>
+
+                                    <!-- Progress Mode -->
+                                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                        <InputLabel value="📊 Cách tính tiến độ" />
+                                        <div class="mt-3 space-y-3">
+                                            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg transition-colors"
+                                                :class="form.progress_mode === 'value' ? 'bg-blue-100 dark:bg-blue-800/50' : 'hover:bg-blue-100/50 dark:hover:bg-blue-800/20'">
+                                                <input
+                                                    type="radio"
+                                                    v-model="form.progress_mode"
+                                                    value="value"
+                                                    class="mt-1 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <div>
+                                                    <span class="font-semibold text-gray-900 dark:text-white">📈 Theo giá trị (Value)</span>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                        Progress = Current Value / Target Value. Thích hợp cho mục tiêu đo lường được (km, kg, %).
+                                                    </p>
+                                                </div>
+                                            </label>
+                                            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg transition-colors"
+                                                :class="form.progress_mode === 'milestone' ? 'bg-blue-100 dark:bg-blue-800/50' : 'hover:bg-blue-100/50 dark:hover:bg-blue-800/20'">
+                                                <input
+                                                    type="radio"
+                                                    v-model="form.progress_mode"
+                                                    value="milestone"
+                                                    class="mt-1 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <div>
+                                                    <span class="font-semibold text-gray-900 dark:text-white">🏁 Theo milestones</span>
+                                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                        Progress = Milestones hoàn thành / Tổng milestones. Thích hợp cho mục tiêu có nhiều bước.
+                                                    </p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        <InputError :message="form.errors.progress_mode" class="mt-2" />
                                     </div>
 
                                     <!-- Checklist -->

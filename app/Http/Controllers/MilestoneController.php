@@ -163,10 +163,18 @@ class MilestoneController extends Controller
     }
 
     /**
-     * Recalculate goal progress based on non-soft milestones.
+     * Recalculate goal progress based on progress_mode setting.
+     * - 'milestone': count completed/total non-soft milestones
+     * - 'value': use current_value/target_value
      */
     private function recalculateGoalProgress(Goal $goal): void
     {
+        // Nếu progress_mode = 'value', không cập nhật theo milestones
+        if ($goal->progress_mode === 'value') {
+            return;
+        }
+
+        // progress_mode = 'milestone': tính theo milestones
         $totalMilestones = $goal->milestones()->where('is_soft', false)->count();
 
         if ($totalMilestones > 0) {
@@ -176,6 +184,9 @@ class MilestoneController extends Controller
                 ->count();
             $progress = (int) round(($completedMilestones / $totalMilestones) * 100);
             $goal->update(['progress' => $progress]);
+        } else {
+            // Không còn milestone non-soft, giữ nguyên progress
+            $goal->update(['progress' => 0]);
         }
     }
 }

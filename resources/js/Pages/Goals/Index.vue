@@ -463,16 +463,19 @@ const saveOrder = () => {
                                 :key="goal.id"
                                 class="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden"
                             >
-                                <!-- Goal Header (clickable to expand) -->
-                                <div
-                                    @click="toggleCoreGoal(goal.id)"
-                                    class="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                                >
+                                <!-- Goal Header -->
+                                <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                     <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-3">
+                                        <div
+                                            @click="openGoalModal(goal)"
+                                            class="flex items-center gap-3 cursor-pointer flex-1"
+                                            title="Click để edit goal"
+                                        >
                                             <span class="text-2xl">{{ goal.category?.icon }}</span>
                                             <div>
-                                                <h4 class="font-semibold text-gray-900 dark:text-white">{{ goal.title }}</h4>
+                                                <h4 class="font-semibold text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                                    {{ goal.title }}
+                                                </h4>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400">
                                                     {{ goal.milestones?.length || 0 }} milestones
                                                 </p>
@@ -490,15 +493,21 @@ const saveOrder = () => {
                                                     ></div>
                                                 </div>
                                             </div>
-                                            <svg
-                                                class="w-5 h-5 text-gray-400 transition-transform"
-                                                :class="{ 'rotate-180': expandedCoreGoals[goal.id] }"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                            <button
+                                                @click="toggleCoreGoal(goal.id)"
+                                                class="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                                                title="Xem milestones"
                                             >
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                            </svg>
+                                                <svg
+                                                    class="w-5 h-5 text-gray-400 transition-transform"
+                                                    :class="{ 'rotate-180': expandedCoreGoals[goal.id] }"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

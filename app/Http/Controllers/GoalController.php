@@ -101,11 +101,13 @@ class GoalController extends Controller
             'target_date' => 'nullable|date',
             'priority' => 'required|in:low,medium,high',
             'is_core_goal' => 'boolean',
+            'progress_mode' => 'nullable|in:value,milestone',
         ]);
 
         $validated['user_id'] = $request->user()->id;
         $validated['status'] = 'not_started';
         $validated['progress'] = 0;
+        $validated['progress_mode'] = $validated['progress_mode'] ?? 'value';
 
         // Default current_value: start_value if set, otherwise 0
         $validated['current_value'] = $validated['start_value'] ?? 0;
@@ -195,6 +197,7 @@ class GoalController extends Controller
             'status' => 'required|in:not_started,in_progress,completed,paused,cancelled',
             'is_pinned' => 'boolean',
             'is_core_goal' => 'boolean',
+            'progress_mode' => 'nullable|in:value,milestone',
         ]);
 
         // Default current_value: start_value if set, otherwise 0
@@ -240,8 +243,22 @@ class GoalController extends Controller
         // First update the goal with new values
         $goal->update($validated);
 
-        // Recalculate progress using model's method (supports both increase and decrease goals)
-        if ($goal->target_value && $goal->target_value > 0) {
+        // Recalculate progress based on progress_mode
+        if ($goal->progress_mode === 'milestone') {
+            // Tính theo milestones (non-soft)
+            $totalMilestones = $goal->milestones()->where('is_soft', false)->count();
+            if ($totalMilestones > 0) {
+                $completedMilestones = $goal->milestones()
+                    ->where('is_soft', false)
+                    ->where('is_completed', true)
+                    ->count();
+                $goal->progress = (int) round(($completedMilestones / $totalMilestones) * 100);
+            } else {
+                $goal->progress = 0;
+            }
+            $goal->save();
+        } elseif ($goal->progress_mode === 'value' && $goal->target_value && $goal->target_value > 0) {
+            // Tính theo current_value/target_value
             $goal->progress = $goal->calculateProgress();
             $goal->save();
         }

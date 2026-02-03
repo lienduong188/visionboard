@@ -23,6 +23,7 @@ class Goal extends Model
         'unit',
         'start_value',
         'progress',
+        'progress_mode', // 'milestone' or 'value'
         'start_date',
         'target_date',
         'completed_at',
