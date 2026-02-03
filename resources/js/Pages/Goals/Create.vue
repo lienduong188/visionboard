@@ -18,6 +18,7 @@ const form = useForm({
     description: '',
     slogan: '',
     cover_image: null,
+    start_value: '',
     target_value: '',
     unit: '',
     start_date: '2026-01-01',
@@ -185,32 +186,47 @@ const submit = () => {
                             </p>
                         </div>
 
-                        <!-- Target Value & Unit -->
-                        <div class="grid grid-cols-2 gap-4">
+                        <!-- Start/Target Value & Unit -->
+                        <div class="grid grid-cols-3 gap-4">
                             <div>
-                                <InputLabel for="target_value" value="Target Value (optional)" />
+                                <InputLabel for="start_value" value="Start Value" />
+                                <TextInput
+                                    id="start_value"
+                                    v-model="form.start_value"
+                                    type="number"
+                                    step="any"
+                                    class="mt-1 block w-full"
+                                    placeholder="VD: 27"
+                                />
+                                <InputError :message="form.errors.start_value" class="mt-2" />
+                            </div>
+                            <div>
+                                <InputLabel for="target_value" value="Target Value" />
                                 <TextInput
                                     id="target_value"
                                     v-model="form.target_value"
                                     type="number"
-                                    step="1"
+                                    step="any"
                                     class="mt-1 block w-full"
-                                    placeholder="e.g., 2000000"
+                                    placeholder="VD: 20"
                                 />
                                 <InputError :message="form.errors.target_value" class="mt-2" />
                             </div>
                             <div>
-                                <InputLabel for="unit" value="Unit (optional)" />
+                                <InputLabel for="unit" value="Unit" />
                                 <TextInput
                                     id="unit"
                                     v-model="form.unit"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    placeholder="e.g., 円, km, books"
+                                    placeholder="VD: %"
                                 />
                                 <InputError :message="form.errors.unit" class="mt-2" />
                             </div>
                         </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            💡 <strong>Decrease goal</strong>: Nhập Start > Target (VD: giảm mỡ từ 27% xuống 20%). <strong>Increase goal</strong>: Nhập Start &lt; Target hoặc để trống Start.
+                        </p>
 
                         <!-- Dates -->
                         <div class="grid grid-cols-2 gap-4">

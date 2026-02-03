@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import { formatNumber } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: {
@@ -146,10 +147,10 @@ const daysRemaining = computed(() => {
                     class="text-sm text-gray-600 dark:text-gray-400 mb-3"
                 >
                     <span class="font-semibold text-gray-900 dark:text-white">
-                        {{ goal.current_value?.toLocaleString() || 0 }}
+                        {{ formatNumber(goal.current_value) }}
                     </span>
                     /
-                    <span>{{ goal.target_value?.toLocaleString() }} {{ goal.unit }}</span>
+                    <span>{{ formatNumber(goal.target_value) }} {{ goal.unit }}</span>
                 </div>
 
                 <!-- Footer -->

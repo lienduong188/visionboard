@@ -24,6 +24,7 @@ const form = useForm({
     remove_cover_image: false,
     target_value: '',
     current_value: 0,
+    start_value: '',
     unit: '',
     start_date: '2026-01-01',
     target_date: '2026-12-31',
@@ -44,6 +45,7 @@ watch(() => props.goal, (newGoal) => {
         form.remove_cover_image = false;
         form.target_value = newGoal.target_value || '';
         form.current_value = newGoal.current_value || 0;
+        form.start_value = newGoal.start_value || '';
         form.unit = newGoal.unit || '';
         form.start_date = newGoal.start_date || '2026-01-01';
         form.target_date = newGoal.target_date || '2026-12-31';
@@ -400,16 +402,29 @@ const progressColor = computed(() => {
                                         </div>
                                     </div>
 
-                                    <!-- Target/Current Value & Unit -->
-                                    <div class="grid grid-cols-3 gap-4">
+                                    <!-- Start/Target/Current Value & Unit -->
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        <div>
+                                            <InputLabel for="modal_start_value" value="Start Value" />
+                                            <TextInput
+                                                id="modal_start_value"
+                                                v-model="form.start_value"
+                                                type="number"
+                                                step="any"
+                                                class="mt-1 block w-full"
+                                                placeholder="VD: 27"
+                                            />
+                                            <InputError :message="form.errors.start_value" class="mt-2" />
+                                        </div>
                                         <div>
                                             <InputLabel for="modal_target_value" value="Target Value" />
                                             <TextInput
                                                 id="modal_target_value"
                                                 v-model="form.target_value"
                                                 type="number"
-                                                step="1"
+                                                step="any"
                                                 class="mt-1 block w-full"
+                                                placeholder="VD: 20"
                                             />
                                             <InputError :message="form.errors.target_value" class="mt-2" />
                                         </div>
@@ -419,8 +434,9 @@ const progressColor = computed(() => {
                                                 id="modal_current_value"
                                                 v-model="form.current_value"
                                                 type="number"
-                                                step="1"
+                                                step="any"
                                                 class="mt-1 block w-full"
+                                                placeholder="VD: 25"
                                             />
                                             <InputError :message="form.errors.current_value" class="mt-2" />
                                         </div>
@@ -431,10 +447,14 @@ const progressColor = computed(() => {
                                                 v-model="form.unit"
                                                 type="text"
                                                 class="mt-1 block w-full"
+                                                placeholder="VD: %"
                                             />
                                             <InputError :message="form.errors.unit" class="mt-2" />
                                         </div>
                                     </div>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                                        💡 <strong>Decrease goal</strong>: Nhập Start > Target (VD: giảm mỡ từ 27% xuống 20%). <strong>Increase goal</strong>: Nhập Start &lt; Target hoặc để trống Start.
+                                    </p>
 
                                     <!-- Dates -->
                                     <div class="grid grid-cols-2 gap-4">

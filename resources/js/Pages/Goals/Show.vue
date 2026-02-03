@@ -5,6 +5,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import draggable from 'vuedraggable';
 import { marked } from 'marked';
+import { formatNumber } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -488,9 +489,9 @@ const formatFrequency = (reminder) => {
                                 </button>
                             </div>
                             <div class="text-2xl font-bold text-gray-900 dark:text-white">
-                                {{ goal.current_value?.toLocaleString() || 0 }}
+                                {{ formatNumber(goal.current_value) }}
                                 <span class="text-gray-500 dark:text-gray-400 font-normal">
-                                    / {{ goal.target_value?.toLocaleString() }} {{ goal.unit }}
+                                    / {{ formatNumber(goal.target_value) }} {{ goal.unit }}
                                 </span>
                             </div>
                         </div>

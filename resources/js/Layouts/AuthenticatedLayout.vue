@@ -6,22 +6,22 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Toast.vue';
-import { Link, router, usePage } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
 const page = usePage();
-
-const isGoalsPage = computed(() => {
-    return route().current('goals.index');
-});
 
 const currentView = computed(() => {
     return page.props.view || 'visionboard';
 });
 
-const switchView = (view) => {
-    router.get(route('goals.index'), { view }, { preserveState: true, preserveScroll: true });
-};
+const isVisionBoardActive = computed(() => {
+    return route().current('goals.index') && currentView.value === 'visionboard';
+});
+
+const isPlanActive = computed(() => {
+    return route().current('goals.index') && currentView.value === 'plan';
+});
 </script>
 
 <template>
@@ -39,7 +39,7 @@ const switchView = (view) => {
                         <div class="flex">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="route('goals.index', { view: 'visionboard' })">
                                     <ApplicationLogo
                                         class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
                                     />
@@ -51,10 +51,16 @@ const switchView = (view) => {
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
                                 <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
+                                    :href="route('goals.index', { view: 'visionboard' })"
+                                    :active="isVisionBoardActive"
                                 >
-                                    Dashboard
+                                    VisionBoard
+                                </NavLink>
+                                <NavLink
+                                    :href="route('goals.index', { view: 'plan' })"
+                                    :active="isPlanActive"
+                                >
+                                    Plan
                                 </NavLink>
                                 <NavLink
                                     :href="route('analytics.index')"
@@ -66,28 +72,6 @@ const switchView = (view) => {
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- View Toggle (only on Goals page) -->
-                            <div v-if="isGoalsPage" class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5 me-4">
-                                <button
-                                    @click="switchView('visionboard')"
-                                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'visionboard'
-                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                                >
-                                    VisionBoard
-                                </button>
-                                <button
-                                    @click="switchView('plan')"
-                                    class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'plan'
-                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                                >
-                                    Plan
-                                </button>
-                            </div>
-
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
@@ -191,10 +175,16 @@ const switchView = (view) => {
                 >
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
+                            :href="route('goals.index', { view: 'visionboard' })"
+                            :active="isVisionBoardActive"
                         >
-                            Dashboard
+                            VisionBoard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('goals.index', { view: 'plan' })"
+                            :active="isPlanActive"
+                        >
+                            Plan
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('analytics.index')"
@@ -202,31 +192,6 @@ const switchView = (view) => {
                         >
                             Analytics
                         </ResponsiveNavLink>
-
-                        <!-- Responsive View Toggle (only on Goals page) -->
-                        <div v-if="isGoalsPage" class="px-4 py-2">
-                            <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">View Mode</div>
-                            <div class="flex gap-2">
-                                <button
-                                    @click="switchView('visionboard')"
-                                    class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'visionboard'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                                >
-                                    VisionBoard
-                                </button>
-                                <button
-                                    @click="switchView('plan')"
-                                    class="flex-1 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                                    :class="currentView === 'plan'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                                >
-                                    Plan
-                                </button>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Responsive Settings Options -->

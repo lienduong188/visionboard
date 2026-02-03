@@ -21,6 +21,7 @@ class Goal extends Model
         'target_value',
         'current_value',
         'unit',
+        'start_value',
         'progress',
         'start_date',
         'target_date',
@@ -34,8 +35,9 @@ class Goal extends Model
     ];
 
     protected $casts = [
-        'target_value' => 'integer',
-        'current_value' => 'integer',
+        'target_value' => 'float',
+        'current_value' => 'float',
+        'start_value' => 'float',
         'progress' => 'integer',
         'start_date' => 'date',
         'target_date' => 'date',
@@ -102,20 +104,41 @@ class Goal extends Model
     }
 
     /**
-     * Calculate progress based on current_value and target_value.
+     * Check if this is a decrease goal (e.g., reduce body fat).
+     */
+    public function isDecreaseGoal(): bool
+    {
+        return $this->start_value !== null && $this->start_value > $this->target_value;
+    }
+
+    /**
+     * Calculate progress based on current_value, target_value, and start_value.
+     * Supports both increase goals (run 100km) and decrease goals (reduce fat from 27% to 20%).
      */
     public function calculateProgress(): int
     {
         if (!$this->target_value || $this->target_value == 0) {
             return $this->progress;
         }
+
+        // Decrease goal: progress = (start - current) / (start - target) * 100
+        if ($this->isDecreaseGoal()) {
+            $totalDecrease = $this->start_value - $this->target_value;
+            if ($totalDecrease == 0) {
+                return 100;
+            }
+            $currentDecrease = $this->start_value - $this->current_value;
+            return max(0, min(100, (int) round(($currentDecrease / $totalDecrease) * 100)));
+        }
+
+        // Increase goal: progress = current / target * 100
         return min(100, (int) round(($this->current_value / $this->target_value) * 100));
     }
 
     /**
      * Update progress and log the change.
      */
-    public function updateProgress(int $newValue, ?string $note = null): void
+    public function updateProgress(float $newValue, ?string $note = null): void
     {
         $previousValue = $this->current_value;
         $previousProgress = $this->progress;

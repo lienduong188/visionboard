@@ -94,7 +94,8 @@ class GoalController extends Controller
             'description' => 'nullable|string',
             'slogan' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'target_value' => 'nullable|integer',
+            'target_value' => 'nullable|numeric',
+            'start_value' => 'nullable|numeric',
             'unit' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
             'target_date' => 'nullable|date',
@@ -105,6 +106,9 @@ class GoalController extends Controller
         $validated['user_id'] = $request->user()->id;
         $validated['status'] = 'not_started';
         $validated['progress'] = 0;
+
+        // Default current_value: start_value if set, otherwise 0
+        $validated['current_value'] = $validated['start_value'] ?? 0;
 
         // Check core goals limit (max 3)
         if ($request->boolean('is_core_goal')) {
@@ -181,8 +185,9 @@ class GoalController extends Controller
             'slogan' => 'nullable|string|max:255',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'remove_cover_image' => 'nullable|boolean',
-            'target_value' => 'nullable|integer',
-            'current_value' => 'nullable|integer',
+            'target_value' => 'nullable|numeric',
+            'current_value' => 'nullable|numeric',
+            'start_value' => 'nullable|numeric',
             'unit' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
             'target_date' => 'nullable|date',
@@ -191,6 +196,11 @@ class GoalController extends Controller
             'is_pinned' => 'boolean',
             'is_core_goal' => 'boolean',
         ]);
+
+        // Default current_value: start_value if set, otherwise 0
+        if (!isset($validated['current_value']) || $validated['current_value'] === null || $validated['current_value'] === '') {
+            $validated['current_value'] = $validated['start_value'] ?? $goal->start_value ?? 0;
+        }
 
         // Check core goals limit (max 3)
         if ($request->boolean('is_core_goal') && !$goal->is_core_goal) {
@@ -227,12 +237,14 @@ class GoalController extends Controller
         }
         unset($validated['remove_cover_image']);
 
-        // Calculate progress if target_value exists
-        if (isset($validated['target_value']) && $validated['target_value'] > 0) {
-            $validated['progress'] = min(100, round(($validated['current_value'] ?? 0) / $validated['target_value'] * 100));
-        }
-
+        // First update the goal with new values
         $goal->update($validated);
+
+        // Recalculate progress using model's method (supports both increase and decrease goals)
+        if ($goal->target_value && $goal->target_value > 0) {
+            $goal->progress = $goal->calculateProgress();
+            $goal->save();
+        }
 
         return redirect()->route('goals.index')
             ->with('success', 'Goal updated successfully!');
@@ -246,11 +258,11 @@ class GoalController extends Controller
         $this->authorize('update', $goal);
 
         $validated = $request->validate([
-            'current_value' => 'required|integer',
+            'current_value' => 'required|numeric',
             'note' => 'nullable|string',
         ]);
 
-        $goal->updateProgress($validated['current_value'], $validated['note'] ?? null);
+        $goal->updateProgress((float) $validated['current_value'], $validated['note'] ?? null);
 
         return back()->with('success', 'Progress updated!');
     }
