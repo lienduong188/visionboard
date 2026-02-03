@@ -40,6 +40,21 @@ Personal vision board web application to track 2026 goals.
   - **Floating Effect** - Words float around with physics-based animation (bounce off walls, avoid center)
   - **Waterfall Effect** - Words fall from top like rain/waterfall with random speed and opacity
 - **Collision System** - Goals and Theme Words automatically push each other away when getting close
+- **Goal Checklist** - Simple checklist inside goal edit modal (does not affect progress)
+- **Milestone Enhancements:**
+  - **Memo** - Detailed notes separate from description, supports **Markdown** (bold, italic, lists, line breaks)
+  - **Image Upload** - Attach images to milestones
+  - **Soft Milestone** - Light reminders that don't count toward goal progress
+  - **Sub-todos** - Each milestone can have multiple todos with start/end dates
+  - **Drag & Drop** - Reorder milestones by dragging
+  - **Toggle Expand/Collapse** - Click title to show/hide milestone details
+- **Reminder Enhancements:**
+  - **Reminder Types** - Progress, Deadline, Custom with visual tooltips
+  - **Google Calendar-like Frequency:**
+    - Daily
+    - Weekly (select days of week)
+    - Monthly (select day of month)
+    - Custom
 
 ## Local Development
 ```bash

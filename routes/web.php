@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\GoalChecklistController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MilestoneController;
+use App\Http\Controllers\MilestoneTodoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReviewSettingController;
@@ -37,8 +39,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/goals/{goal}/milestones', [MilestoneController::class, 'store'])->name('milestones.store');
     Route::put('/goals/{goal}/milestones/{milestone}', [MilestoneController::class, 'update'])->name('milestones.update');
     Route::patch('/goals/{goal}/milestones/{milestone}/toggle', [MilestoneController::class, 'toggle'])->name('milestones.toggle');
+    Route::patch('/goals/{goal}/milestones/{milestone}/toggle-soft', [MilestoneController::class, 'toggleSoft'])->name('milestones.toggle-soft');
     Route::post('/goals/{goal}/milestones/reorder', [MilestoneController::class, 'reorder'])->name('milestones.reorder');
     Route::delete('/goals/{goal}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('milestones.destroy');
+
+    // Milestone Todos
+    Route::post('/goals/{goal}/milestones/{milestone}/todos', [MilestoneTodoController::class, 'store'])->name('milestone-todos.store');
+    Route::put('/goals/{goal}/milestones/{milestone}/todos/{todo}', [MilestoneTodoController::class, 'update'])->name('milestone-todos.update');
+    Route::patch('/goals/{goal}/milestones/{milestone}/todos/{todo}/toggle', [MilestoneTodoController::class, 'toggle'])->name('milestone-todos.toggle');
+    Route::post('/goals/{goal}/milestones/{milestone}/todos/reorder', [MilestoneTodoController::class, 'reorder'])->name('milestone-todos.reorder');
+    Route::delete('/goals/{goal}/milestones/{milestone}/todos/{todo}', [MilestoneTodoController::class, 'destroy'])->name('milestone-todos.destroy');
+
+    // Goal Checklists
+    Route::post('/goals/{goal}/checklists', [GoalChecklistController::class, 'store'])->name('checklists.store');
+    Route::put('/goals/{goal}/checklists/{checklist}', [GoalChecklistController::class, 'update'])->name('checklists.update');
+    Route::patch('/goals/{goal}/checklists/{checklist}/toggle', [GoalChecklistController::class, 'toggle'])->name('checklists.toggle');
+    Route::post('/goals/{goal}/checklists/reorder', [GoalChecklistController::class, 'reorder'])->name('checklists.reorder');
+    Route::delete('/goals/{goal}/checklists/{checklist}', [GoalChecklistController::class, 'destroy'])->name('checklists.destroy');
 
     // Reminders
     Route::post('/goals/{goal}/reminders', [ReminderController::class, 'store'])->name('reminders.store');

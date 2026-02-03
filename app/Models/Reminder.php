@@ -16,6 +16,8 @@ class Reminder extends Model
         'type',
         'frequency',
         'custom_days',
+        'weekly_days',
+        'monthly_day',
         'remind_time',
         'message',
         'is_active',
@@ -47,14 +49,75 @@ class Reminder extends Model
         $time = Carbon::parse($this->remind_time);
 
         $next = match($this->frequency) {
-            'daily' => $now->copy()->setTimeFrom($time)->addDay(),
-            'weekly' => $now->copy()->setTimeFrom($time)->next(Carbon::MONDAY),
-            'monthly' => $now->copy()->setTimeFrom($time)->addMonth()->startOfMonth(),
+            'daily' => $this->calculateDailyNext($now, $time),
+            'weekly' => $this->calculateWeeklyNext($now, $time),
+            'monthly' => $this->calculateMonthlyNext($now, $time),
             'custom' => $this->calculateCustomNext($now, $time),
             default => $now->copy()->setTimeFrom($time)->addDay(),
         };
 
         $this->update(['next_send_at' => $next]);
+    }
+
+    /**
+     * Calculate next daily send time.
+     */
+    protected function calculateDailyNext(Carbon $now, Carbon $time): Carbon
+    {
+        $next = $now->copy()->setTimeFrom($time);
+        if ($next->lte($now)) {
+            $next->addDay();
+        }
+        return $next;
+    }
+
+    /**
+     * Calculate next weekly send time based on selected days.
+     */
+    protected function calculateWeeklyNext(Carbon $now, Carbon $time): Carbon
+    {
+        // If weekly_days is set (e.g., "1,3,5" for Mon, Wed, Fri)
+        if ($this->weekly_days) {
+            $days = array_map('intval', explode(',', $this->weekly_days));
+            sort($days);
+            $currentDayOfWeek = $now->dayOfWeekIso; // 1=Mon, 7=Sun
+
+            // Find next day this week
+            foreach ($days as $day) {
+                if ($day > $currentDayOfWeek || ($day == $currentDayOfWeek && $now->copy()->setTimeFrom($time)->gt($now))) {
+                    $next = $now->copy()->startOfWeek()->addDays($day - 1)->setTimeFrom($time);
+                    if ($next->gt($now)) {
+                        return $next;
+                    }
+                }
+            }
+
+            // Next week's first selected day
+            return $now->copy()->addWeek()->startOfWeek()->addDays($days[0] - 1)->setTimeFrom($time);
+        }
+
+        // Default: next Monday
+        $next = $now->copy()->setTimeFrom($time)->next(Carbon::MONDAY);
+        return $next;
+    }
+
+    /**
+     * Calculate next monthly send time based on selected day of month.
+     */
+    protected function calculateMonthlyNext(Carbon $now, Carbon $time): Carbon
+    {
+        $dayOfMonth = $this->monthly_day ?? 1;
+
+        // Try this month
+        $next = $now->copy()->setDay(min($dayOfMonth, $now->daysInMonth))->setTimeFrom($time);
+
+        if ($next->lte($now)) {
+            // Move to next month
+            $next = $now->copy()->addMonth();
+            $next->setDay(min($dayOfMonth, $next->daysInMonth))->setTimeFrom($time);
+        }
+
+        return $next;
     }
 
     /**

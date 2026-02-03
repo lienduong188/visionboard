@@ -94,6 +94,14 @@ class Goal extends Model
     }
 
     /**
+     * Get all checklist items for this goal.
+     */
+    public function checklists(): HasMany
+    {
+        return $this->hasMany(GoalChecklist::class)->orderBy('sort_order');
+    }
+
+    /**
      * Calculate progress based on current_value and target_value.
      */
     public function calculateProgress(): int

@@ -3,7 +3,7 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, Link } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
@@ -67,6 +67,9 @@ const imagePreview = ref(null);
 const fileInput = ref(null);
 const showDeleteConfirm = ref(false);
 const processing = ref(false);
+const newChecklistItem = ref('');
+const editingChecklistId = ref(null);
+const editingChecklistTitle = ref('');
 
 const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -136,6 +139,60 @@ const deleteGoal = () => {
 const close = () => {
     showDeleteConfirm.value = false;
     emit('close');
+};
+
+// Checklist methods
+const addChecklist = () => {
+    if (!newChecklistItem.value.trim() || !props.goal) return;
+
+    router.post(route('checklists.store', props.goal.id), {
+        title: newChecklistItem.value.trim(),
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            newChecklistItem.value = '';
+        },
+    });
+};
+
+const toggleChecklist = (checklist) => {
+    if (!props.goal) return;
+
+    router.patch(route('checklists.toggle', [props.goal.id, checklist.id]), {}, {
+        preserveScroll: true,
+    });
+};
+
+const startEditChecklist = (checklist) => {
+    editingChecklistId.value = checklist.id;
+    editingChecklistTitle.value = checklist.title;
+};
+
+const saveEditChecklist = (checklist) => {
+    if (!editingChecklistTitle.value.trim() || !props.goal) return;
+
+    router.put(route('checklists.update', [props.goal.id, checklist.id]), {
+        title: editingChecklistTitle.value.trim(),
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            editingChecklistId.value = null;
+            editingChecklistTitle.value = '';
+        },
+    });
+};
+
+const cancelEditChecklist = () => {
+    editingChecklistId.value = null;
+    editingChecklistTitle.value = '';
+};
+
+const deleteChecklist = (checklist) => {
+    if (!props.goal) return;
+
+    router.delete(route('checklists.destroy', [props.goal.id, checklist.id]), {
+        preserveScroll: true,
+    });
 };
 
 // Handle ESC key
@@ -420,6 +477,94 @@ const progressColor = computed(() => {
                                         <InputError :message="form.errors.status" class="mt-2" />
                                     </div>
 
+                                    <!-- Checklist -->
+                                    <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                        <InputLabel value="✅ Checklist" />
+                                        <div class="mt-3 space-y-2">
+                                            <!-- Existing items -->
+                                            <div
+                                                v-for="item in goal.checklists"
+                                                :key="item.id"
+                                                class="flex items-center gap-2 group"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    @click="toggleChecklist(item)"
+                                                    class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors"
+                                                    :class="item.is_completed
+                                                        ? 'bg-green-500 border-green-500 text-white'
+                                                        : 'border-gray-300 dark:border-gray-500 hover:border-green-400'"
+                                                >
+                                                    <svg v-if="item.is_completed" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                                <!-- Edit mode -->
+                                                <div v-if="editingChecklistId === item.id" class="flex-1 flex items-center gap-2">
+                                                    <input
+                                                        v-model="editingChecklistTitle"
+                                                        type="text"
+                                                        class="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded focus:ring-indigo-500 focus:border-indigo-500 py-1"
+                                                        @keyup.enter="saveEditChecklist(item)"
+                                                        @keyup.escape="cancelEditChecklist"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        @click="saveEditChecklist(item)"
+                                                        class="text-green-500 hover:text-green-600 text-sm"
+                                                    >✓</button>
+                                                    <button
+                                                        type="button"
+                                                        @click="cancelEditChecklist"
+                                                        class="text-gray-400 hover:text-gray-600 text-sm"
+                                                    >✕</button>
+                                                </div>
+                                                <!-- Display mode -->
+                                                <span
+                                                    v-else
+                                                    @dblclick="startEditChecklist(item)"
+                                                    class="flex-1 text-sm cursor-pointer"
+                                                    :class="item.is_completed
+                                                        ? 'line-through text-gray-400 dark:text-gray-500'
+                                                        : 'text-gray-700 dark:text-gray-300'"
+                                                >
+                                                    {{ item.title }}
+                                                </span>
+                                                <button
+                                                    v-if="editingChecklistId !== item.id"
+                                                    type="button"
+                                                    @click="deleteChecklist(item)"
+                                                    class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+
+                                            <!-- Add new item -->
+                                            <div class="flex items-center gap-2 pt-2">
+                                                <div class="w-5 h-5 flex-shrink-0"></div>
+                                                <input
+                                                    v-model="newChecklistItem"
+                                                    type="text"
+                                                    placeholder="Thêm checklist item..."
+                                                    class="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded focus:ring-indigo-500 focus:border-indigo-500 py-1.5"
+                                                    @keyup.enter="addChecklist"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    @click="addChecklist"
+                                                    :disabled="!newChecklistItem.trim()"
+                                                    class="text-indigo-500 hover:text-indigo-600 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    + Add
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                            💡 Double-click để edit. Checklist không ảnh hưởng tiến độ goal.
+                                        </p>
+                                    </div>
+
                                     <!-- Priority -->
                                     <div>
                                         <InputLabel value="Priority" />
@@ -523,13 +668,24 @@ const progressColor = computed(() => {
                                     </div>
                                 </div>
 
-                                <!-- Save Button -->
-                                <PrimaryButton
-                                    @click="submit"
-                                    :disabled="processing"
-                                >
-                                    💾 Save
-                                </PrimaryButton>
+                                <!-- Actions -->
+                                <div class="flex items-center gap-3">
+                                    <!-- View Details Link -->
+                                    <Link
+                                        :href="route('goals.show', goal.id)"
+                                        class="px-4 py-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors text-sm font-medium"
+                                    >
+                                        📋 Milestones & Details
+                                    </Link>
+
+                                    <!-- Save Button -->
+                                    <PrimaryButton
+                                        @click="submit"
+                                        :disabled="processing"
+                                    >
+                                        💾 Save
+                                    </PrimaryButton>
+                                </div>
                             </div>
                         </div>
                     </Transition>

@@ -19,6 +19,8 @@ class ReminderController extends Controller
             'type' => 'required|in:deadline,progress,custom',
             'frequency' => 'required|in:daily,weekly,monthly,custom',
             'custom_days' => 'nullable|string',
+            'weekly_days' => 'nullable|string', // e.g., "1,3,5" for Mon, Wed, Fri
+            'monthly_day' => 'nullable|integer|min:1|max:31', // day of month
             'remind_time' => 'required|date_format:H:i',
             'message' => 'nullable|string|max:500',
         ]);
@@ -47,6 +49,8 @@ class ReminderController extends Controller
             'type' => 'required|in:deadline,progress,custom',
             'frequency' => 'required|in:daily,weekly,monthly,custom',
             'custom_days' => 'nullable|string',
+            'weekly_days' => 'nullable|string',
+            'monthly_day' => 'nullable|integer|min:1|max:31',
             'remind_time' => 'required|date_format:H:i',
             'message' => 'nullable|string|max:500',
             'is_active' => 'boolean',

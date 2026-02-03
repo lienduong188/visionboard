@@ -8,6 +8,19 @@ import ThemeWordsManager from '@/Components/ThemeWordsManager.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import draggable from 'vuedraggable';
+import { marked } from 'marked';
+
+// Markdown parser configuration
+marked.setOptions({
+    breaks: true, // Convert line breaks to <br>
+    gfm: true,    // GitHub Flavored Markdown
+});
+
+// Render markdown memo
+const renderMemo = (memo) => {
+    if (!memo) return '';
+    return marked.parse(memo);
+};
 
 const props = defineProps({
     goals: Array,
@@ -180,6 +193,17 @@ const toggleMilestone = (goalId, milestone) => {
         preserveState: true,
     });
 };
+
+// Toggle milestone todo completion
+const toggleMilestoneTodo = (goalId, milestone, todo) => {
+    router.patch(route('milestone-todos.toggle', [goalId, milestone.id, todo.id]), {}, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
+// Expanded state for milestone todos
+const expandedMilestoneTodos = ref({});
 
 // Filter core goals based on selected category
 const filteredCoreGoals = computed(() => {
@@ -488,31 +512,94 @@ const saveOrder = () => {
                                         <div
                                             v-for="milestone in goal.milestones"
                                             :key="milestone.id"
-                                            class="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors"
+                                            class="rounded-lg transition-colors"
+                                            :class="milestone.is_soft ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800' : 'hover:bg-white dark:hover:bg-gray-800'"
                                         >
-                                            <button
-                                                @click.stop="toggleMilestone(goal.id, milestone)"
-                                                class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
-                                                :class="milestone.is_completed
-                                                    ? 'bg-green-500 border-green-500 text-white'
-                                                    : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500'"
+                                            <div class="flex items-center gap-3 p-2">
+                                                <button
+                                                    @click.stop="toggleMilestone(goal.id, milestone)"
+                                                    class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0"
+                                                    :class="milestone.is_completed
+                                                        ? 'bg-green-500 border-green-500 text-white'
+                                                        : milestone.is_soft
+                                                            ? 'border-amber-400 dark:border-amber-600 hover:border-amber-500'
+                                                            : 'border-gray-300 dark:border-gray-600 hover:border-indigo-500'"
+                                                >
+                                                    <svg v-if="milestone.is_completed" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                </button>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span v-if="milestone.is_soft" class="text-amber-500" title="Soft milestone - nhắc nhở nhẹ, không tính vào progress">🔔</span>
+                                                        <span
+                                                            :class="milestone.is_completed
+                                                                ? 'text-gray-400 line-through'
+                                                                : milestone.is_soft
+                                                                    ? 'text-amber-700 dark:text-amber-300'
+                                                                    : 'text-gray-700 dark:text-gray-300'"
+                                                        >
+                                                            {{ milestone.title }}
+                                                        </span>
+                                                    </div>
+                                                    <div v-if="milestone.memo" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        <span class="mr-0.5">📝</span>
+                                                        <span class="memo-content prose prose-xs prose-gray dark:prose-invert max-w-none inline line-clamp-2" v-html="renderMemo(milestone.memo)"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2 flex-shrink-0">
+                                                    <!-- Todo count badge -->
+                                                    <button
+                                                        v-if="milestone.todos?.length"
+                                                        @click.stop="expandedMilestoneTodos[milestone.id] = !expandedMilestoneTodos[milestone.id]"
+                                                        class="text-xs px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-200 dark:hover:bg-indigo-900"
+                                                        :title="`${milestone.todos.filter(t => t.is_completed).length}/${milestone.todos.length} todos`"
+                                                    >
+                                                        📋 {{ milestone.todos.filter(t => t.is_completed).length }}/{{ milestone.todos.length }}
+                                                    </button>
+                                                    <span
+                                                        v-if="milestone.due_date"
+                                                        class="text-xs text-gray-500 dark:text-gray-400"
+                                                    >
+                                                        {{ new Date(milestone.due_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <!-- Milestone Todos (expandable) -->
+                                            <div
+                                                v-if="milestone.todos?.length && expandedMilestoneTodos[milestone.id]"
+                                                class="ml-8 pb-2 pr-2 space-y-1"
                                             >
-                                                <svg v-if="milestone.is_completed" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                                </svg>
-                                            </button>
-                                            <span
-                                                class="flex-1"
-                                                :class="milestone.is_completed ? 'text-gray-400 line-through' : 'text-gray-700 dark:text-gray-300'"
-                                            >
-                                                {{ milestone.title }}
-                                            </span>
-                                            <span
-                                                v-if="milestone.target_date"
-                                                class="text-xs text-gray-500 dark:text-gray-400"
-                                            >
-                                                {{ new Date(milestone.target_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) }}
-                                            </span>
+                                                <div
+                                                    v-for="todo in milestone.todos"
+                                                    :key="todo.id"
+                                                    class="flex items-center gap-2 text-sm p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                                                >
+                                                    <button
+                                                        @click.stop="toggleMilestoneTodo(goal.id, milestone, todo)"
+                                                        class="w-4 h-4 rounded border flex items-center justify-center transition-colors flex-shrink-0"
+                                                        :class="todo.is_completed
+                                                            ? 'bg-green-500 border-green-500 text-white'
+                                                            : 'border-gray-300 dark:border-gray-500 hover:border-green-400'"
+                                                    >
+                                                        <svg v-if="todo.is_completed" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                                        </svg>
+                                                    </button>
+                                                    <span
+                                                        class="flex-1"
+                                                        :class="todo.is_completed ? 'text-gray-400 line-through' : 'text-gray-600 dark:text-gray-400'"
+                                                    >
+                                                        {{ todo.title }}
+                                                    </span>
+                                                    <span
+                                                        v-if="todo.end_date"
+                                                        class="text-xs text-gray-400"
+                                                    >
+                                                        → {{ new Date(todo.end_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div v-if="!goal.milestones?.length" class="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
                                             Chưa có milestones. <Link :href="route('goals.show', goal.id)" class="text-indigo-600 hover:underline">Thêm milestones</Link>
