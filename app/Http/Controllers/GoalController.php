@@ -263,7 +263,7 @@ class GoalController extends Controller
             $goal->save();
         }
 
-        return redirect()->route('goals.index')
+        return redirect()->route('goals.index', ['view' => 'plan'])
             ->with('success', 'Goal updated successfully!');
     }
 
@@ -349,7 +349,7 @@ class GoalController extends Controller
 
         $goal->delete();
 
-        return redirect()->route('goals.index')
+        return redirect()->route('goals.index', ['view' => 'plan'])
             ->with('success', 'Goal deleted successfully!');
     }
 }

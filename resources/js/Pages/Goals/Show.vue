@@ -364,10 +364,10 @@ const formatFrequency = (reminder) => {
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <Link
-                        :href="route('goals.index')"
+                        :href="route('goals.index', { view: 'plan' })"
                         class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     >
-                        ← Back
+                        ← Back to Plan
                     </Link>
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
                         {{ goal.title }}
