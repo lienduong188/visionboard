@@ -4,7 +4,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useForm, router } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 
 const props = defineProps({
     goal: Object,
@@ -34,30 +34,36 @@ const form = useForm({
     progress_mode: 'value',
 });
 
-// Watch for goal changes to update form
-watch(() => props.goal, (newGoal) => {
-    if (newGoal) {
-        form.category_id = newGoal.category_id;
-        form.title = newGoal.title;
-        form.description = newGoal.description || '';
-        form.slogan = newGoal.slogan || '';
+// Function to sync form with goal data
+const syncFormWithGoal = () => {
+    if (props.goal) {
+        form.category_id = props.goal.category_id;
+        form.title = props.goal.title;
+        form.description = props.goal.description || '';
+        form.slogan = props.goal.slogan || '';
         form.cover_image = null;
         form.remove_cover_image = false;
-        form.target_value = newGoal.target_value || '';
-        form.current_value = newGoal.current_value || 0;
-        form.start_value = newGoal.start_value || '';
-        form.unit = newGoal.unit || '';
-        form.start_date = formatDateForInput(newGoal.start_date) || '2026-01-01';
-        form.target_date = formatDateForInput(newGoal.target_date) || '2026-12-31';
-        form.priority = newGoal.priority;
-        form.status = newGoal.status;
-        form.is_pinned = newGoal.is_pinned;
-        form.is_core_goal = newGoal.is_core_goal || false;
-        form.progress_mode = newGoal.progress_mode || 'value';
-        currentImage.value = newGoal.cover_image;
+        form.target_value = props.goal.target_value || '';
+        form.current_value = props.goal.current_value || 0;
+        form.start_value = props.goal.start_value || '';
+        form.unit = props.goal.unit || '';
+        form.start_date = formatDateForInput(props.goal.start_date) || '2026-01-01';
+        form.target_date = formatDateForInput(props.goal.target_date) || '2026-12-31';
+        form.priority = props.goal.priority;
+        form.status = props.goal.status;
+        form.is_pinned = !!props.goal.is_pinned;
+        form.is_core_goal = !!props.goal.is_core_goal;
+        form.progress_mode = props.goal.progress_mode || 'value';
+        currentImage.value = props.goal.cover_image;
         imagePreview.value = null;
     }
-}, { immediate: true });
+};
+
+// Watch for goal id changes
+watch(() => props.goal?.id, syncFormWithGoal);
+
+// Also sync on mount to handle initial load
+onMounted(syncFormWithGoal);
 
 // Can set core goal if: already a core goal OR has less than 3 core goals
 const canSetCoreGoal = computed(() => {
