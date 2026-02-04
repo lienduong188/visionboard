@@ -435,10 +435,10 @@ const formatFrequency = (reminder) => {
                         {{ goal.is_pinned ? '📍' : '📌' }}
                     </button>
                     <Link
-                        :href="route('goals.edit', goal.id)"
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                        :href="route('goals.index', { view: 'plan' })"
+                        class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
                     >
-                        Edit
+                        Edit in Modal
                     </Link>
                     <button
                         @click="deleteGoal"

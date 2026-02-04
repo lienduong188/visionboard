@@ -17,7 +17,7 @@ class GoalController extends Controller
     {
         $user = $request->user();
 
-        $goals = Goal::with(['category', 'milestones.todos', 'progressLogs', 'checklists'])
+        $goals = Goal::with(['category', 'milestones.todos', 'progressLogs', 'checklists', 'reminders'])
             ->where('user_id', $user->id)
             ->orderBy('is_pinned', 'desc')
             ->orderBy('sort_order', 'asc')
