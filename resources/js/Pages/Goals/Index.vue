@@ -43,7 +43,13 @@ const drag = ref(false);
 
 // Modal state
 const showEditModal = ref(false);
-const selectedGoal = ref(null);
+const selectedGoalId = ref(null);
+
+// Computed to get the latest goal data from props
+const selectedGoal = computed(() => {
+    if (!selectedGoalId.value) return null;
+    return props.goals.find(g => g.id === selectedGoalId.value) || null;
+});
 
 // Theme Words Manager state
 const showThemeWordsManager = ref(false);
@@ -62,13 +68,13 @@ const modalCoreGoalsCount = computed(() => {
 });
 
 const openGoalModal = (goal) => {
-    selectedGoal.value = goal;
+    selectedGoalId.value = goal.id;
     showEditModal.value = true;
 };
 
 const closeGoalModal = () => {
     showEditModal.value = false;
-    selectedGoal.value = null;
+    selectedGoalId.value = null;
 };
 
 const onGoalSaved = () => {
