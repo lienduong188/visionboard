@@ -12,6 +12,11 @@ Personal vision board web application to track 2026 goals.
 - Authentication (Login/Register)
 - **VisionBoard View (Default)** - 3 Core Goals float around "Vision Board 2026" title with physics-based animation
 - **Plan View** - Todo list showing Core Goals with expandable milestones + regular goals with drag & drop
+- **Plan View Filters** - Multi-dimensional filters:
+  - Time: All, Next 3 months, Next 6 months, Past
+  - Status: All, In Progress, Not Started, Completed
+  - Priority: All, High, Medium, Low
+  - Category filter with active filters summary
 - **Core Goals System** - Mark up to 3 goals as "Core Goals" (trục trung tâm) to display in VisionBoard
 - **View Toggle** - Switch between VisionBoard and Plan views from the navigation bar
 - **Goal Edit Popup** - Click any goal to open edit popup (Save/Delete buttons, ESC or X to close)

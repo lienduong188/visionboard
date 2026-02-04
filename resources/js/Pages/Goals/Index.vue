@@ -41,6 +41,11 @@ const expandedCoreGoals = ref({});
 const selectedCategory = ref(null);
 const drag = ref(false);
 
+// View filters
+const timeFilter = ref('all'); // 'all', '3months', '6months', 'past'
+const statusFilter = ref('all'); // 'all', 'in_progress', 'not_started', 'completed'
+const priorityFilter = ref('all'); // 'all', 'high', 'medium', 'low'
+
 // Modal state
 const showEditModal = ref(false);
 const selectedGoalId = ref(null);
@@ -211,18 +216,63 @@ const toggleMilestoneTodo = (goalId, milestone, todo) => {
 // Expanded state for milestone todos
 const expandedMilestoneTodos = ref({});
 
-// Filter core goals based on selected category
+// Helper function to check if goal matches time filter
+const matchesTimeFilter = (goal) => {
+    if (timeFilter.value === 'all') return true;
+
+    const now = new Date();
+    const targetDate = goal.target_date ? new Date(goal.target_date) : null;
+
+    if (timeFilter.value === 'past') {
+        // Goals with target_date in the past
+        return targetDate && targetDate < now;
+    }
+
+    if (timeFilter.value === '3months') {
+        // Goals with target_date within next 3 months
+        const threeMonthsLater = new Date(now);
+        threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+        return targetDate && targetDate >= now && targetDate <= threeMonthsLater;
+    }
+
+    if (timeFilter.value === '6months') {
+        // Goals with target_date within next 6 months
+        const sixMonthsLater = new Date(now);
+        sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+        return targetDate && targetDate >= now && targetDate <= sixMonthsLater;
+    }
+
+    return true;
+};
+
+// Helper function to check if goal matches status filter
+const matchesStatusFilter = (goal) => {
+    if (statusFilter.value === 'all') return true;
+    return goal.status === statusFilter.value;
+};
+
+// Helper function to check if goal matches priority filter
+const matchesPriorityFilter = (goal) => {
+    if (priorityFilter.value === 'all') return true;
+    return goal.priority === priorityFilter.value;
+};
+
+// Combined filter function
+const matchesAllFilters = (goal) => {
+    const categoryMatch = !selectedCategory.value || goal.category_id === selectedCategory.value;
+    return categoryMatch && matchesTimeFilter(goal) && matchesStatusFilter(goal) && matchesPriorityFilter(goal);
+};
+
+// Filter core goals based on all filters
 const filteredCoreGoals = computed(() => {
     const goals = props.coreGoals || [];
-    if (!selectedCategory.value) return goals;
-    return goals.filter(goal => goal.category_id === selectedCategory.value);
+    return goals.filter(matchesAllFilters);
 });
 
-// Filter regular goals based on selected category
+// Filter regular goals based on all filters
 const filteredRegularGoals = computed(() => {
     const goals = props.regularGoals || [];
-    if (!selectedCategory.value) return goals;
-    return goals.filter(goal => goal.category_id === selectedCategory.value);
+    return goals.filter(matchesAllFilters);
 });
 
 // Local reactive copy of regular goals for drag & drop in Plan view
@@ -305,31 +355,63 @@ const saveOrder = () => {
                     </div>
                 </div>
 
-                <!-- Category Filter (only in Plan view) -->
-                <div v-if="currentView === 'plan'" class="flex flex-wrap items-center gap-2 mb-6">
-                    <button
-                        @click="selectedCategory = null"
-                        class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-                        :class="selectedCategory === null
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
-                        title="Hiển thị tất cả goals"
-                    >
-                        All
-                    </button>
-                    <button
-                        v-for="category in categories"
-                        :key="category.id"
-                        @click="selectedCategory = category.id"
-                        class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
-                        :class="selectedCategory === category.id
-                            ? 'text-white'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'"
-                        :style="selectedCategory === category.id ? { backgroundColor: category.color } : {}"
-                        :title="getCategoryTooltip(category)"
-                    >
-                        {{ category.icon }} {{ category.name }}
-                    </button>
+                <!-- Filters Section (only in Plan view) -->
+                <div v-if="currentView === 'plan'" class="mb-6">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <!-- Time Filter Dropdown -->
+                        <select
+                            v-model="timeFilter"
+                            class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
+                        >
+                            <option value="all">📅 Tất cả thời gian</option>
+                            <option value="3months">📅 3 tháng tới</option>
+                            <option value="6months">📅 6 tháng tới</option>
+                            <option value="past">📅 Quá khứ</option>
+                        </select>
+
+                        <!-- Status Filter Dropdown -->
+                        <select
+                            v-model="statusFilter"
+                            class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
+                        >
+                            <option value="all">📊 Tất cả tiến độ</option>
+                            <option value="in_progress">🚀 Đang làm</option>
+                            <option value="not_started">📋 Chưa bắt đầu</option>
+                            <option value="completed">✅ Hoàn thành</option>
+                        </select>
+
+                        <!-- Priority Filter Dropdown -->
+                        <select
+                            v-model="priorityFilter"
+                            class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
+                        >
+                            <option value="all">🎯 Tất cả ưu tiên</option>
+                            <option value="high">🔴 Ưu tiên cao</option>
+                            <option value="medium">🟡 Ưu tiên TB</option>
+                            <option value="low">🟢 Ưu tiên thấp</option>
+                        </select>
+
+                        <!-- Category Filter Dropdown -->
+                        <select
+                            v-model="selectedCategory"
+                            class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
+                        >
+                            <option :value="null">🏷️ Tất cả danh mục</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+                                {{ category.icon }} {{ category.name }}
+                            </option>
+                        </select>
+
+                        <!-- Reset Filters Button -->
+                        <button
+                            v-if="timeFilter !== 'all' || statusFilter !== 'all' || priorityFilter !== 'all' || selectedCategory"
+                            @click="timeFilter = 'all'; statusFilter = 'all'; priorityFilter = 'all'; selectedCategory = null"
+                            class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                            title="Xóa tất cả bộ lọc"
+                        >
+                            ✕ Xóa lọc
+                        </button>
+                    </div>
                 </div>
 
                 <!-- VisionBoard View (3 Core Goals) -->
@@ -651,7 +733,7 @@ const saveOrder = () => {
                         >
                             <template #item="{ element }">
                                 <GoalCard
-                                    v-if="!selectedCategory || element.category_id === selectedCategory"
+                                    v-if="matchesAllFilters(element)"
                                     :goal="element"
                                     class="cursor-grab active:cursor-grabbing"
                                     @click="openGoalModal"
@@ -663,7 +745,10 @@ const saveOrder = () => {
                             class="text-center py-8 text-gray-500 dark:text-gray-400"
                         >
                             <div class="text-4xl mb-2">📝</div>
-                            <p>Chưa có goals thường. Tất cả goals đều là Core Goals!</p>
+                            <p v-if="timeFilter !== 'all' || statusFilter !== 'all' || priorityFilter !== 'all' || selectedCategory">
+                                Không có goals nào phù hợp với bộ lọc.
+                            </p>
+                            <p v-else>Chưa có goals thường. Tất cả goals đều là Core Goals!</p>
                         </div>
                     </div>
 
