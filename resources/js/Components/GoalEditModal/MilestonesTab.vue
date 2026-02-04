@@ -271,10 +271,8 @@ const formatDate = (date) => {
                                     (soft)
                                 </span>
                                 <!-- Indicators -->
-                                <span v-if="!expandedMilestones[milestone.id] && (milestone.description || milestone.memo || milestone.image_url || milestone.due_date)" class="text-xs text-gray-400">
-                                    <span v-if="milestone.memo" class="mr-0.5">memo</span>
-                                    <span v-if="milestone.image_url" class="mr-0.5">img</span>
-                                    <span v-if="milestone.due_date">date</span>
+                                <span v-if="!expandedMilestones[milestone.id] && milestone.image_url" class="text-xs text-gray-400">
+                                    img
                                 </span>
                             </div>
                             <!-- Expandable details -->
