@@ -21,6 +21,8 @@ class ReminderController extends Controller
             'custom_days' => 'nullable|string',
             'weekly_days' => 'nullable|string', // e.g., "1,3,5" for Mon, Wed, Fri
             'monthly_day' => 'nullable|integer|min:1|max:31', // day of month
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'remind_time' => 'required|date_format:H:i',
             'message' => 'nullable|string|max:500',
         ]);
@@ -51,6 +53,8 @@ class ReminderController extends Controller
             'custom_days' => 'nullable|string',
             'weekly_days' => 'nullable|string',
             'monthly_day' => 'nullable|integer|min:1|max:31',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
             'remind_time' => 'required|date_format:H:i',
             'message' => 'nullable|string|max:500',
             'is_active' => 'boolean',

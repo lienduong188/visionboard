@@ -15,6 +15,8 @@ const reminderForm = useForm({
     custom_days: '',
     weekly_days: '',
     monthly_day: 1,
+    start_date: '',
+    end_date: '',
     remind_time: '09:00',
     message: '',
     is_active: true,
@@ -54,6 +56,8 @@ const openAddReminder = () => {
     reminderForm.remind_time = '09:00';
     reminderForm.weekly_days = '1';
     reminderForm.monthly_day = 1;
+    reminderForm.start_date = '';
+    reminderForm.end_date = '';
     selectedWeekDays.value = [1];
     showReminderModal.value = true;
 };
@@ -65,6 +69,8 @@ const openEditReminder = (reminder) => {
     reminderForm.custom_days = reminder.custom_days || '';
     reminderForm.weekly_days = reminder.weekly_days || '1';
     reminderForm.monthly_day = reminder.monthly_day || 1;
+    reminderForm.start_date = reminder.start_date || '';
+    reminderForm.end_date = reminder.end_date || '';
     reminderForm.remind_time = reminder.remind_time?.slice(0, 5) || '09:00';
     reminderForm.message = reminder.message || '';
     reminderForm.is_active = reminder.is_active;
@@ -203,6 +209,13 @@ const formatDate = (date) => {
                         class="text-sm text-gray-500 dark:text-gray-400 truncate mt-1"
                     >
                         "{{ reminder.message }}"
+                    </div>
+                    <div
+                        v-if="reminder.start_date || reminder.end_date"
+                        class="text-xs text-gray-400 dark:text-gray-500 mt-1"
+                    >
+                        📅 {{ reminder.start_date ? formatDate(reminder.start_date) : 'Start' }}
+                        → {{ reminder.end_date ? formatDate(reminder.end_date) : 'Ongoing' }}
                     </div>
                     <div
                         v-if="reminder.next_send_at"
@@ -354,6 +367,37 @@ const formatDate = (date) => {
                             placeholder="e.g., 1,3,5 for Mon, Wed, Fri"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         />
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Active Period
+                            <span class="text-gray-400 font-normal">(optional)</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1">
+                                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">From</label>
+                                <input
+                                    v-model="reminderForm.start_date"
+                                    type="date"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
+                                />
+                            </div>
+                            <span class="text-gray-400 mt-5">→</span>
+                            <div class="flex-1">
+                                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">To</label>
+                                <input
+                                    v-model="reminderForm.end_date"
+                                    type="date"
+                                    :min="reminderForm.start_date || undefined"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
+                                />
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Leave empty for ongoing reminders
+                        </p>
                     </div>
 
                     <!-- Time -->

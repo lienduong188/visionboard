@@ -18,6 +18,8 @@ class Reminder extends Model
         'custom_days',
         'weekly_days',
         'monthly_day',
+        'start_date',
+        'end_date',
         'remind_time',
         'message',
         'is_active',
@@ -28,6 +30,8 @@ class Reminder extends Model
     protected $casts = [
         'remind_time' => 'datetime:H:i',
         'is_active' => 'boolean',
+        'start_date' => 'date',
+        'end_date' => 'date',
         'last_sent_at' => 'datetime',
         'next_send_at' => 'datetime',
     ];
@@ -48,6 +52,20 @@ class Reminder extends Model
         $now = Carbon::now();
         $time = Carbon::parse($this->remind_time);
 
+        // Check if reminder is within date range
+        if ($this->start_date && $now->lt($this->start_date->startOfDay())) {
+            // Before start date - set next to start date
+            $next = $this->start_date->copy()->setTimeFrom($time);
+            $this->update(['next_send_at' => $next]);
+            return;
+        }
+
+        if ($this->end_date && $now->gt($this->end_date->endOfDay())) {
+            // After end date - disable reminder
+            $this->update(['next_send_at' => null, 'is_active' => false]);
+            return;
+        }
+
         $next = match($this->frequency) {
             'daily' => $this->calculateDailyNext($now, $time),
             'weekly' => $this->calculateWeeklyNext($now, $time),
@@ -55,6 +73,12 @@ class Reminder extends Model
             'custom' => $this->calculateCustomNext($now, $time),
             default => $now->copy()->setTimeFrom($time)->addDay(),
         };
+
+        // If next is after end_date, disable reminder
+        if ($this->end_date && $next->gt($this->end_date->endOfDay())) {
+            $this->update(['next_send_at' => null, 'is_active' => false]);
+            return;
+        }
 
         $this->update(['next_send_at' => $next]);
     }
