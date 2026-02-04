@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     goals: {
@@ -323,15 +322,6 @@ const progressColor = (progress) => {
     return 'bg-red-500';
 };
 
-const updateScale = (goalId, newScale) => {
-    router.patch(route('goals.orbit-scale', goalId), {
-        orbit_scale: newScale,
-    }, {
-        preserveScroll: true,
-        preserveState: true,
-    });
-};
-
 // Computed for filtering
 const floatingGoals = computed(() => floatingObjects.value.filter(obj => obj.type === 'goal'));
 const floatingWords = computed(() => floatingObjects.value.filter(obj => obj.type === 'word'));
@@ -445,28 +435,6 @@ const floatingWords = computed(() => floatingObjects.value.filter(obj => obj.typ
                 </div>
             </div>
 
-            <!-- Scale Slider (shows on hover) - hidden on mobile -->
-            <div
-                v-if="hoveredGoalId === goal.id && !isMobile"
-                class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-2 z-50"
-                @click.prevent.stop
-            >
-                <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500 dark:text-gray-400">Size:</span>
-                    <input
-                        type="range"
-                        min="1"
-                        max="5"
-                        :value="goal.orbit_scale || 3"
-                        class="w-20 h-1 accent-indigo-600 cursor-pointer"
-                        @input="updateScale(goal.id, parseInt($event.target.value))"
-                        @click.stop
-                    />
-                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                        {{ goal.orbit_scale || 3 }}
-                    </span>
-                </div>
-            </div>
         </div>
     </div>
 </template>
