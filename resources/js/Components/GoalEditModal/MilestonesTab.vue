@@ -82,7 +82,8 @@ const openEditMilestone = (milestone) => {
     milestoneForm.memo = milestone.memo || '';
     milestoneForm.target_value = milestone.target_value || '';
     displayTargetValue.value = formatForInput(milestone.target_value);
-    milestoneForm.due_date = milestone.due_date || '';
+    // Format due_date to YYYY-MM-DD for input type="date"
+    milestoneForm.due_date = milestone.due_date ? milestone.due_date.substring(0, 10) : '';
     milestoneForm.is_soft = milestone.is_soft || false;
     milestoneForm.image = null;
     milestoneForm.remove_image = false;
