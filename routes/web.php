@@ -26,7 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Goals (Vision Board)
     Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
     Route::get('/goals/create', [GoalController::class, 'create'])->name('goals.create');
+    Route::get('/goals/export/csv', [GoalController::class, 'exportCsv'])->name('goals.export.csv');
+    Route::get('/goals/export/pdf', [GoalController::class, 'exportPdf'])->name('goals.export.pdf');
     Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
+    Route::post('/goals/reorder', [GoalController::class, 'reorder'])->name('goals.reorder');
     Route::get('/goals/{goal}', [GoalController::class, 'show'])->name('goals.show');
     Route::get('/goals/{goal}/edit', [GoalController::class, 'edit'])->name('goals.edit');
     Route::put('/goals/{goal}', [GoalController::class, 'update'])->name('goals.update');
@@ -34,7 +37,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/goals/{goal}/progress', [GoalController::class, 'updateProgress'])->name('goals.progress');
     Route::patch('/goals/{goal}/pin', [GoalController::class, 'togglePin'])->name('goals.pin');
     Route::patch('/goals/{goal}/orbit-scale', [GoalController::class, 'updateOrbitScale'])->name('goals.orbit-scale');
-    Route::post('/goals/reorder', [GoalController::class, 'reorder'])->name('goals.reorder');
 
     // Milestones
     Route::post('/goals/{goal}/milestones', [MilestoneController::class, 'store'])->name('milestones.store');

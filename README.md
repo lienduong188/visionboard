@@ -60,6 +60,10 @@ Personal vision board web application to track 2026 goals.
     - Weekly (select days of week)
     - Monthly (select day of month)
     - Custom
+  - **Active Period** - Set date range for when reminder is active
+- **Export Goals:**
+  - **CSV Export** - Export all goals with milestones to CSV file
+  - **PDF Export** - Beautiful PDF report with stats, core goals, and other goals
 
 ## Local Development
 ```bash

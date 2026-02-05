@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Goal;
 use Illuminate\Http\Request;
+use Mpdf\Mpdf;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -351,5 +353,136 @@ class GoalController extends Controller
 
         return redirect()->route('goals.index', ['view' => 'plan'])
             ->with('success', 'Goal deleted successfully!');
+    }
+
+    /**
+     * Export goals to CSV.
+     */
+    public function exportCsv(Request $request): StreamedResponse
+    {
+        $user = $request->user();
+
+        $goals = Goal::with(['category', 'milestones'])
+            ->where('user_id', $user->id)
+            ->orderBy('is_core_goal', 'desc')
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="goals_' . date('Y-m-d') . '.csv"',
+        ];
+
+        $columns = [
+            'Title',
+            'Category',
+            'Status',
+            'Priority',
+            'Progress (%)',
+            'Target Value',
+            'Current Value',
+            'Unit',
+            'Start Date',
+            'Target Date',
+            'Core Goal',
+            'Slogan',
+            'Description',
+            'Milestones',
+        ];
+
+        $callback = function () use ($goals, $columns) {
+            $file = fopen('php://output', 'w');
+
+            // Add BOM for UTF-8
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, $columns);
+
+            foreach ($goals as $goal) {
+                $milestones = $goal->milestones->pluck('title')->implode('; ');
+
+                fputcsv($file, [
+                    $goal->title,
+                    $goal->category?->name ?? '',
+                    $goal->status,
+                    $goal->priority,
+                    $goal->progress,
+                    $goal->target_value,
+                    $goal->current_value,
+                    $goal->unit,
+                    $goal->start_date?->format('Y-m-d'),
+                    $goal->target_date?->format('Y-m-d'),
+                    $goal->is_core_goal ? 'Yes' : 'No',
+                    $goal->slogan,
+                    $goal->description,
+                    $milestones,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export goals to PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        $user = $request->user();
+
+        // Order: Core Goals -> Priority (high->medium->low) -> Status -> Target Date
+        $priorityOrder = ['high' => 1, 'medium' => 2, 'low' => 3];
+        $statusOrder = ['completed' => 1, 'in_progress' => 2, 'not_started' => 3, 'paused' => 4, 'cancelled' => 5];
+
+        $goals = Goal::with(['category', 'milestones'])
+            ->where('user_id', $user->id)
+            ->get()
+            ->sortBy([
+                ['is_core_goal', 'desc'],
+                fn($a, $b) => ($priorityOrder[$a->priority] ?? 99) <=> ($priorityOrder[$b->priority] ?? 99),
+                fn($a, $b) => ($statusOrder[$a->status] ?? 99) <=> ($statusOrder[$b->status] ?? 99),
+                ['target_date', 'asc'],
+            ])
+            ->values();
+
+        $coreGoals = $goals->where('is_core_goal', true)->values();
+        $regularGoals = $goals->where('is_core_goal', false)->values();
+
+        $stats = [
+            'total' => $goals->count(),
+            'completed' => $goals->where('status', 'completed')->count(),
+            'in_progress' => $goals->where('status', 'in_progress')->count(),
+            'not_started' => $goals->where('status', 'not_started')->count(),
+            'overall_progress' => $goals->count() > 0
+                ? round($goals->avg('progress'))
+                : 0,
+        ];
+
+        // Use mPDF for CJK (Japanese/Vietnamese) support
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font' => 'sans-serif',
+            'autoScriptToLang' => true,
+            'autoLangToFont' => true,
+        ]);
+
+        $html = view('exports.goals-pdf', [
+            'goals' => $goals,
+            'coreGoals' => $coreGoals,
+            'regularGoals' => $regularGoals,
+            'stats' => $stats,
+            'user' => $user,
+            'exportDate' => now()->format('Y-m-d H:i'),
+        ])->render();
+
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('', 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="goals_' . date('Y-m-d') . '.pdf"',
+        ]);
     }
 }
