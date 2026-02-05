@@ -69,8 +69,8 @@ const openEditReminder = (reminder) => {
     reminderForm.custom_days = reminder.custom_days || '';
     reminderForm.weekly_days = reminder.weekly_days || '1';
     reminderForm.monthly_day = reminder.monthly_day || 1;
-    reminderForm.start_date = reminder.start_date || '';
-    reminderForm.end_date = reminder.end_date || '';
+    reminderForm.start_date = reminder.start_date ? reminder.start_date.slice(0, 10) : '';
+    reminderForm.end_date = reminder.end_date ? reminder.end_date.slice(0, 10) : '';
     reminderForm.remind_time = reminder.remind_time?.slice(0, 5) || '09:00';
     reminderForm.message = reminder.message || '';
     reminderForm.is_active = reminder.is_active;
