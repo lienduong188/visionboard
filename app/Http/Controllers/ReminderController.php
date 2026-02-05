@@ -17,8 +17,8 @@ class ReminderController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|in:deadline,progress,custom',
-            'frequency' => 'required|in:daily,weekly,monthly,custom',
-            'custom_days' => 'nullable|string',
+            'frequency' => 'required|in:daily,weekly,monthly,specific',
+            'specific_dates' => 'nullable|string', // e.g., "2026-03-15,2026-05-20"
             'weekly_days' => 'nullable|string', // e.g., "1,3,5" for Mon, Wed, Fri
             'monthly_day' => 'nullable|integer|min:1|max:31', // day of month
             'start_date' => 'nullable|date',
@@ -49,8 +49,8 @@ class ReminderController extends Controller
 
         $validated = $request->validate([
             'type' => 'required|in:deadline,progress,custom',
-            'frequency' => 'required|in:daily,weekly,monthly,custom',
-            'custom_days' => 'nullable|string',
+            'frequency' => 'required|in:daily,weekly,monthly,specific',
+            'specific_dates' => 'nullable|string',
             'weekly_days' => 'nullable|string',
             'monthly_day' => 'nullable|integer|min:1|max:31',
             'start_date' => 'nullable|date',

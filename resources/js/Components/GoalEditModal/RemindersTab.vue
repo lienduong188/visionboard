@@ -12,7 +12,7 @@ const editingReminder = ref(null);
 const reminderForm = useForm({
     type: 'progress',
     frequency: 'daily',
-    custom_days: '',
+    specific_dates: [],
     weekly_days: '',
     monthly_day: 1,
     start_date: '',
@@ -21,6 +21,9 @@ const reminderForm = useForm({
     message: '',
     is_active: true,
 });
+
+// Specific dates management
+const newSpecificDate = ref('');
 
 // Days of week
 const weekDays = [
@@ -48,6 +51,26 @@ const toggleWeekDay = (day) => {
     reminderForm.weekly_days = selectedWeekDays.value.join(',');
 };
 
+const addSpecificDate = () => {
+    if (newSpecificDate.value && !reminderForm.specific_dates.includes(newSpecificDate.value)) {
+        reminderForm.specific_dates.push(newSpecificDate.value);
+        reminderForm.specific_dates.sort();
+        newSpecificDate.value = '';
+    }
+};
+
+const removeSpecificDate = (date) => {
+    const idx = reminderForm.specific_dates.indexOf(date);
+    if (idx > -1) {
+        reminderForm.specific_dates.splice(idx, 1);
+    }
+};
+
+const formatSpecificDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
+};
+
 const openAddReminder = () => {
     editingReminder.value = null;
     reminderForm.reset();
@@ -56,9 +79,11 @@ const openAddReminder = () => {
     reminderForm.remind_time = '09:00';
     reminderForm.weekly_days = '1';
     reminderForm.monthly_day = 1;
+    reminderForm.specific_dates = [];
     reminderForm.start_date = '';
     reminderForm.end_date = '';
     selectedWeekDays.value = [1];
+    newSpecificDate.value = '';
     showReminderModal.value = true;
 };
 
@@ -66,7 +91,7 @@ const openEditReminder = (reminder) => {
     editingReminder.value = reminder;
     reminderForm.type = reminder.type;
     reminderForm.frequency = reminder.frequency;
-    reminderForm.custom_days = reminder.custom_days || '';
+    reminderForm.specific_dates = reminder.specific_dates ? reminder.specific_dates.split(',') : [];
     reminderForm.weekly_days = reminder.weekly_days || '1';
     reminderForm.monthly_day = reminder.monthly_day || 1;
     reminderForm.start_date = reminder.start_date ? reminder.start_date.slice(0, 10) : '';
@@ -77,24 +102,39 @@ const openEditReminder = (reminder) => {
     selectedWeekDays.value = reminder.weekly_days
         ? reminder.weekly_days.split(',').map(Number)
         : [1];
+    newSpecificDate.value = '';
     showReminderModal.value = true;
 };
 
 const submitReminder = () => {
+    // Transform specific_dates array to comma-separated string
+    const formData = {
+        ...reminderForm.data(),
+        specific_dates: reminderForm.specific_dates.length > 0
+            ? reminderForm.specific_dates.join(',')
+            : null,
+    };
+
     if (editingReminder.value) {
-        reminderForm.put(route('reminders.update', [props.goal.id, editingReminder.value.id]), {
-            onSuccess: () => {
-                showReminderModal.value = false;
-                reminderForm.reset();
-            },
-        });
+        reminderForm.transform(() => formData).put(
+            route('reminders.update', [props.goal.id, editingReminder.value.id]),
+            {
+                onSuccess: () => {
+                    showReminderModal.value = false;
+                    reminderForm.reset();
+                },
+            }
+        );
     } else {
-        reminderForm.post(route('reminders.store', props.goal.id), {
-            onSuccess: () => {
-                showReminderModal.value = false;
-                reminderForm.reset();
-            },
-        });
+        reminderForm.transform(() => formData).post(
+            route('reminders.store', props.goal.id),
+            {
+                onSuccess: () => {
+                    showReminderModal.value = false;
+                    reminderForm.reset();
+                },
+            }
+        );
     }
 };
 
@@ -116,7 +156,7 @@ const frequencyLabels = {
     daily: 'Hàng ngày',
     weekly: 'Hàng tuần',
     monthly: 'Hàng tháng',
-    custom: 'Tùy chỉnh',
+    specific: 'Ngày cụ thể',
 };
 
 const typeLabels = {
@@ -133,6 +173,16 @@ const formatFrequency = (reminder) => {
     }
     if (reminder.frequency === 'monthly' && reminder.monthly_day) {
         return `Ngày ${reminder.monthly_day} hàng tháng`;
+    }
+    if (reminder.frequency === 'specific' && reminder.specific_dates) {
+        const dates = reminder.specific_dates.split(',');
+        if (dates.length <= 3) {
+            return dates.map(d => {
+                const date = new Date(d);
+                return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
+            }).join(', ');
+        }
+        return `${dates.length} ngày cụ thể`;
     }
     return frequencyLabels[reminder.frequency] || reminder.frequency;
 };
@@ -310,10 +360,10 @@ const formatDate = (date) => {
                             v-model="reminderForm.frequency"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         >
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="custom">Custom</option>
+                            <option value="daily">Hàng ngày</option>
+                            <option value="weekly">Hàng tuần</option>
+                            <option value="monthly">Hàng tháng</option>
+                            <option value="specific">Ngày cụ thể</option>
                         </select>
                     </div>
 
@@ -356,17 +406,49 @@ const formatDate = (date) => {
                         </div>
                     </div>
 
-                    <!-- Custom days -->
-                    <div v-if="reminderForm.frequency === 'custom'" class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Custom days (1=Mon, 7=Sun)
+                    <!-- Specific dates -->
+                    <div v-if="reminderForm.frequency === 'specific'" class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Chọn ngày cụ thể
                         </label>
-                        <input
-                            v-model="reminderForm.custom_days"
-                            type="text"
-                            placeholder="e.g., 1,3,5 for Mon, Wed, Fri"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                        />
+                        <div class="flex gap-2 mb-2">
+                            <input
+                                v-model="newSpecificDate"
+                                type="date"
+                                class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
+                            />
+                            <button
+                                type="button"
+                                @click="addSpecificDate"
+                                :disabled="!newSpecificDate"
+                                class="px-3 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div v-if="reminderForm.specific_dates.length" class="flex flex-wrap gap-2">
+                            <span
+                                v-for="date in reminderForm.specific_dates"
+                                :key="date"
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm"
+                            >
+                                {{ formatSpecificDate(date) }}
+                                <button
+                                    type="button"
+                                    @click="removeSpecificDate(date)"
+                                    class="hover:text-red-500 transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </span>
+                        </div>
+                        <p v-else class="text-xs text-gray-400 mt-1">
+                            Thêm ít nhất 1 ngày
+                        </p>
                     </div>
 
                     <!-- Date Range -->

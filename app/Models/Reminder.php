@@ -16,6 +16,7 @@ class Reminder extends Model
         'type',
         'frequency',
         'custom_days',
+        'specific_dates',
         'weekly_days',
         'monthly_day',
         'start_date',
@@ -70,9 +71,15 @@ class Reminder extends Model
             'daily' => $this->calculateDailyNext($now, $time),
             'weekly' => $this->calculateWeeklyNext($now, $time),
             'monthly' => $this->calculateMonthlyNext($now, $time),
-            'custom' => $this->calculateCustomNext($now, $time),
+            'specific' => $this->calculateSpecificNext($now, $time),
             default => $now->copy()->setTimeFrom($time)->addDay(),
         };
+
+        // If no next date (e.g., all specific dates passed), disable reminder
+        if ($next === null) {
+            $this->update(['next_send_at' => null, 'is_active' => false]);
+            return;
+        }
 
         // If next is after end_date, disable reminder
         if ($this->end_date && $next->gt($this->end_date->endOfDay())) {
@@ -145,25 +152,26 @@ class Reminder extends Model
     }
 
     /**
-     * Calculate next send time for custom frequency.
+     * Calculate next send time for specific dates.
      */
-    protected function calculateCustomNext(Carbon $now, Carbon $time): Carbon
+    protected function calculateSpecificNext(Carbon $now, Carbon $time): ?Carbon
     {
-        if (!$this->custom_days) {
-            return $now->copy()->setTimeFrom($time)->addDay();
+        if (!$this->specific_dates) {
+            return null;
         }
 
-        $days = array_map('intval', explode(',', $this->custom_days));
-        $currentDayOfWeek = $now->dayOfWeekIso;
+        $dates = explode(',', $this->specific_dates);
+        $nowWithTime = $now->copy()->setTimeFrom($time);
 
-        foreach ($days as $day) {
-            if ($day > $currentDayOfWeek) {
-                return $now->copy()->setTimeFrom($time)->next($day);
+        foreach ($dates as $dateStr) {
+            $date = Carbon::parse($dateStr)->setTimeFrom($time);
+            if ($date->gt($now) || ($date->isSameDay($now) && $nowWithTime->gt($now))) {
+                return $date;
             }
         }
 
-        // Next week's first custom day
-        return $now->copy()->setTimeFrom($time)->addWeek()->startOfWeek()->next($days[0]);
+        // No more dates - return null to disable reminder
+        return null;
     }
 
     /**
