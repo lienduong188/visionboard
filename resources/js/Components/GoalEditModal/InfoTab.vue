@@ -287,29 +287,29 @@ defineExpose({
 
             <!-- Description -->
             <div>
-                <InputLabel for="modal_description" value="Thuyết minh mục tiêu" />
+                <InputLabel for="modal_description" value="Description" />
                 <textarea
                     id="modal_description"
                     v-model="form.description"
                     rows="3"
                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                    placeholder="Mô tả theo công thức: Trạng thái + Hình ảnh + Hành động"
+                    placeholder="Describe using: State + Vision + Action"
                 ></textarea>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Gợi ý: Mô tả theo công thức <strong>Trạng thái + Hình ảnh + Hành động</strong>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" title="Mô tả theo công thức: Trạng thái + Hình ảnh + Hành động">
+                    Tip: Use <strong>State + Vision + Action</strong> formula
                 </p>
                 <InputError :message="form.errors.description" class="mt-2" />
             </div>
 
             <!-- Slogan -->
             <div>
-                <InputLabel for="modal_slogan" value="Câu dẫn đường (Slogan)" />
+                <InputLabel for="modal_slogan" value="Slogan" />
                 <TextInput
                     id="modal_slogan"
                     v-model="form.slogan"
                     type="text"
                     class="mt-1 block w-full"
-                    placeholder="Ví dụ: Chạy để sống, sống để chạy!"
+                    placeholder="e.g., Run to live, live to run!"
                 />
                 <InputError :message="form.errors.slogan" class="mt-2" />
             </div>
@@ -407,7 +407,7 @@ defineExpose({
                 </div>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">
-                <strong>Decrease goal</strong>: Nhập Start > Target (VD: giảm mỡ từ 27% xuống 20%). <strong>Increase goal</strong>: Nhập Start &lt; Target hoặc để trống Start.
+                <strong>Decrease goal</strong>: Start > Target (e.g., body fat 27% → 20%). <strong>Increase goal</strong>: Start &lt; Target or leave Start empty.
             </p>
 
             <!-- Dates -->
@@ -453,7 +453,7 @@ defineExpose({
 
             <!-- Progress Mode -->
             <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <InputLabel value="Cách tính tiến độ" />
+                <InputLabel value="Progress Mode" />
                 <div class="mt-3 space-y-3">
                     <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg transition-colors"
                         :class="form.progress_mode === 'value' ? 'bg-blue-100 dark:bg-blue-800/50' : 'hover:bg-blue-100/50 dark:hover:bg-blue-800/20'">
@@ -464,9 +464,9 @@ defineExpose({
                             class="mt-1 text-blue-600 focus:ring-blue-500"
                         />
                         <div>
-                            <span class="font-semibold text-gray-900 dark:text-white">Theo giá trị (Value)</span>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Progress = Current Value / Target Value. Thích hợp cho mục tiêu đo lường được (km, kg, %).
+                            <span class="font-semibold text-gray-900 dark:text-white">By Value</span>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" title="Theo giá trị - thích hợp cho mục tiêu đo lường được">
+                                Progress = Current Value / Target Value. Best for measurable goals (km, kg, %).
                             </p>
                         </div>
                     </label>
@@ -479,9 +479,9 @@ defineExpose({
                             class="mt-1 text-blue-600 focus:ring-blue-500"
                         />
                         <div>
-                            <span class="font-semibold text-gray-900 dark:text-white">Theo milestones</span>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                Progress = Milestones hoàn thành / Tổng milestones. Thích hợp cho mục tiêu có nhiều bước.
+                            <span class="font-semibold text-gray-900 dark:text-white">By Milestones</span>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" title="Theo milestones - thích hợp cho mục tiêu có nhiều bước">
+                                Progress = Completed Milestones / Total Milestones. Best for multi-step goals.
                             </p>
                         </div>
                     </label>
@@ -558,7 +558,7 @@ defineExpose({
                         <input
                             v-model="newChecklistItem"
                             type="text"
-                            placeholder="Thêm checklist item..."
+                            placeholder="Add checklist item..."
                             class="flex-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-white rounded focus:ring-indigo-500 focus:border-indigo-500 py-1.5"
                             @keyup.enter="addChecklist"
                         />
@@ -573,7 +573,7 @@ defineExpose({
                     </div>
                 </div>
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Double-click để edit. Checklist không ảnh hưởng tiến độ goal.
+                    Double-click to edit. Checklist doesn't affect goal progress.
                 </p>
             </div>
 
@@ -634,12 +634,12 @@ defineExpose({
                         class="mt-1 rounded text-indigo-600 focus:ring-indigo-500"
                     />
                     <div>
-                        <span class="font-semibold text-gray-900 dark:text-white">Core Goal - Trục Trung Tâm</span>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Đánh dấu goal này là 1 trong 3 trục trung tâm của Vision Board.
+                        <span class="font-semibold text-gray-900 dark:text-white">Core Goal</span>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" title="Trục trung tâm của Vision Board">
+                            Mark this as one of 3 core goals that orbit your Vision Board.
                         </p>
                         <p v-if="!canSetCoreGoal" class="text-sm text-amber-600 dark:text-amber-400 mt-1">
-                            Bạn đã có 3/3 Core Goals. Hãy bỏ chọn một goal khác để thêm mới.
+                            You already have 3/3 Core Goals. Uncheck another goal to add a new one.
                         </p>
                     </div>
                 </label>

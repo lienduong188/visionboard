@@ -363,10 +363,10 @@ const saveOrder = () => {
                             v-model="timeFilter"
                             class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
                         >
-                            <option value="all">📅 Tất cả thời gian</option>
-                            <option value="3months">📅 3 tháng tới</option>
-                            <option value="6months">📅 6 tháng tới</option>
-                            <option value="past">📅 Quá khứ</option>
+                            <option value="all">📅 All Time</option>
+                            <option value="3months">📅 Next 3 Months</option>
+                            <option value="6months">📅 Next 6 Months</option>
+                            <option value="past">📅 Past</option>
                         </select>
 
                         <!-- Status Filter Dropdown -->
@@ -374,12 +374,12 @@ const saveOrder = () => {
                             v-model="statusFilter"
                             class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
                         >
-                            <option value="all">📊 Tất cả tiến độ</option>
-                            <option value="in_progress">🚀 Đang làm</option>
-                            <option value="not_started">📋 Chưa bắt đầu</option>
-                            <option value="completed">✅ Hoàn thành</option>
-                            <option value="paused">⏸️ Tạm dừng</option>
-                            <option value="cancelled">❌ Hủy bỏ</option>
+                            <option value="all">📊 All Status</option>
+                            <option value="in_progress">🚀 In Progress</option>
+                            <option value="not_started">📋 Not Started</option>
+                            <option value="completed">✅ Completed</option>
+                            <option value="paused">⏸️ Paused</option>
+                            <option value="cancelled">❌ Cancelled</option>
                         </select>
 
                         <!-- Priority Filter Dropdown -->
@@ -387,10 +387,10 @@ const saveOrder = () => {
                             v-model="priorityFilter"
                             class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
                         >
-                            <option value="all">🎯 Tất cả ưu tiên</option>
-                            <option value="high">🔴 Ưu tiên cao</option>
-                            <option value="medium">🟡 Ưu tiên TB</option>
-                            <option value="low">🟢 Ưu tiên thấp</option>
+                            <option value="all">🎯 All Priority</option>
+                            <option value="high">🔴 High Priority</option>
+                            <option value="medium">🟡 Medium Priority</option>
+                            <option value="low">🟢 Low Priority</option>
                         </select>
 
                         <!-- Category Filter Dropdown -->
@@ -398,7 +398,7 @@ const saveOrder = () => {
                             v-model="selectedCategory"
                             class="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-gray-200"
                         >
-                            <option :value="null">🏷️ Tất cả danh mục</option>
+                            <option :value="null">🏷️ All Categories</option>
                             <option
                                 v-for="category in categories"
                                 :key="category.id"
@@ -414,9 +414,9 @@ const saveOrder = () => {
                             v-if="timeFilter !== 'all' || statusFilter !== 'all' || priorityFilter !== 'all' || selectedCategory"
                             @click="timeFilter = 'all'; statusFilter = 'all'; priorityFilter = 'all'; selectedCategory = null"
                             class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                            title="Xóa tất cả bộ lọc"
+                            title="Clear all filters"
                         >
-                            ✕ Xóa lọc
+                            ✕ Clear
                         </button>
 
                         <!-- Spacer -->
@@ -427,7 +427,7 @@ const saveOrder = () => {
                             <a
                                 :href="route('goals.export.csv')"
                                 class="inline-flex items-center gap-1.5 px-3 py-2 text-sm bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/50 rounded-lg transition-colors"
-                                title="Xuất file CSV"
+                                title="Export CSV"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -438,7 +438,7 @@ const saveOrder = () => {
                                 :href="route('goals.export.pdf')"
                                 target="_blank"
                                 class="inline-flex items-center gap-1.5 px-3 py-2 text-sm bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
-                                title="Xuất file PDF"
+                                title="Export PDF"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -523,17 +523,17 @@ const saveOrder = () => {
                         <div class="text-center">
                             <div class="text-6xl mb-4">🎯</div>
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                                Chưa có Core Goals
+                                No Core Goals
                             </h3>
                             <p class="text-gray-500 dark:text-gray-400 mb-6">
-                                Thêm 3 trục trung tâm để xoay quanh Vision Board!
+                                Add up to 3 core goals to orbit your Vision Board!
                             </p>
                             <Link
                                 :href="route('goals.create')"
                                 class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
                             >
                                 <span>+</span>
-                                <span>Thêm Core Goal</span>
+                                <span>Add Core Goal</span>
                             </Link>
                         </div>
                     </div>
@@ -577,8 +577,8 @@ const saveOrder = () => {
                     <!-- Core Goals Section (with Milestones) -->
                     <div v-if="filteredCoreGoals.length > 0" class="mb-8">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                            🎯 Core Goals - Trục Trung Tâm
-                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(click để xem milestones)</span>
+                            🎯 Core Goals
+                            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(click to view milestones)</span>
                         </h3>
                         <div class="space-y-4">
                             <div
@@ -592,7 +592,7 @@ const saveOrder = () => {
                                         <div
                                             @click="openGoalModal(goal)"
                                             class="flex items-center gap-3 cursor-pointer flex-1"
-                                            title="Click để edit goal"
+                                            title="Click to edit goal"
                                         >
                                             <span class="text-2xl">{{ goal.category?.icon }}</span>
                                             <div>
@@ -619,7 +619,7 @@ const saveOrder = () => {
                                             <button
                                                 @click="toggleCoreGoal(goal.id)"
                                                 class="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
-                                                title="Xem milestones"
+                                                title="View milestones"
                                             >
                                                 <svg
                                                     class="w-5 h-5 text-gray-400 transition-transform"
@@ -663,7 +663,7 @@ const saveOrder = () => {
                                                 </button>
                                                 <div class="flex-1 min-w-0">
                                                     <div class="flex items-center gap-2">
-                                                        <span v-if="milestone.is_soft" class="text-amber-500" title="Soft milestone - nhắc nhở nhẹ, không tính vào progress">🔔</span>
+                                                        <span v-if="milestone.is_soft" class="text-amber-500" title="Soft milestone - reminder only, doesn't count toward progress">🔔</span>
                                                         <span
                                                             :class="milestone.is_completed
                                                                 ? 'text-gray-400 line-through'
@@ -734,7 +734,7 @@ const saveOrder = () => {
                                             </div>
                                         </div>
                                         <div v-if="!goal.milestones?.length" class="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
-                                            Chưa có milestones. <Link :href="route('goals.show', goal.id)" class="text-indigo-600 hover:underline">Thêm milestones</Link>
+                                            No milestones yet. <Link :href="route('goals.show', goal.id)" class="text-indigo-600 hover:underline">Add milestones</Link>
                                         </div>
                                     </div>
                                     <div class="px-4 pb-4">
@@ -742,7 +742,7 @@ const saveOrder = () => {
                                             :href="route('goals.show', goal.id)"
                                             class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
                                         >
-                                            Xem chi tiết goal →
+                                            View goal details →
                                         </Link>
                                     </div>
                                 </div>
@@ -781,9 +781,9 @@ const saveOrder = () => {
                         >
                             <div class="text-4xl mb-2">📝</div>
                             <p v-if="timeFilter !== 'all' || statusFilter !== 'all' || priorityFilter !== 'all' || selectedCategory">
-                                Không có goals nào phù hợp với bộ lọc.
+                                No goals match the filters.
                             </p>
-                            <p v-else>Chưa có goals thường. Tất cả goals đều là Core Goals!</p>
+                            <p v-else>No regular goals. All goals are Core Goals!</p>
                         </div>
                     </div>
 
@@ -794,17 +794,17 @@ const saveOrder = () => {
                     >
                         <div class="text-6xl mb-4">🎯</div>
                         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                            Chưa có goals
+                            No goals yet
                         </h3>
                         <p class="text-gray-500 dark:text-gray-400 mb-6">
-                            Bắt đầu bằng việc thêm goal đầu tiên!
+                            Start by adding your first goal!
                         </p>
                         <Link
                             :href="route('goals.create')"
                             class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
                         >
                             <span>+</span>
-                            <span>Thêm Goal</span>
+                            <span>Add Goal</span>
                         </Link>
                     </div>
                 </div>

@@ -60,7 +60,7 @@ const chartData = computed(() => {
     return {
         labels: props.data.map(d => d.month),
         datasets: [{
-            label: 'Mục tiêu hoàn thành',
+            label: 'Goals Completed',
             data: props.data.map(d => d.completed),
             backgroundColor: props.data.map((d, i) => {
                 // Highlight current month
@@ -105,7 +105,7 @@ const chartOptions = computed(() => {
                     },
                     label: (context) => {
                         const count = context.parsed.y;
-                        return `${count} mục tiêu hoàn thành`;
+                        return `${count} goals completed`;
                     },
                 },
             },
@@ -148,10 +148,10 @@ const totalCompleted = computed(() => {
     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Hoàn thành theo tháng
+                Monthly Completions
             </h3>
             <span class="text-sm text-gray-500 dark:text-gray-400">
-                Tổng: {{ totalCompleted }} mục tiêu
+                Total: {{ totalCompleted }} goals
             </span>
         </div>
 

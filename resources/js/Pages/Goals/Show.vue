@@ -262,13 +262,13 @@ const reminderForm = useForm({
 
 // Days of week for weekly frequency
 const weekDays = [
-    { value: 1, label: 'T2', fullLabel: 'Thứ 2' },
-    { value: 2, label: 'T3', fullLabel: 'Thứ 3' },
-    { value: 3, label: 'T4', fullLabel: 'Thứ 4' },
-    { value: 4, label: 'T5', fullLabel: 'Thứ 5' },
-    { value: 5, label: 'T6', fullLabel: 'Thứ 6' },
-    { value: 6, label: 'T7', fullLabel: 'Thứ 7' },
-    { value: 7, label: 'CN', fullLabel: 'Chủ nhật' },
+    { value: 1, label: 'Mon', fullLabel: 'Monday' },
+    { value: 2, label: 'Tue', fullLabel: 'Tuesday' },
+    { value: 3, label: 'Wed', fullLabel: 'Wednesday' },
+    { value: 4, label: 'Thu', fullLabel: 'Thursday' },
+    { value: 5, label: 'Fri', fullLabel: 'Friday' },
+    { value: 6, label: 'Sat', fullLabel: 'Saturday' },
+    { value: 7, label: 'Sun', fullLabel: 'Sunday' },
 ];
 
 // Selected week days (array of numbers)
@@ -346,16 +346,16 @@ const deleteReminder = (reminder) => {
 };
 
 const frequencyLabels = {
-    daily: 'Hàng ngày',
-    weekly: 'Hàng tuần',
-    monthly: 'Hàng tháng',
-    custom: 'Tùy chỉnh',
+    daily: 'Daily',
+    weekly: 'Weekly',
+    monthly: 'Monthly',
+    custom: 'Custom',
 };
 
 const typeLabels = {
-    progress: 'Tiến độ',
+    progress: 'Progress',
     deadline: 'Deadline',
-    custom: 'Tùy chỉnh',
+    custom: 'Custom',
 };
 
 // Progress Log management
@@ -412,7 +412,7 @@ const submitProgressLog = () => {
 };
 
 const deleteProgressLog = (log) => {
-    if (confirm('Xóa bản ghi tiến độ này?')) {
+    if (confirm('Delete this progress log?')) {
         router.delete(route('progress-logs.destroy', [props.goal.id, log.id]));
     }
 };
@@ -423,12 +423,12 @@ const showAllProgressLogs = ref(false);
 // Format frequency display with details
 const formatFrequency = (reminder) => {
     if (reminder.frequency === 'weekly' && reminder.weekly_days) {
-        const dayNames = { 1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 7: 'CN' };
+        const dayNames = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 7: 'Sun' };
         const days = reminder.weekly_days.split(',').map(d => dayNames[d] || d).join(', ');
-        return `Hàng tuần (${days})`;
+        return `Weekly (${days})`;
     }
     if (reminder.frequency === 'monthly' && reminder.monthly_day) {
-        return `Ngày ${reminder.monthly_day} hàng tháng`;
+        return `Day ${reminder.monthly_day} monthly`;
     }
     return frequencyLabels[reminder.frequency] || reminder.frequency;
 };
@@ -672,8 +672,8 @@ const formatFrequency = (reminder) => {
                                                 >
                                                     {{ milestone.title }}
                                                 </span>
-                                                <span v-if="milestone.is_soft" class="text-xs text-amber-600 dark:text-amber-400" title="Soft milestone - không tính vào progress">
-                                                    (nhắc nhở)
+                                                <span v-if="milestone.is_soft" class="text-xs text-amber-600 dark:text-amber-400" title="Soft milestone - doesn't count toward progress">
+                                                    (soft)
                                                 </span>
                                                 <!-- Show indicators for hidden content -->
                                                 <span v-if="!expandedMilestones[milestone.id] && (milestone.description || milestone.memo || milestone.image_url || milestone.due_date)" class="text-xs text-gray-400">
@@ -710,7 +710,7 @@ const formatFrequency = (reminder) => {
                                                 :class="milestone.is_soft
                                                     ? 'text-amber-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30'
                                                     : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30'"
-                                                :title="milestone.is_soft ? 'Chuyển thành milestone thường' : 'Chuyển thành nhắc nhở nhẹ'"
+                                                :title="milestone.is_soft ? 'Make normal milestone' : 'Make soft milestone'"
                                             >
                                                 🔔
                                             </button>
@@ -1012,11 +1012,11 @@ const formatFrequency = (reminder) => {
                                     @click="showAllProgressLogs = !showAllProgressLogs"
                                     class="w-full py-2 text-sm text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                 >
-                                    {{ showAllProgressLogs ? 'Ẩn bớt' : `Xem tất cả ${goal.progress_logs.length} bản ghi` }}
+                                    {{ showAllProgressLogs ? 'Show less' : `View all ${goal.progress_logs.length} logs` }}
                                 </button>
                             </div>
                             <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                Chưa có bản ghi tiến độ nào. Thêm log đầu tiên!
+                                No progress logs yet. Add your first log!
                             </div>
                         </div>
                     </div>
@@ -1109,18 +1109,18 @@ const formatFrequency = (reminder) => {
                             v-model="milestoneForm.description"
                             rows="2"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            placeholder="Mô tả ngắn gọn về milestone..."
+                            placeholder="Short description..."
                         ></textarea>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            📝 Memo / Ghi chú chi tiết
+                            📝 Memo / Notes
                         </label>
                         <textarea
                             v-model="milestoneForm.memo"
                             rows="3"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            placeholder="Ghi chú chi tiết, notes, ideas..."
+                            placeholder="Detailed notes, ideas..."
                         ></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -1192,9 +1192,9 @@ const formatFrequency = (reminder) => {
                                 class="mt-1 rounded text-amber-500 focus:ring-amber-500"
                             />
                             <div>
-                                <span class="font-medium text-gray-900 dark:text-white">🔔 Nhắc nhở nhẹ (Soft Milestone)</span>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                                    Milestone này sẽ không tính vào tiến độ goal, chỉ là lời nhắc nhở hàng ngày.
+                                <span class="font-medium text-gray-900 dark:text-white">🔔 Soft Milestone</span>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" title="Nhắc nhở nhẹ, không tính vào progress">
+                                    This milestone won't count toward goal progress, just a daily reminder.
                                 </p>
                             </div>
                         </label>
@@ -1227,12 +1227,12 @@ const formatFrequency = (reminder) => {
         >
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md mx-4">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                    {{ editingProgressLog ? 'Sửa bản ghi tiến độ' : 'Thêm bản ghi tiến độ' }}
+                    {{ editingProgressLog ? 'Edit Progress Log' : 'Add Progress Log' }}
                 </h3>
                 <form @submit.prevent="submitProgressLog">
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            📅 Ngày ghi nhận *
+                            📅 Date *
                         </label>
                         <input
                             v-model="progressLogForm.logged_at"
@@ -1240,13 +1240,13 @@ const formatFrequency = (reminder) => {
                             required
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         />
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Chọn ngày bạn muốn ghi nhận tiến độ (có thể là quá khứ)
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" title="Chọn ngày bạn muốn ghi nhận tiến độ">
+                            Select the date for this progress entry (can be past date)
                         </p>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            📊 Giá trị ({{ goal.unit || 'đơn vị' }}) *
+                            📊 Value ({{ goal.unit || 'unit' }}) *
                         </label>
                         <input
                             v-model="displayProgressLogNewValue"
@@ -1262,13 +1262,13 @@ const formatFrequency = (reminder) => {
                     </div>
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            📝 Ghi chú
+                            📝 Note
                         </label>
                         <textarea
                             v-model="progressLogForm.note"
                             rows="2"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            placeholder="VD: Chạy 5km buổi sáng..."
+                            placeholder="e.g., Ran 5km this morning..."
                         ></textarea>
                     </div>
                     <div class="flex justify-end gap-3">
@@ -1305,7 +1305,7 @@ const formatFrequency = (reminder) => {
                     <!-- Reminder Type with tooltips -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Loại nhắc nhở *
+                            Reminder Type *
                         </label>
                         <div class="grid grid-cols-3 gap-2">
                             <button
@@ -1315,11 +1315,11 @@ const formatFrequency = (reminder) => {
                                 :class="reminderForm.type === 'progress'
                                     ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
                                     : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'"
-                                title="Nhắc cập nhật tiến độ goal"
+                                title="Remind to update progress"
                             >
                                 <div class="text-xl mb-1">📊</div>
                                 <div class="text-xs font-medium text-gray-700 dark:text-gray-300">Progress</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">Cập nhật tiến độ</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Update progress</div>
                             </button>
                             <button
                                 type="button"
@@ -1328,11 +1328,11 @@ const formatFrequency = (reminder) => {
                                 :class="reminderForm.type === 'deadline'
                                     ? 'border-red-500 bg-red-50 dark:bg-red-900/30'
                                     : 'border-gray-200 dark:border-gray-600 hover:border-red-300'"
-                                title="Nhắc deadline sắp đến"
+                                title="Remind about upcoming deadline"
                             >
                                 <div class="text-xl mb-1">⏰</div>
                                 <div class="text-xs font-medium text-gray-700 dark:text-gray-300">Deadline</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">Hạn chót sắp đến</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Due date alert</div>
                             </button>
                             <button
                                 type="button"
@@ -1341,11 +1341,11 @@ const formatFrequency = (reminder) => {
                                 :class="reminderForm.type === 'custom'
                                     ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
                                     : 'border-gray-200 dark:border-gray-600 hover:border-purple-300'"
-                                title="Tin nhắn tùy chỉnh"
+                                title="Custom message"
                             >
                                 <div class="text-xl mb-1">💬</div>
                                 <div class="text-xs font-medium text-gray-700 dark:text-gray-300">Custom</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">Tin nhắn riêng</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Custom message</div>
                             </button>
                         </div>
                     </div>
@@ -1353,23 +1353,23 @@ const formatFrequency = (reminder) => {
                     <!-- Frequency selection (like Google Calendar) -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Tần suất *
+                            Frequency *
                         </label>
                         <select
                             v-model="reminderForm.frequency"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         >
-                            <option value="daily">Hàng ngày</option>
-                            <option value="weekly">Hàng tuần</option>
-                            <option value="monthly">Hàng tháng</option>
-                            <option value="custom">Tùy chỉnh</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="custom">Custom</option>
                         </select>
                     </div>
 
                     <!-- Weekly: Select days of week -->
                     <div v-if="reminderForm.frequency === 'weekly'" class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Chọn ngày trong tuần
+                            Select days of week
                         </label>
                         <div class="flex gap-1">
                             <button
@@ -1391,32 +1391,32 @@ const formatFrequency = (reminder) => {
                     <!-- Monthly: Select day of month -->
                     <div v-if="reminderForm.frequency === 'monthly'" class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Ngày trong tháng
+                            Day of month
                         </label>
                         <div class="flex items-center gap-2">
-                            <span class="text-gray-600 dark:text-gray-400">Ngày</span>
+                            <span class="text-gray-600 dark:text-gray-400">Day</span>
                             <select
                                 v-model="reminderForm.monthly_day"
                                 class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                             >
                                 <option v-for="d in 31" :key="d" :value="d">{{ d }}</option>
                             </select>
-                            <span class="text-gray-600 dark:text-gray-400">hàng tháng</span>
+                            <span class="text-gray-600 dark:text-gray-400">monthly</span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Nếu tháng không có ngày này, sẽ nhắc vào ngày cuối tháng.
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" title="Nếu tháng không có ngày này, sẽ nhắc vào ngày cuối tháng">
+                            If the month doesn't have this day, will remind on the last day.
                         </p>
                     </div>
 
                     <!-- Custom days (legacy) -->
                     <div v-if="reminderForm.frequency === 'custom'" class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Ngày tùy chỉnh (1=T2, 7=CN)
+                            Custom days (1=Mon, 7=Sun)
                         </label>
                         <input
                             v-model="reminderForm.custom_days"
                             type="text"
-                            placeholder="VD: 1,3,5 cho T2, T4, T6"
+                            placeholder="e.g., 1,3,5 for Mon, Wed, Fri"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
@@ -1424,7 +1424,7 @@ const formatFrequency = (reminder) => {
                     <!-- Time -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Giờ nhắc *
+                            Remind Time *
                         </label>
                         <input
                             v-model="reminderForm.remind_time"
@@ -1437,13 +1437,13 @@ const formatFrequency = (reminder) => {
                     <!-- Custom Message -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Tin nhắn tùy chỉnh
+                            Custom Message
                         </label>
                         <textarea
                             v-model="reminderForm.message"
                             rows="2"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            placeholder="Tin nhắn sẽ hiển thị trong email nhắc nhở..."
+                            placeholder="Message to show in reminder email..."
                         ></textarea>
                     </div>
 
@@ -1455,7 +1455,7 @@ const formatFrequency = (reminder) => {
                                 type="checkbox"
                                 class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             />
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Đang hoạt động</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Active</span>
                         </label>
                     </div>
                     <div class="flex justify-end gap-3">

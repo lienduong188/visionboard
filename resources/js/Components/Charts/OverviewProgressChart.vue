@@ -12,9 +12,9 @@ const props = defineProps({
 const selectedPeriod = ref('30');
 
 const periods = [
-    { value: '7', label: '7 ngày' },
-    { value: '30', label: '30 ngày' },
-    { value: '90', label: '90 ngày' },
+    { value: '7', label: '7 days' },
+    { value: '30', label: '30 days' },
+    { value: '90', label: '90 days' },
 ];
 
 const formatDate = (date) => {
@@ -121,7 +121,7 @@ const chartData = computed(() => {
     return {
         labels,
         datasets: [{
-            label: 'Tiến độ tổng quan (%)',
+            label: 'Overall Progress (%)',
             data,
             borderColor: '#6366F1',
             backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -134,7 +134,7 @@ const chartData = computed(() => {
     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                📈 Xu hướng tiến độ
+                📈 Progress Trend
             </h3>
             <select
                 v-model="selectedPeriod"

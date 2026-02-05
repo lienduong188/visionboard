@@ -62,7 +62,7 @@ const chartData = computed(() => {
     return {
         labels: categories.map(c => `${c.icon} ${c.name}`),
         datasets: [{
-            label: 'Tiến độ trung bình',
+            label: 'Average Progress',
             data: categories.map(c => c.avgProgress),
             backgroundColor: categories.map(c => c.color + 'CC'), // Add alpha
             borderColor: categories.map(c => c.color),
@@ -93,9 +93,9 @@ const chartOptions = computed(() => ({
                 label: (context) => {
                     const category = props.data.find(c => `${c.icon} ${c.name}` === context.label);
                     return [
-                        `Tiến độ: ${context.parsed.x}%`,
-                        `Mục tiêu: ${category?.goalCount || 0}`,
-                        `Hoàn thành: ${category?.completedCount || 0}`,
+                        `Progress: ${context.parsed.x}%`,
+                        `Goals: ${category?.goalCount || 0}`,
+                        `Completed: ${category?.completedCount || 0}`,
                     ];
                 },
             },
@@ -148,8 +148,8 @@ const hasData = computed(() => {
             class="h-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400"
         >
             <div class="text-4xl mb-2">📊</div>
-            <p class="font-medium">Chưa có mục tiêu</p>
-            <p class="text-sm">Tạo mục tiêu để xem so sánh danh mục</p>
+            <p class="font-medium">No goals yet</p>
+            <p class="text-sm">Create goals to see category comparison</p>
         </div>
     </div>
 </template>

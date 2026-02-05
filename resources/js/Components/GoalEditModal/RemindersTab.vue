@@ -27,13 +27,13 @@ const newSpecificDate = ref('');
 
 // Days of week
 const weekDays = [
-    { value: 1, label: 'T2', fullLabel: 'Thứ 2' },
-    { value: 2, label: 'T3', fullLabel: 'Thứ 3' },
-    { value: 3, label: 'T4', fullLabel: 'Thứ 4' },
-    { value: 4, label: 'T5', fullLabel: 'Thứ 5' },
-    { value: 5, label: 'T6', fullLabel: 'Thứ 6' },
-    { value: 6, label: 'T7', fullLabel: 'Thứ 7' },
-    { value: 7, label: 'CN', fullLabel: 'Chủ nhật' },
+    { value: 1, label: 'Mon', fullLabel: 'Monday' },
+    { value: 2, label: 'Tue', fullLabel: 'Tuesday' },
+    { value: 3, label: 'Wed', fullLabel: 'Wednesday' },
+    { value: 4, label: 'Thu', fullLabel: 'Thursday' },
+    { value: 5, label: 'Fri', fullLabel: 'Friday' },
+    { value: 6, label: 'Sat', fullLabel: 'Saturday' },
+    { value: 7, label: 'Sun', fullLabel: 'Sunday' },
 ];
 
 const selectedWeekDays = ref([1]);
@@ -68,7 +68,7 @@ const removeSpecificDate = (date) => {
 
 const formatSpecificDate = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
+    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
 };
 
 const openAddReminder = () => {
@@ -153,36 +153,36 @@ const deleteReminder = (reminder) => {
 };
 
 const frequencyLabels = {
-    daily: 'Hàng ngày',
-    weekly: 'Hàng tuần',
-    monthly: 'Hàng tháng',
-    specific: 'Ngày cụ thể',
+    daily: 'Daily',
+    weekly: 'Weekly',
+    monthly: 'Monthly',
+    specific: 'Specific dates',
 };
 
 const typeLabels = {
-    progress: 'Tiến độ',
+    progress: 'Progress',
     deadline: 'Deadline',
-    custom: 'Tùy chỉnh',
+    custom: 'Custom',
 };
 
 const formatFrequency = (reminder) => {
     if (reminder.frequency === 'weekly' && reminder.weekly_days) {
-        const dayNames = { 1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7', 7: 'CN' };
+        const dayNames = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 7: 'Sun' };
         const days = reminder.weekly_days.split(',').map(d => dayNames[d] || d).join(', ');
-        return `Hàng tuần (${days})`;
+        return `Weekly (${days})`;
     }
     if (reminder.frequency === 'monthly' && reminder.monthly_day) {
-        return `Ngày ${reminder.monthly_day} hàng tháng`;
+        return `Day ${reminder.monthly_day} monthly`;
     }
     if (reminder.frequency === 'specific' && reminder.specific_dates) {
         const dates = reminder.specific_dates.split(',');
         if (dates.length <= 3) {
             return dates.map(d => {
                 const date = new Date(d);
-                return date.toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' });
+                return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
             }).join(', ');
         }
-        return `${dates.length} ngày cụ thể`;
+        return `${dates.length} specific dates`;
     }
     return frequencyLabels[reminder.frequency] || reminder.frequency;
 };
@@ -251,7 +251,7 @@ const formatDate = (date) => {
                             {{ typeLabels[reminder.type] }}
                         </span>
                         <span class="text-sm text-gray-600 dark:text-gray-400">
-                            {{ formatFrequency(reminder) }} lúc {{ reminder.remind_time?.slice(0, 5) }}
+                            {{ formatFrequency(reminder) }} at {{ reminder.remind_time?.slice(0, 5) }}
                         </span>
                     </div>
                     <div
@@ -360,10 +360,10 @@ const formatDate = (date) => {
                             v-model="reminderForm.frequency"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         >
-                            <option value="daily">Hàng ngày</option>
-                            <option value="weekly">Hàng tuần</option>
-                            <option value="monthly">Hàng tháng</option>
-                            <option value="specific">Ngày cụ thể</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="specific">Specific dates</option>
                         </select>
                     </div>
 
@@ -409,7 +409,7 @@ const formatDate = (date) => {
                     <!-- Specific dates -->
                     <div v-if="reminderForm.frequency === 'specific'" class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Chọn ngày cụ thể
+                            Select specific dates
                         </label>
                         <div class="flex gap-2 mb-2">
                             <input
@@ -447,7 +447,7 @@ const formatDate = (date) => {
                             </span>
                         </div>
                         <p v-else class="text-xs text-gray-400 mt-1">
-                            Thêm ít nhất 1 ngày
+                            Add at least 1 date
                         </p>
                     </div>
 

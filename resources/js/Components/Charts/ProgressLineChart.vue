@@ -95,7 +95,7 @@ const chartOptions = computed(() => ({
             displayColors: false,
             callbacks: {
                 label: (context) => {
-                    return `Tiến độ: ${context.parsed.y}%`;
+                    return `Progress: ${context.parsed.y}%`;
                 },
             },
         },
@@ -187,8 +187,8 @@ const hasData = computed(() => {
             class="h-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400"
         >
             <div class="text-4xl mb-2">📊</div>
-            <p class="font-medium">Chưa có dữ liệu tiến độ</p>
-            <p class="text-sm">Cập nhật tiến độ để xem biểu đồ</p>
+            <p class="font-medium">No progress data yet</p>
+            <p class="text-sm">Update progress to see the chart</p>
         </div>
     </div>
 </template>

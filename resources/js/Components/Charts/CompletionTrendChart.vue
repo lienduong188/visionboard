@@ -39,9 +39,9 @@ const props = defineProps({
 const selectedPeriod = ref('30');
 
 const periods = [
-    { value: '7', label: '7 ngày' },
-    { value: '30', label: '30 ngày' },
-    { value: '90', label: '90 ngày' },
+    { value: '7', label: '7 days' },
+    { value: '30', label: '30 days' },
+    { value: '90', label: '90 days' },
 ];
 
 // Dark mode detection
@@ -76,7 +76,7 @@ const chartData = computed(() => {
         labels: periodData.labels,
         datasets: [
             {
-                label: 'Tiến độ tổng quan',
+                label: 'Overall Progress',
                 data: periodData.progress,
                 borderColor: '#6366F1',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -88,7 +88,7 @@ const chartData = computed(() => {
                 yAxisID: 'y',
             },
             {
-                label: 'Mục tiêu hoàn thành',
+                label: 'Goals Completed',
                 data: periodData.completed,
                 borderColor: '#10B981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -204,7 +204,7 @@ const hasData = computed(() => {
     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Xu hướng hoàn thành
+                Completion Trend
             </h3>
             <select
                 v-model="selectedPeriod"
@@ -232,8 +232,8 @@ const hasData = computed(() => {
                 class="h-full flex flex-col items-center justify-center text-gray-500 dark:text-gray-400"
             >
                 <div class="text-4xl mb-2">📈</div>
-                <p class="font-medium">Chưa có dữ liệu</p>
-                <p class="text-sm">Dữ liệu tiến độ sẽ hiển thị theo thời gian</p>
+                <p class="font-medium">No data yet</p>
+                <p class="text-sm">Progress data will appear over time</p>
             </div>
         </div>
     </div>

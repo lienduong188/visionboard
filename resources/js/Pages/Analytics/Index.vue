@@ -19,7 +19,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
 </script>
 
 <template>
-    <Head title="Phân tích" />
+    <Head title="Analytics" />
 
     <AuthenticatedLayout>
         <div class="py-6 sm:py-12">
@@ -29,10 +29,10 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                                Phân tích
+                                Analytics
                             </h1>
                             <p class="mt-1 text-gray-600 dark:text-gray-400">
-                                Theo dõi tiến độ và hiệu suất mục tiêu của bạn
+                                Track your goals progress and performance
                             </p>
                         </div>
                         <Link
@@ -42,7 +42,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
-                            Quay lại Goals
+                            Back to Goals
                         </Link>
                     </div>
                 </div>
@@ -57,7 +57,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                                 </svg>
                             </div>
                             <div class="ml-3 sm:ml-4">
-                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Tổng mục tiêu</p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Total Goals</p>
                                 <p class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ detailedStats.totalGoals }}</p>
                             </div>
                         </div>
@@ -71,7 +71,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                                 </svg>
                             </div>
                             <div class="ml-3 sm:ml-4">
-                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Hoàn thành</p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
                                 <p class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ detailedStats.completedGoals }}</p>
                             </div>
                         </div>
@@ -85,7 +85,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                                 </svg>
                             </div>
                             <div class="ml-3 sm:ml-4">
-                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Tỷ lệ hoàn thành</p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Completion Rate</p>
                                 <p class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ detailedStats.completionRate }}%</p>
                             </div>
                         </div>
@@ -99,7 +99,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                                 </svg>
                             </div>
                             <div class="ml-3 sm:ml-4">
-                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Tiến độ TB</p>
+                                <p class="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">Avg Progress</p>
                                 <p class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ detailedStats.avgProgress }}%</p>
                             </div>
                         </div>
@@ -112,8 +112,8 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">&#9203;</span>
                             <div>
-                                <p class="text-sm font-medium text-amber-800 dark:text-amber-200">Sắp đến hạn</p>
-                                <p class="text-lg font-bold text-amber-900 dark:text-amber-100">{{ detailedStats.upcomingDeadlines }} mục tiêu</p>
+                                <p class="text-sm font-medium text-amber-800 dark:text-amber-200">Upcoming Deadlines</p>
+                                <p class="text-lg font-bold text-amber-900 dark:text-amber-100">{{ detailedStats.upcomingDeadlines }} goals</p>
                             </div>
                         </div>
                     </div>
@@ -122,8 +122,8 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">&#9888;</span>
                             <div>
-                                <p class="text-sm font-medium text-red-800 dark:text-red-200">Quá hạn</p>
-                                <p class="text-lg font-bold text-red-900 dark:text-red-100">{{ detailedStats.overdueGoals }} mục tiêu</p>
+                                <p class="text-sm font-medium text-red-800 dark:text-red-200">Overdue</p>
+                                <p class="text-lg font-bold text-red-900 dark:text-red-100">{{ detailedStats.overdueGoals }} goals</p>
                             </div>
                         </div>
                     </div>
@@ -132,7 +132,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">{{ detailedStats.bestCategory.icon }}</span>
                             <div>
-                                <p class="text-sm font-medium text-green-800 dark:text-green-200">Danh mục tốt nhất</p>
+                                <p class="text-sm font-medium text-green-800 dark:text-green-200">Best Category</p>
                                 <p class="text-lg font-bold text-green-900 dark:text-green-100">{{ detailedStats.bestCategory.avgProgress }}%</p>
                             </div>
                         </div>
@@ -142,7 +142,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">{{ detailedStats.worstCategory.icon }}</span>
                             <div>
-                                <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Cần chú ý</p>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-300">Needs Attention</p>
                                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ detailedStats.worstCategory.avgProgress }}%</p>
                             </div>
                         </div>
@@ -162,7 +162,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            So sánh danh mục
+                            Category Comparison
                         </h3>
                         <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
                             <button
@@ -202,18 +202,18 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                 <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Chi tiết danh mục
+                            Category Details
                         </h3>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Danh mục</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Mục tiêu</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Hoàn thành</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tiến độ TB</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Thanh tiến độ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Goals</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Completed</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Avg Progress</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Progress Bar</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">

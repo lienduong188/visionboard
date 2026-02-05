@@ -136,34 +136,34 @@ const submit = () => {
                             <InputError :message="form.errors.title" class="mt-2" />
                         </div>
 
-                        <!-- Description (Thuyết minh mục tiêu) -->
+                        <!-- Description -->
                         <div>
-                            <InputLabel for="description" value="Thuyết minh mục tiêu" />
+                            <InputLabel for="description" value="Description" />
                             <textarea
                                 id="description"
                                 v-model="form.description"
                                 rows="4"
                                 class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
-                                placeholder="Mô tả theo công thức: Trạng thái + Hình ảnh + Hành động&#10;Ví dụ: Tôi cảm thấy tràn đầy năng lượng khi đứng trên vạch đích marathon, với đôi chân khỏe mạnh chạy đều đặn mỗi sáng..."
+                                placeholder="Describe using: State + Vision + Action"
                             ></textarea>
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                💡 Gợi ý: Mô tả theo công thức <strong>Trạng thái + Hình ảnh + Hành động</strong> để hình dung rõ ràng mục tiêu
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" title="Mô tả theo công thức: Trạng thái + Hình ảnh + Hành động">
+                                💡 Tip: Use <strong>State + Vision + Action</strong> formula to visualize your goal clearly
                             </p>
                             <InputError :message="form.errors.description" class="mt-2" />
                         </div>
 
-                        <!-- Slogan (Câu dẫn đường) -->
+                        <!-- Slogan -->
                         <div>
-                            <InputLabel for="slogan" value="Câu dẫn đường (Slogan)" />
+                            <InputLabel for="slogan" value="Slogan" />
                             <TextInput
                                 id="slogan"
                                 v-model="form.slogan"
                                 type="text"
                                 class="mt-1 block w-full"
-                                placeholder="Ví dụ: Chạy để sống, sống để chạy!"
+                                placeholder="e.g., Run to live, live to run!"
                             />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                ✨ Một câu ngắn gọn truyền cảm hứng cho mục tiêu này
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" title="Câu dẫn đường truyền cảm hứng">
+                                ✨ A short inspiring phrase for this goal
                             </p>
                             <InputError :message="form.errors.slogan" class="mt-2" />
                         </div>
@@ -347,13 +347,12 @@ const submit = () => {
                                     class="mt-1 rounded text-indigo-600 focus:ring-indigo-500"
                                 />
                                 <div>
-                                    <span class="font-semibold text-gray-900 dark:text-white">🎯 Core Goal - Trục Trung Tâm</span>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                        Đánh dấu goal này là 1 trong 3 trục trung tâm của Vision Board.
-                                        Core goals sẽ hiển thị xoay quanh trong VisionBoard view.
+                                    <span class="font-semibold text-gray-900 dark:text-white">🎯 Core Goal</span>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" title="Trục trung tâm của Vision Board">
+                                        Mark this as one of 3 core goals that orbit your Vision Board.
                                     </p>
                                     <p v-if="!canSetCoreGoal" class="text-sm text-amber-600 dark:text-amber-400 mt-1">
-                                        ⚠️ Bạn đã có {{ coreGoalsCount + (goal.is_core_goal ? 1 : 0) }}/3 Core Goals. Hãy bỏ chọn một goal khác để thêm mới.
+                                        ⚠️ You already have {{ coreGoalsCount + (goal.is_core_goal ? 1 : 0) }}/3 Core Goals. Uncheck another goal to add a new one.
                                     </p>
                                 </div>
                             </label>

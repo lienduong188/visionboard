@@ -31,7 +31,7 @@ const chartData = computed(() => {
         return {
             labels,
             datasets: [{
-                label: 'Tiến độ (%)',
+                label: 'Progress (%)',
                 data,
                 borderColor: '#6366F1',
                 backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -75,7 +75,7 @@ const chartData = computed(() => {
     return {
         labels,
         datasets: [{
-            label: 'Tiến độ (%)',
+            label: 'Progress (%)',
             data,
             borderColor: '#6366F1',
             backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -87,7 +87,7 @@ const chartData = computed(() => {
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            📈 Biểu đồ tiến độ
+            📈 Progress Chart
         </h3>
         <ProgressLineChart
             :chart-data="chartData"
