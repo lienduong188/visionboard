@@ -105,6 +105,14 @@ class Goal extends Model
     }
 
     /**
+     * Get all references for this goal.
+     */
+    public function references(): HasMany
+    {
+        return $this->hasMany(GoalReference::class)->orderBy('sort_order');
+    }
+
+    /**
      * Check if this is a decrease goal (e.g., reduce body fat).
      */
     public function isDecreaseGoal(): bool

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressLogController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReviewSettingController;
+use App\Http\Controllers\GoalReferenceController;
 use App\Http\Controllers\ThemeWordController;
 use Illuminate\Support\Facades\Route;
 
@@ -70,6 +71,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/goals/{goal}/progress-logs', [ProgressLogController::class, 'store'])->name('progress-logs.store');
     Route::put('/goals/{goal}/progress-logs/{progressLog}', [ProgressLogController::class, 'update'])->name('progress-logs.update');
     Route::delete('/goals/{goal}/progress-logs/{progressLog}', [ProgressLogController::class, 'destroy'])->name('progress-logs.destroy');
+
+    // Goal References
+    Route::post('/goals/{goal}/references', [GoalReferenceController::class, 'store'])->name('references.store');
+    Route::put('/goals/{goal}/references/{reference}', [GoalReferenceController::class, 'update'])->name('references.update');
+    Route::post('/goals/{goal}/references/reorder', [GoalReferenceController::class, 'reorder'])->name('references.reorder');
+    Route::delete('/goals/{goal}/references/{reference}', [GoalReferenceController::class, 'destroy'])->name('references.destroy');
 
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');

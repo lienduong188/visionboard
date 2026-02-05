@@ -2,6 +2,7 @@
 import InfoTab from './GoalEditModal/InfoTab.vue';
 import MilestonesTab from './GoalEditModal/MilestonesTab.vue';
 import RemindersTab from './GoalEditModal/RemindersTab.vue';
+import ReferencesTab from './GoalEditModal/ReferencesTab.vue';
 import HistoryTab from './GoalEditModal/HistoryTab.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
@@ -198,6 +199,12 @@ const handleDeleteCancel = () => {
                                         {{ activeRemindersCount }}
                                     </span>
                                 </button>
+                                <button @click="activeTab = 'references'" :class="tabClass('references')">
+                                    Refs
+                                    <span v-if="goal.references?.length" class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
+                                        {{ goal.references.length }}
+                                    </span>
+                                </button>
                                 <button @click="activeTab = 'history'" :class="tabClass('history')">
                                     History
                                     <span v-if="goal.progress_logs?.length" class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
@@ -223,6 +230,10 @@ const handleDeleteCancel = () => {
                                 />
                                 <RemindersTab
                                     v-show="activeTab === 'reminders'"
+                                    :goal="goal"
+                                />
+                                <ReferencesTab
+                                    v-show="activeTab === 'references'"
                                     :goal="goal"
                                 />
                                 <HistoryTab

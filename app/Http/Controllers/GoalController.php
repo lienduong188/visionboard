@@ -19,7 +19,7 @@ class GoalController extends Controller
     {
         $user = $request->user();
 
-        $goals = Goal::with(['category', 'milestones.todos', 'progressLogs', 'checklists', 'reminders'])
+        $goals = Goal::with(['category', 'milestones.todos', 'progressLogs', 'checklists', 'reminders', 'references'])
             ->where('user_id', $user->id)
             ->orderBy('is_pinned', 'desc')
             ->orderBy('sort_order', 'asc')
@@ -148,7 +148,7 @@ class GoalController extends Controller
     {
         $this->authorize('view', $goal);
 
-        $goal->load(['category', 'milestones.todos', 'images', 'progressLogs', 'reminders', 'checklists']);
+        $goal->load(['category', 'milestones.todos', 'images', 'progressLogs', 'reminders', 'checklists', 'references']);
 
         return Inertia::render('Goals/Show', [
             'goal' => $goal,
