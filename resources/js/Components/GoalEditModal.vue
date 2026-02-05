@@ -18,10 +18,12 @@ const emit = defineEmits(['close', 'saved', 'deleted']);
 
 const activeTab = ref('info');
 const infoTabRef = ref(null);
+const showExitConfirm = ref(false);
 
 // Reset to info tab when modal opens with new goal
 watch(() => props.goal?.id, () => {
     activeTab.value = 'info';
+    showExitConfirm.value = false;
 });
 
 // Tab class helper
@@ -48,9 +50,20 @@ const progressColor = computed(() => {
     return 'bg-red-500';
 });
 
-// Close modal
+// Close modal with confirmation
 const close = () => {
+    showExitConfirm.value = true;
+};
+
+// Actually close the modal
+const confirmClose = () => {
+    showExitConfirm.value = false;
     emit('close');
+};
+
+// Cancel close
+const cancelClose = () => {
+    showExitConfirm.value = false;
 };
 
 // Handle save from InfoTab
@@ -288,6 +301,48 @@ const handleDeleteCancel = () => {
                         </div>
                     </Transition>
                 </div>
+
+                <!-- Exit Confirmation Modal -->
+                <Transition
+                    enter-active-class="transition ease-out duration-150"
+                    enter-from-class="opacity-0"
+                    enter-to-class="opacity-100"
+                    leave-active-class="transition ease-in duration-100"
+                    leave-from-class="opacity-100"
+                    leave-to-class="opacity-0"
+                >
+                    <div
+                        v-if="showExitConfirm"
+                        class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+                    >
+                        <div class="absolute inset-0 bg-black/30" @click="cancelClose"></div>
+                        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full">
+                            <div class="text-center">
+                                <div class="text-4xl mb-4">⚠️</div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                    Unsaved Changes
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                    Are you sure you want to leave? You will lose any unsaved changes.
+                                </p>
+                                <div class="flex items-center justify-center gap-3">
+                                    <button
+                                        @click="cancelClose"
+                                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
+                                        Stay
+                                    </button>
+                                    <button
+                                        @click="confirmClose"
+                                        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                                    >
+                                        Leave
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Transition>
             </div>
         </Transition>
     </Teleport>

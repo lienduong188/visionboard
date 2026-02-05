@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import GoalCard from '@/Components/GoalCard.vue';
 import UnifiedFloating from '@/Components/UnifiedFloating.vue';
 import GoalEditModal from '@/Components/GoalEditModal.vue';
+import GoalDetailsModal from '@/Components/GoalDetailsModal.vue';
 import ThemeWordsWaterfall from '@/Components/ThemeWordsWaterfall.vue';
 import ThemeWordsManager from '@/Components/ThemeWordsManager.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
@@ -48,6 +49,7 @@ const priorityFilter = ref('all'); // 'all', 'high', 'medium', 'low'
 
 // Modal state
 const showEditModal = ref(false);
+const showDetailsModal = ref(false);
 const selectedGoalId = ref(null);
 
 // Computed to get the latest goal data from props
@@ -72,8 +74,20 @@ const modalCoreGoalsCount = computed(() => {
     return props.coreGoals?.length || 0;
 });
 
-const openGoalModal = (goal) => {
+// Open Details Modal (when clicking on goal card)
+const openGoalDetails = (goal) => {
     selectedGoalId.value = goal.id;
+    showDetailsModal.value = true;
+};
+
+const closeDetailsModal = () => {
+    showDetailsModal.value = false;
+    selectedGoalId.value = null;
+};
+
+// Open Edit Modal (from Details modal)
+const openGoalEdit = () => {
+    showDetailsModal.value = false;
     showEditModal.value = true;
 };
 
@@ -504,7 +518,7 @@ const saveOrder = () => {
                             :container-width="floatingWidth"
                             :container-height="floatingHeight"
                             :is-mobile="floatingWidth < 500"
-                            @goal-click="openGoalModal"
+                            @goal-click="openGoalDetails"
                         />
 
                         <!-- Theme Words Waterfall Effect (random 100 positive words from system) - renders above goals -->
@@ -590,7 +604,7 @@ const saveOrder = () => {
                                 <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                     <div class="flex items-center justify-between">
                                         <div
-                                            @click="openGoalModal(goal)"
+                                            @click="openGoalDetails(goal)"
                                             class="flex items-center gap-3 cursor-pointer flex-1"
                                             title="Click to edit goal"
                                         >
@@ -771,7 +785,7 @@ const saveOrder = () => {
                                     v-if="matchesAllFilters(element)"
                                     :goal="element"
                                     class="cursor-grab active:cursor-grabbing"
-                                    @click="openGoalModal"
+                                    @click="openGoalDetails"
                                 />
                             </template>
                         </draggable>
@@ -810,6 +824,15 @@ const saveOrder = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Goal Details Modal -->
+        <GoalDetailsModal
+            :show="showDetailsModal"
+            :goal="selectedGoal"
+            @close="closeDetailsModal"
+            @edit="openGoalEdit"
+            @deleted="onGoalDeleted"
+        />
 
         <!-- Goal Edit Modal -->
         <GoalEditModal
