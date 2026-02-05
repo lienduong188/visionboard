@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import draggable from 'vuedraggable';
 import { marked } from 'marked';
+import { formatForInput, parseFromInput } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -51,6 +52,13 @@ const milestoneForm = useForm({
 const milestoneImagePreview = ref(null);
 const milestoneFileInput = ref(null);
 
+// Display value for formatted number input
+const displayTargetValue = ref('');
+const onTargetValueBlur = () => {
+    milestoneForm.target_value = parseFromInput(displayTargetValue.value);
+    displayTargetValue.value = formatForInput(milestoneForm.target_value);
+};
+
 // Expanded states
 const expandedMilestones = ref({});
 const expandedMilestoneTodos = ref({});
@@ -63,6 +71,7 @@ const openAddMilestone = () => {
     editingMilestone.value = null;
     milestoneForm.reset();
     milestoneImagePreview.value = null;
+    displayTargetValue.value = '';
     showMilestoneModal.value = true;
 };
 
@@ -72,6 +81,7 @@ const openEditMilestone = (milestone) => {
     milestoneForm.description = milestone.description || '';
     milestoneForm.memo = milestone.memo || '';
     milestoneForm.target_value = milestone.target_value || '';
+    displayTargetValue.value = formatForInput(milestone.target_value);
     milestoneForm.due_date = milestone.due_date || '';
     milestoneForm.is_soft = milestone.is_soft || false;
     milestoneForm.image = null;
@@ -459,11 +469,12 @@ const formatDate = (date) => {
                                 Target Value
                             </label>
                             <input
-                                v-model="milestoneForm.target_value"
-                                type="number"
-                                step="any"
+                                v-model="displayTargetValue"
+                                type="text"
+                                inputmode="decimal"
                                 class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Optional"
+                                @blur="onTargetValueBlur"
                             />
                         </div>
                         <div>

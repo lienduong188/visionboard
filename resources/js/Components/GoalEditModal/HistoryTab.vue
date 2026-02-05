@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import GoalProgressChart from '@/Components/Charts/GoalProgressChart.vue';
-import { formatNumber } from '@/utils/formatNumber';
+import { formatNumber, formatForInput, parseFromInput } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -19,17 +19,26 @@ const progressLogForm = useForm({
 
 const showAllProgressLogs = ref(false);
 
+// Display value for formatted number input
+const displayNewValue = ref('');
+const onNewValueBlur = () => {
+    progressLogForm.new_value = parseFromInput(displayNewValue.value);
+    displayNewValue.value = formatForInput(progressLogForm.new_value);
+};
+
 const openAddProgressLog = () => {
     editingProgressLog.value = null;
     progressLogForm.reset();
     progressLogForm.logged_at = new Date().toISOString().split('T')[0];
     progressLogForm.new_value = props.goal.current_value || 0;
+    displayNewValue.value = formatForInput(props.goal.current_value || 0);
     showProgressLogModal.value = true;
 };
 
 const openEditProgressLog = (log) => {
     editingProgressLog.value = log;
     progressLogForm.new_value = log.new_value;
+    displayNewValue.value = formatForInput(log.new_value);
     progressLogForm.logged_at = log.logged_at?.split('T')[0] || log.logged_at?.split(' ')[0] || '';
     progressLogForm.note = log.note || '';
     showProgressLogModal.value = true;
@@ -205,11 +214,12 @@ const formatDate = (date) => {
                             Value ({{ goal.unit || 'unit' }}) *
                         </label>
                         <input
-                            v-model="progressLogForm.new_value"
-                            type="number"
-                            step="any"
+                            v-model="displayNewValue"
+                            type="text"
+                            inputmode="decimal"
                             required
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            @blur="onNewValueBlur"
                         />
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Target: {{ formatNumber(goal.target_value) }} {{ goal.unit }}

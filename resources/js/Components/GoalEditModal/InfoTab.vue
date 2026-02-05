@@ -5,6 +5,7 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onMounted } from 'vue';
+import { formatForInput, parseFromInput } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -56,6 +57,10 @@ const syncFormWithGoal = () => {
         form.progress_mode = props.goal.progress_mode || 'value';
         currentImage.value = props.goal.cover_image;
         imagePreview.value = null;
+        // Format display values
+        displayStartValue.value = formatForInput(props.goal.start_value);
+        displayTargetValue.value = formatForInput(props.goal.target_value);
+        displayCurrentValue.value = formatForInput(props.goal.current_value);
     }
 };
 
@@ -79,6 +84,25 @@ const processing = ref(false);
 const newChecklistItem = ref('');
 const editingChecklistId = ref(null);
 const editingChecklistTitle = ref('');
+
+// Display values for formatted number inputs
+const displayStartValue = ref('');
+const displayTargetValue = ref('');
+const displayCurrentValue = ref('');
+
+// Handle blur events to sync display -> form
+const onStartValueBlur = () => {
+    form.start_value = parseFromInput(displayStartValue.value);
+    displayStartValue.value = formatForInput(form.start_value);
+};
+const onTargetValueBlur = () => {
+    form.target_value = parseFromInput(displayTargetValue.value);
+    displayTargetValue.value = formatForInput(form.target_value);
+};
+const onCurrentValueBlur = () => {
+    form.current_value = parseFromInput(displayCurrentValue.value);
+    displayCurrentValue.value = formatForInput(form.current_value);
+};
 
 // Helper function to format date for input type="date" (YYYY-MM-DD)
 const formatDateForInput = (dateValue) => {
@@ -335,11 +359,12 @@ defineExpose({
                     <InputLabel for="modal_start_value" value="Start Value" />
                     <TextInput
                         id="modal_start_value"
-                        v-model="form.start_value"
-                        type="number"
-                        step="any"
+                        v-model="displayStartValue"
+                        type="text"
+                        inputmode="decimal"
                         class="mt-1 block w-full"
                         placeholder="VD: 27"
+                        @blur="onStartValueBlur"
                     />
                     <InputError :message="form.errors.start_value" class="mt-2" />
                 </div>
@@ -347,11 +372,12 @@ defineExpose({
                     <InputLabel for="modal_target_value" value="Target Value" />
                     <TextInput
                         id="modal_target_value"
-                        v-model="form.target_value"
-                        type="number"
-                        step="any"
+                        v-model="displayTargetValue"
+                        type="text"
+                        inputmode="decimal"
                         class="mt-1 block w-full"
                         placeholder="VD: 20"
+                        @blur="onTargetValueBlur"
                     />
                     <InputError :message="form.errors.target_value" class="mt-2" />
                 </div>
@@ -359,11 +385,12 @@ defineExpose({
                     <InputLabel for="modal_current_value" value="Current Value" />
                     <TextInput
                         id="modal_current_value"
-                        v-model="form.current_value"
-                        type="number"
-                        step="any"
+                        v-model="displayCurrentValue"
+                        type="text"
+                        inputmode="decimal"
                         class="mt-1 block w-full"
                         placeholder="VD: 25"
+                        @blur="onCurrentValueBlur"
                     />
                     <InputError :message="form.errors.current_value" class="mt-2" />
                 </div>

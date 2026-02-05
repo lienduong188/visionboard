@@ -6,6 +6,7 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { formatForInput, parseFromInput } from '@/utils/formatNumber';
 
 const props = defineProps({
     categories: Array,
@@ -31,6 +32,19 @@ const canSetCoreGoal = computed(() => props.coreGoalsCount < 3);
 
 const imagePreview = ref(null);
 const fileInput = ref(null);
+
+// Display values for formatted number inputs
+const displayStartValue = ref('');
+const displayTargetValue = ref('');
+
+const onStartValueBlur = () => {
+    form.start_value = parseFromInput(displayStartValue.value);
+    displayStartValue.value = formatForInput(form.start_value);
+};
+const onTargetValueBlur = () => {
+    form.target_value = parseFromInput(displayTargetValue.value);
+    displayTargetValue.value = formatForInput(form.target_value);
+};
 
 const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -192,11 +206,12 @@ const submit = () => {
                                 <InputLabel for="start_value" value="Start Value" />
                                 <TextInput
                                     id="start_value"
-                                    v-model="form.start_value"
-                                    type="number"
-                                    step="any"
+                                    v-model="displayStartValue"
+                                    type="text"
+                                    inputmode="decimal"
                                     class="mt-1 block w-full"
                                     placeholder="VD: 27"
+                                    @blur="onStartValueBlur"
                                 />
                                 <InputError :message="form.errors.start_value" class="mt-2" />
                             </div>
@@ -204,11 +219,12 @@ const submit = () => {
                                 <InputLabel for="target_value" value="Target Value" />
                                 <TextInput
                                     id="target_value"
-                                    v-model="form.target_value"
-                                    type="number"
-                                    step="any"
+                                    v-model="displayTargetValue"
+                                    type="text"
+                                    inputmode="decimal"
                                     class="mt-1 block w-full"
                                     placeholder="VD: 20"
+                                    @blur="onTargetValueBlur"
                                 />
                                 <InputError :message="form.errors.target_value" class="mt-2" />
                             </div>

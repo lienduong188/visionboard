@@ -12,7 +12,7 @@ This is a reminder about your goal: **{{ $goal->title }}**
 **Current Progress:** {{ $goal->progress }}%
 
 @if($goal->target_value && $goal->unit)
-**Progress:** {{ number_format($goal->current_value ?? 0) }} / {{ number_format($goal->target_value) }} {{ $goal->unit }}
+**Progress:** {{ formatNumber($goal->current_value ?? 0) }} / {{ formatNumber($goal->target_value) }} {{ $goal->unit }}
 @endif
 
 @if($goal->target_date)

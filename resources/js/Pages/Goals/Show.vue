@@ -5,7 +5,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import draggable from 'vuedraggable';
 import { marked } from 'marked';
-import { formatNumber } from '@/utils/formatNumber';
+import { formatNumber, formatForInput, parseFromInput } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -45,6 +45,13 @@ const progressForm = useForm({
     note: '',
 });
 
+// Display value for progress form
+const displayProgressCurrentValue = ref(formatForInput(props.goal.current_value || 0));
+const onProgressCurrentValueBlur = () => {
+    progressForm.current_value = parseFromInput(displayProgressCurrentValue.value);
+    displayProgressCurrentValue.value = formatForInput(progressForm.current_value);
+};
+
 const submitProgress = () => {
     progressForm.patch(route('goals.progress', props.goal.id), {
         onSuccess: () => {
@@ -80,6 +87,13 @@ const milestoneForm = useForm({
 const milestoneImagePreview = ref(null);
 const milestoneFileInput = ref(null);
 
+// Display value for milestone form
+const displayMilestoneTargetValue = ref('');
+const onMilestoneTargetValueBlur = () => {
+    milestoneForm.target_value = parseFromInput(displayMilestoneTargetValue.value);
+    displayMilestoneTargetValue.value = formatForInput(milestoneForm.target_value);
+};
+
 // Expanded todos state
 const expandedMilestoneTodos = ref({});
 
@@ -87,6 +101,7 @@ const openAddMilestone = () => {
     editingMilestone.value = null;
     milestoneForm.reset();
     milestoneImagePreview.value = null;
+    displayMilestoneTargetValue.value = '';
     showMilestoneModal.value = true;
 };
 
@@ -96,6 +111,7 @@ const openEditMilestone = (milestone) => {
     milestoneForm.description = milestone.description || '';
     milestoneForm.memo = milestone.memo || '';
     milestoneForm.target_value = milestone.target_value || '';
+    displayMilestoneTargetValue.value = formatForInput(milestone.target_value);
     milestoneForm.due_date = milestone.due_date || '';
     milestoneForm.is_soft = milestone.is_soft || false;
     milestoneForm.image = null;
@@ -351,18 +367,27 @@ const progressLogForm = useForm({
     note: '',
 });
 
+// Display value for progress log form
+const displayProgressLogNewValue = ref('');
+const onProgressLogNewValueBlur = () => {
+    progressLogForm.new_value = parseFromInput(displayProgressLogNewValue.value);
+    displayProgressLogNewValue.value = formatForInput(progressLogForm.new_value);
+};
+
 const openAddProgressLog = () => {
     editingProgressLog.value = null;
     progressLogForm.reset();
     // Default to today
     progressLogForm.logged_at = new Date().toISOString().split('T')[0];
     progressLogForm.new_value = props.goal.current_value || 0;
+    displayProgressLogNewValue.value = formatForInput(props.goal.current_value || 0);
     showProgressLogModal.value = true;
 };
 
 const openEditProgressLog = (log) => {
     editingProgressLog.value = log;
     progressLogForm.new_value = log.new_value;
+    displayProgressLogNewValue.value = formatForInput(log.new_value);
     progressLogForm.logged_at = log.logged_at?.split('T')[0] || log.logged_at?.split(' ')[0] || '';
     progressLogForm.note = log.note || '';
     showProgressLogModal.value = true;
@@ -1015,10 +1040,11 @@ const formatFrequency = (reminder) => {
                             Current Value ({{ goal.unit }})
                         </label>
                         <input
-                            v-model="progressForm.current_value"
-                            type="number"
-                            step="any"
+                            v-model="displayProgressCurrentValue"
+                            type="text"
+                            inputmode="decimal"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            @blur="onProgressCurrentValueBlur"
                         />
                     </div>
                     <div class="mb-6">
@@ -1103,11 +1129,12 @@ const formatFrequency = (reminder) => {
                                 Target Value
                             </label>
                             <input
-                                v-model="milestoneForm.target_value"
-                                type="number"
-                                step="any"
+                                v-model="displayMilestoneTargetValue"
+                                type="text"
+                                inputmode="decimal"
                                 class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Optional"
+                                @blur="onMilestoneTargetValueBlur"
                             />
                         </div>
                         <div>
@@ -1222,11 +1249,12 @@ const formatFrequency = (reminder) => {
                             📊 Giá trị ({{ goal.unit || 'đơn vị' }}) *
                         </label>
                         <input
-                            v-model="progressLogForm.new_value"
-                            type="number"
-                            step="any"
+                            v-model="displayProgressLogNewValue"
+                            type="text"
+                            inputmode="decimal"
                             required
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            @blur="onProgressLogNewValueBlur"
                         />
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Target: {{ formatNumber(goal.target_value) }} {{ goal.unit }}

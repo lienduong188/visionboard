@@ -240,7 +240,7 @@
             <div class="goal-meta">
                 <span class="priority-{{ $goal->priority }}">{{ ucfirst($goal->priority) }} Priority</span>
                 @if($goal->target_value)
-                | Target: {{ number_format($goal->current_value ?? 0) }}/{{ number_format($goal->target_value) }} {{ $goal->unit }}
+                | Target: {{ formatNumber($goal->current_value ?? 0) }}/{{ formatNumber($goal->target_value) }} {{ $goal->unit }}
                 @endif
                 @if($goal->target_date)
                 | Due: {{ $goal->target_date->format('M d, Y') }}
@@ -293,7 +293,7 @@
             <div class="goal-meta">
                 <span class="priority-{{ $goal->priority }}">{{ ucfirst($goal->priority) }} Priority</span>
                 @if($goal->target_value)
-                | Target: {{ number_format($goal->current_value ?? 0) }}/{{ number_format($goal->target_value) }} {{ $goal->unit }}
+                | Target: {{ formatNumber($goal->current_value ?? 0) }}/{{ formatNumber($goal->target_value) }} {{ $goal->unit }}
                 @endif
                 @if($goal->target_date)
                 | Due: {{ $goal->target_date->format('M d, Y') }}

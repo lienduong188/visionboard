@@ -6,6 +6,7 @@ import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { formatForInput, parseFromInput } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -37,6 +38,19 @@ const canSetCoreGoal = computed(() => props.goal.is_core_goal || props.coreGoals
 const currentImage = ref(props.goal.cover_image);
 const imagePreview = ref(null);
 const fileInput = ref(null);
+
+// Display values for formatted number inputs
+const displayTargetValue = ref(formatForInput(props.goal.target_value));
+const displayCurrentValue = ref(formatForInput(props.goal.current_value));
+
+const onTargetValueBlur = () => {
+    form.target_value = parseFromInput(displayTargetValue.value);
+    displayTargetValue.value = formatForInput(form.target_value);
+};
+const onCurrentValueBlur = () => {
+    form.current_value = parseFromInput(displayCurrentValue.value);
+    displayCurrentValue.value = formatForInput(form.current_value);
+};
 
 const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -203,10 +217,11 @@ const submit = () => {
                                 <InputLabel for="target_value" value="Target Value" />
                                 <TextInput
                                     id="target_value"
-                                    v-model="form.target_value"
-                                    type="number"
-                                    step="1"
+                                    v-model="displayTargetValue"
+                                    type="text"
+                                    inputmode="decimal"
                                     class="mt-1 block w-full"
+                                    @blur="onTargetValueBlur"
                                 />
                                 <InputError :message="form.errors.target_value" class="mt-2" />
                             </div>
@@ -214,10 +229,11 @@ const submit = () => {
                                 <InputLabel for="current_value" value="Current Value" />
                                 <TextInput
                                     id="current_value"
-                                    v-model="form.current_value"
-                                    type="number"
-                                    step="1"
+                                    v-model="displayCurrentValue"
+                                    type="text"
+                                    inputmode="decimal"
                                     class="mt-1 block w-full"
+                                    @blur="onCurrentValueBlur"
                                 />
                                 <InputError :message="form.errors.current_value" class="mt-2" />
                             </div>
