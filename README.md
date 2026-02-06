@@ -11,6 +11,11 @@ Personal vision board web application to track 2026 goals.
 ## Features
 - Authentication (Login/Register)
 - **VisionBoard View (Default)** - 3 Core Goals float around "Vision Board 2026" title with physics-based animation
+- **Today View** - See all tasks due today and upcoming (7 days):
+  - Stats: Overdue, Due Today, This Week, Total
+  - Sections grouped by timeframe with visual indicators
+  - Filter by type: All, Milestones, Todos, Reminders
+  - Toggle completion directly from Today view
 - **Plan View** - Todo list showing Core Goals with expandable milestones + regular goals with drag & drop
 - **Plan View Filters** - Multi-dimensional filters:
   - Time: All, Next 3 months, Next 6 months, Past

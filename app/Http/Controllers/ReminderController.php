@@ -90,6 +90,32 @@ class ReminderController extends Controller
     }
 
     /**
+     * Dismiss reminder for today (skip current notification).
+     */
+    public function dismiss(Goal $goal, Reminder $reminder)
+    {
+        $this->authorize('update', $goal);
+
+        if ($reminder->goal_id !== $goal->id) {
+            abort(403);
+        }
+
+        // Mark as sent to calculate next_send_at
+        $reminder->markAsSent();
+
+        // If next_send_at is still today, force it to tomorrow
+        // This handles the case where remind_time hasn't passed yet
+        if ($reminder->next_send_at && $reminder->next_send_at->isToday()) {
+            $reminder->update([
+                'next_send_at' => $reminder->next_send_at->addDay()
+            ]);
+        }
+
+        // Redirect to today page to refresh data
+        return redirect()->route('today.index')->with('success', 'Reminder dismissed for today!');
+    }
+
+    /**
      * Delete a reminder.
      */
     public function destroy(Goal $goal, Reminder $reminder)

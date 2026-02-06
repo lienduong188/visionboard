@@ -1,6 +1,14 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
+import { marked } from 'marked';
+
+marked.setOptions({ breaks: true, gfm: true });
+
+const renderMarkdown = (text) => {
+    if (!text) return '';
+    return marked.parse(text);
+};
 
 const props = defineProps({
     goal: Object,
@@ -21,7 +29,16 @@ const form = useForm({
 
 // File input ref
 const fileInput = ref(null);
+const textareaRef = ref(null);
 const selectedFileName = ref('');
+
+// Auto resize textarea based on content
+const autoResizeTextarea = () => {
+    const el = textareaRef.value;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, window.innerHeight * 0.6) + 'px';
+};
 
 // Grouped references
 const groupedReferences = computed(() => {
@@ -35,12 +52,51 @@ const groupedReferences = computed(() => {
 
 const totalCount = computed(() => props.goal?.references?.length || 0);
 
+// Track original values for dirty check
+const originalFormData = ref({ title: '', content: '', file: null });
+
+const isFormDirty = computed(() => {
+    return form.title !== originalFormData.value.title
+        || form.content !== originalFormData.value.content
+        || form.file !== null;
+});
+
+// Confirm close modal state
+const showCloseConfirm = ref(false);
+
+// Try close modal with dirty check
+const tryCloseModal = () => {
+    if (isFormDirty.value) {
+        showCloseConfirm.value = true;
+        return;
+    }
+    showModal.value = false;
+};
+
+// Confirm leaving (discard changes)
+const confirmLeave = () => {
+    showCloseConfirm.value = false;
+    showModal.value = false;
+};
+
+// Cancel leaving (stay editing)
+const cancelLeave = () => {
+    showCloseConfirm.value = false;
+};
+
+// Handle overlay click - stop propagation to prevent GoalEditModal from closing
+const handleOverlayClick = (e) => {
+    e.stopPropagation();
+    tryCloseModal();
+};
+
 // Open modal for adding
 const openAddModal = (type = 'link') => {
     editingReference.value = null;
     form.reset();
     form.type = type;
     selectedFileName.value = '';
+    originalFormData.value = { title: '', content: '', file: null };
     showModal.value = true;
 };
 
@@ -52,7 +108,9 @@ const openEditModal = (reference) => {
     form.content = reference.content || '';
     form.file = null;
     selectedFileName.value = reference.file_name || '';
+    originalFormData.value = { title: reference.title, content: reference.content || '', file: null };
     showModal.value = true;
+    nextTick(() => autoResizeTextarea());
 };
 
 // Handle file selection
@@ -331,11 +389,10 @@ const typeIcons = {
                                     {{ ref.title }}
                                 </div>
                                 <div
-                                    class="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap"
+                                    class="text-sm text-gray-600 dark:text-gray-300 prose prose-sm prose-purple dark:prose-invert max-w-none"
                                     :class="{ 'line-clamp-3': expandedTextId !== ref.id }"
-                                >
-                                    {{ ref.content }}
-                                </div>
+                                    v-html="renderMarkdown(ref.content)"
+                                ></div>
                                 <button
                                     v-if="ref.content && ref.content.length > 150"
                                     @click="toggleTextExpand(ref.id)"
@@ -387,13 +444,14 @@ const typeIcons = {
             No references yet. Add links, files, or notes to keep track of resources!
         </div>
 
-        <!-- Add/Edit Modal -->
+        <!-- Add/Edit Modal (Teleport to body to escape overflow-hidden parent) -->
+        <Teleport to="body">
         <div
             v-if="showModal"
-            class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50"
-            @click.self="showModal = false"
+            class="fixed inset-0 z-[70] flex items-center justify-center bg-black/50"
+            @click.self="handleOverlayClick"
         >
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-[90vw] max-w-5xl max-h-[90vh] overflow-y-auto">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                     {{ editingReference ? 'Edit Reference' : 'Add Reference' }}
                 </h3>
@@ -503,19 +561,22 @@ const typeIcons = {
                             Content *
                         </label>
                         <textarea
+                            ref="textareaRef"
                             v-model="form.content"
                             rows="6"
                             required
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            placeholder="Your notes..."
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 min-h-[200px] max-h-[60vh] resize-y"
+                            placeholder="Your notes... (supports **bold**, *italic*, - lists)"
+                            @input="autoResizeTextarea"
                         ></textarea>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Supports Markdown formatting</p>
                     </div>
 
                     <!-- Actions -->
                     <div class="flex justify-end gap-3">
                         <button
                             type="button"
-                            @click="showModal = false"
+                            @click="tryCloseModal"
                             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
                             Cancel
@@ -531,5 +592,48 @@ const typeIcons = {
                 </form>
             </div>
         </div>
+
+        <!-- Unsaved Changes Confirm Modal -->
+        <Transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition ease-in duration-100"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div
+                v-if="showCloseConfirm"
+                class="fixed inset-0 z-[80] flex items-center justify-center p-4"
+            >
+                <div class="absolute inset-0 bg-black/30" @click="cancelLeave"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full">
+                    <div class="text-center">
+                        <div class="text-4xl mb-4">⚠️</div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            Unsaved Changes
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">
+                            Are you sure you want to leave? You will lose any unsaved changes.
+                        </p>
+                        <div class="flex items-center justify-center gap-3">
+                            <button
+                                @click="cancelLeave"
+                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            >
+                                Stay
+                            </button>
+                            <button
+                                @click="confirmLeave"
+                                class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                            >
+                                Leave
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+        </Teleport>
     </div>
 </template>

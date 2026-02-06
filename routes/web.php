@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\TodayController;
 use App\Http\Controllers\GoalChecklistController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\MilestoneController;
@@ -65,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/goals/{goal}/reminders', [ReminderController::class, 'store'])->name('reminders.store');
     Route::put('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'update'])->name('reminders.update');
     Route::patch('/goals/{goal}/reminders/{reminder}/toggle', [ReminderController::class, 'toggle'])->name('reminders.toggle');
+    Route::patch('/goals/{goal}/reminders/{reminder}/dismiss', [ReminderController::class, 'dismiss'])->name('reminders.dismiss');
     Route::delete('/goals/{goal}/reminders/{reminder}', [ReminderController::class, 'destroy'])->name('reminders.destroy');
 
     // Progress Logs
@@ -82,6 +84,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // Today View
+    Route::get('/today', [TodayController::class, 'index'])->name('today.index');
 
     // Review Settings
     Route::get('/settings/reviews', [ReviewSettingController::class, 'show'])->name('settings.reviews');

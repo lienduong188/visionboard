@@ -58,6 +58,12 @@ const isPlanActive = computed(() => {
                                     VisionBoard
                                 </NavLink>
                                 <NavLink
+                                    :href="route('today.index')"
+                                    :active="route().current('today.index')"
+                                >
+                                    Today
+                                </NavLink>
+                                <NavLink
                                     :href="route('goals.index', { view: 'plan' })"
                                     :active="isPlanActive"
                                 >
@@ -188,6 +194,12 @@ const isPlanActive = computed(() => {
                             :active="isVisionBoardActive"
                         >
                             VisionBoard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('today.index')"
+                            :active="route().current('today.index')"
+                        >
+                            Today
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('goals.index', { view: 'plan' })"

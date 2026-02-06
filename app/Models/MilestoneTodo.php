@@ -73,4 +73,14 @@ class MilestoneTodo extends Model
     {
         return $query->where('is_completed', false);
     }
+
+    /**
+     * Scope for overdue todos.
+     */
+    public function scopeOverdue($query)
+    {
+        return $query->where('is_completed', false)
+                    ->whereNotNull('end_date')
+                    ->where('end_date', '<', now());
+    }
 }
