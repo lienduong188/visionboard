@@ -232,6 +232,7 @@ const draggingId = ref(null);
 const dragOffset = ref({ x: 0, y: 0 });
 const lastDragPos = ref({ x: 0, y: 0 });
 const dragVelocity = ref({ vx: 0, vy: 0 });
+const wasDragged = ref(false); // Track if object was actually moved
 
 const startDrag = (objectId, event) => {
     event.preventDefault();
@@ -250,6 +251,7 @@ const startDrag = (objectId, event) => {
     };
     lastDragPos.value = { x: clientX, y: clientY };
     dragVelocity.value = { vx: 0, vy: 0 };
+    wasDragged.value = false; // Reset drag flag
 
     // Add global listeners
     document.addEventListener('mousemove', onDrag);
@@ -265,10 +267,17 @@ const onDrag = (event) => {
     const clientX = event.touches ? event.touches[0].clientX : event.clientX;
     const clientY = event.touches ? event.touches[0].clientY : event.clientY;
 
+    // Check if moved significantly (threshold: 5px)
+    const dx = clientX - lastDragPos.value.x;
+    const dy = clientY - lastDragPos.value.y;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        wasDragged.value = true;
+    }
+
     // Calculate velocity from movement
     dragVelocity.value = {
-        vx: (clientX - lastDragPos.value.x) * 0.3,
-        vy: (clientY - lastDragPos.value.y) * 0.3,
+        vx: dx * 0.3,
+        vy: dy * 0.3,
     };
     lastDragPos.value = { x: clientX, y: clientY };
 
@@ -312,6 +321,15 @@ const endDrag = () => {
     document.removeEventListener('mouseup', endDrag);
     document.removeEventListener('touchmove', onDrag);
     document.removeEventListener('touchend', endDrag);
+};
+
+const handleGoalClick = (goal) => {
+    // Only emit click if not dragged
+    if (!wasDragged.value) {
+        emit('goalClick', goal);
+    }
+    // Reset flag for next interaction
+    wasDragged.value = false;
 };
 
 const progressColor = (progress) => {
@@ -376,7 +394,7 @@ const floatingWords = computed(() => floatingObjects.value.filter(obj => obj.typ
             @touchstart="startDrag(goal.objectId, $event)"
         >
             <div
-                @click="draggingId ? null : emit('goalClick', goal)"
+                @click="handleGoalClick(goal)"
                 class="block cursor-pointer"
             >
                 <div
