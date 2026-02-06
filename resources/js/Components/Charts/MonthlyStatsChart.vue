@@ -147,7 +147,7 @@ const totalCompleted = computed(() => {
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" title="Số goals hoàn thành trong từng tháng của năm">
                 Monthly Completions
             </h3>
             <span class="text-sm text-gray-500 dark:text-gray-400">

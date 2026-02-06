@@ -77,7 +77,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow" title="Tỷ lệ goals đã hoàn thành 100% / tổng số goals">
                         <div class="flex items-center">
                             <div class="p-2 sm:p-3 rounded-full bg-yellow-100 dark:bg-yellow-900">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +91,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 shadow" title="Tiến độ trung bình của tất cả goals (Overall Progress)">
                         <div class="flex items-center">
                             <div class="p-2 sm:p-3 rounded-full bg-purple-100 dark:bg-purple-900">
                                 <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +108,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
 
                 <!-- Alert Cards Row -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div v-if="detailedStats.upcomingDeadlines > 0" class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+                    <div v-if="detailedStats.upcomingDeadlines > 0" class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-4 border border-amber-200 dark:border-amber-800" title="Goals sắp đến hạn trong 7 ngày tới">
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">&#9203;</span>
                             <div>
@@ -118,7 +118,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         </div>
                     </div>
 
-                    <div v-if="detailedStats.overdueGoals > 0" class="bg-red-50 dark:bg-red-900/30 rounded-xl p-4 border border-red-200 dark:border-red-800">
+                    <div v-if="detailedStats.overdueGoals > 0" class="bg-red-50 dark:bg-red-900/30 rounded-xl p-4 border border-red-200 dark:border-red-800" title="Goals đã quá hạn (target date < ngày hiện tại)">
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">&#9888;</span>
                             <div>
@@ -128,7 +128,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         </div>
                     </div>
 
-                    <div v-if="detailedStats.bestCategory" class="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 border border-green-200 dark:border-green-800">
+                    <div v-if="detailedStats.bestCategory" class="bg-green-50 dark:bg-green-900/30 rounded-xl p-4 border border-green-200 dark:border-green-800" title="Category có tiến độ trung bình cao nhất">
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">{{ detailedStats.bestCategory.icon }}</span>
                             <div>
@@ -138,7 +138,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                         </div>
                     </div>
 
-                    <div v-if="detailedStats.worstCategory && detailedStats.worstCategory.avgProgress < detailedStats.avgProgress" class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                    <div v-if="detailedStats.worstCategory && detailedStats.worstCategory.avgProgress < detailedStats.avgProgress" class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600" title="Category có tiến độ thấp nhất, cần tập trung cải thiện">
                         <div class="flex items-center">
                             <span class="text-2xl mr-3">{{ detailedStats.worstCategory.icon }}</span>
                             <div>
@@ -161,7 +161,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                 <!-- Category Comparison -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" title="So sánh tiến độ trung bình giữa các category">
                             Category Comparison
                         </h3>
                         <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
@@ -201,7 +201,7 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                 <!-- Category Details Table -->
                 <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" title="Bảng chi tiết tiến độ của từng category">
                             Category Details
                         </h3>
                     </div>
@@ -210,10 +210,10 @@ const categoryChartType = ref('bar'); // 'bar' or 'radar'
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Goals</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Completed</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Avg Progress</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Progress Bar</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" title="Tổng số goals trong category">Goals</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" title="Số goals đã hoàn thành 100%">Completed</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" title="Tiến độ trung bình của tất cả goals trong category">Avg Progress</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" title="Thanh tiến độ trực quan">Progress Bar</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">

@@ -489,13 +489,13 @@ const saveOrder = () => {
                         <!-- Center Title - responsive text -->
                         <div class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
                             <div class="text-center sparkle-container">
-                                <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
+                                <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500 leading-tight">
                                     VISION
                                 </h1>
-                                <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400 leading-tight">
+                                <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500 leading-tight">
                                     BOARD
                                 </h1>
-                                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mt-2 sparkle-year">
+                                <h2 class="text-4xl sm:text-5xl md:text-6xl font-black mt-2 text-transparent bg-clip-text bg-gradient-to-tr from-yellow-400 via-orange-500 to-red-500 leading-tight">
                                     2026
                                 </h2>
                                 <!-- Sparkle stars -->
@@ -854,7 +854,7 @@ const saveOrder = () => {
 }
 
 .sparkle-year {
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+    background: linear-gradient(135deg, #F97316 0%, #FB923C 50%, #FBBF24 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -862,10 +862,10 @@ const saveOrder = () => {
 
 .star {
     position: absolute;
-    color: #a5b4fc;
+    color: #FBBF24;
     opacity: 0;
     pointer-events: none;
-    text-shadow: 0 0 8px rgba(167, 139, 250, 0.8);
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
 }
 
 .star-1 {

@@ -6,6 +6,7 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import Toast from '@/Components/Toast.vue';
+import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -72,6 +73,9 @@ const isPlanActive = computed(() => {
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
+                            <!-- Theme Switcher -->
+                            <ThemeSwitcher />
+
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
@@ -120,6 +124,11 @@ const isPlanActive = computed(() => {
                                     </template>
                                 </Dropdown>
                             </div>
+                        </div>
+
+                        <!-- Theme Switcher (Mobile) -->
+                        <div class="flex items-center sm:hidden me-2">
+                            <ThemeSwitcher />
                         </div>
 
                         <!-- Hamburger -->

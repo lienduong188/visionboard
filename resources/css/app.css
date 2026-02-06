@@ -1,3 +1,175 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Theme: Hope (Emerald/Mint) */
+.theme-hope {
+    /* Background colors - tối hơn để dễ nhìn */
+    --hope-bg-primary: #A7F3D0;      /* emerald-200 */
+    --hope-bg-secondary: #6EE7B7;    /* emerald-300 */
+    --hope-bg-card: #D1FAE5;         /* emerald-100 */
+    --hope-bg-nav: #D1FAE5;          /* emerald-100 */
+
+    /* Text colors */
+    --hope-text-primary: #064E3B;    /* emerald-900 */
+    --hope-text-secondary: #047857;  /* emerald-700 */
+    --hope-text-muted: #059669;      /* emerald-600 */
+
+    /* Accent colors */
+    --hope-accent: #10B981;          /* emerald-500 */
+    --hope-accent-light: #34D399;    /* emerald-400 */
+    --hope-accent-dark: #059669;     /* emerald-600 */
+
+    /* Border colors */
+    --hope-border: #A7F3D0;          /* emerald-200 */
+    --hope-border-dark: #6EE7B7;     /* emerald-300 */
+}
+
+/* Apply Hope theme */
+.theme-hope,
+.theme-hope * {
+    --tw-bg-opacity: 1;
+}
+
+/* Main background */
+.theme-hope .min-h-screen.bg-gray-100,
+.theme-hope .min-h-screen.dark\:bg-gray-900 {
+    background-color: var(--hope-bg-primary) !important;
+}
+
+/* Navigation */
+.theme-hope nav.bg-white,
+.theme-hope nav.dark\:bg-gray-800 {
+    background-color: var(--hope-bg-nav) !important;
+    border-color: var(--hope-border) !important;
+}
+
+/* Cards and panels */
+.theme-hope .bg-white,
+.theme-hope .dark\:bg-gray-800 {
+    background-color: var(--hope-bg-card) !important;
+}
+
+/* Secondary backgrounds */
+.theme-hope .bg-gray-50,
+.theme-hope .dark\:bg-gray-700 {
+    background-color: var(--hope-bg-secondary) !important;
+}
+
+/* Text colors */
+.theme-hope .text-gray-900,
+.theme-hope .dark\:text-white,
+.theme-hope .dark\:text-gray-100 {
+    color: var(--hope-text-primary) !important;
+}
+
+.theme-hope .text-gray-700,
+.theme-hope .dark\:text-gray-200,
+.theme-hope .dark\:text-gray-300 {
+    color: var(--hope-text-secondary) !important;
+}
+
+.theme-hope .text-gray-500,
+.theme-hope .text-gray-600,
+.theme-hope .dark\:text-gray-400 {
+    color: var(--hope-text-muted) !important;
+}
+
+/* Primary buttons and accents - change from indigo to emerald */
+.theme-hope .bg-indigo-600,
+.theme-hope .hover\:bg-indigo-700:hover {
+    background-color: var(--hope-accent) !important;
+}
+
+.theme-hope .bg-indigo-600:hover {
+    background-color: var(--hope-accent-dark) !important;
+}
+
+.theme-hope .text-indigo-600,
+.theme-hope .dark\:text-indigo-400 {
+    color: var(--hope-accent) !important;
+}
+
+.theme-hope .border-indigo-500,
+.theme-hope .focus\:border-indigo-500:focus {
+    border-color: var(--hope-accent) !important;
+}
+
+.theme-hope .ring-indigo-500,
+.theme-hope .focus\:ring-indigo-500:focus {
+    --tw-ring-color: var(--hope-accent) !important;
+}
+
+/* Borders */
+.theme-hope .border-gray-100,
+.theme-hope .border-gray-200,
+.theme-hope .dark\:border-gray-600,
+.theme-hope .dark\:border-gray-700 {
+    border-color: var(--hope-border) !important;
+}
+
+/* Shadows with emerald tint */
+.theme-hope .shadow {
+    box-shadow: 0 1px 3px 0 rgba(16, 185, 129, 0.1), 0 1px 2px 0 rgba(16, 185, 129, 0.06) !important;
+}
+
+/* Dropdown and menu backgrounds */
+.theme-hope .bg-gray-100 {
+    background-color: var(--hope-bg-secondary) !important;
+}
+
+/* Table hover */
+.theme-hope .hover\:bg-gray-50:hover,
+.theme-hope .dark\:hover\:bg-gray-700\/50:hover {
+    background-color: var(--hope-bg-secondary) !important;
+}
+
+/* Progress bars - make them emerald themed */
+.theme-hope .bg-gray-200 {
+    background-color: var(--hope-border) !important;
+}
+
+/* Input fields */
+.theme-hope input,
+.theme-hope select,
+.theme-hope textarea {
+    background-color: var(--hope-bg-card) !important;
+    border-color: var(--hope-border) !important;
+    color: var(--hope-text-primary) !important;
+}
+
+.theme-hope input:focus,
+.theme-hope select:focus,
+.theme-hope textarea:focus {
+    border-color: var(--hope-accent) !important;
+    --tw-ring-color: var(--hope-accent) !important;
+}
+
+/* Alert cards - keep their semantic colors but softer */
+.theme-hope .bg-amber-50 { background-color: #FFFBEB !important; }
+.theme-hope .bg-red-50 { background-color: #FEF2F2 !important; }
+.theme-hope .bg-green-50 { background-color: #ECFDF5 !important; }
+
+/* Navigation active state */
+.theme-hope .border-indigo-400 {
+    border-color: var(--hope-accent) !important;
+}
+
+/* Scrollbar styling for hope theme */
+.theme-hope ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.theme-hope ::-webkit-scrollbar-track {
+    background: var(--hope-bg-secondary);
+}
+
+.theme-hope ::-webkit-scrollbar-thumb {
+    background: var(--hope-border-dark);
+    border-radius: 4px;
+}
+
+.theme-hope ::-webkit-scrollbar-thumb:hover {
+    background: var(--hope-accent);
+}

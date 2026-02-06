@@ -109,21 +109,22 @@ const chartOptions = computed(() => ({
             max: 100,
             beginAtZero: true,
             ticks: {
+                display: false,
                 stepSize: 25,
-                color: isDarkMode.value ? '#9CA3AF' : '#6B7280',
-                backdropColor: 'transparent',
-                font: { size: 10 },
-                callback: (value) => `${value}%`,
             },
             pointLabels: {
-                color: isDarkMode.value ? '#E5E7EB' : '#374151',
-                font: { size: 11 },
+                color: isDarkMode.value ? '#F9FAFB' : '#1F2937',
+                font: {
+                    size: 13,
+                    weight: '600',
+                },
+                padding: 8,
             },
             grid: {
-                color: isDarkMode.value ? '#374151' : '#E5E7EB',
+                color: isDarkMode.value ? '#4B5563' : '#E5E7EB',
             },
             angleLines: {
-                color: isDarkMode.value ? '#374151' : '#E5E7EB',
+                color: isDarkMode.value ? '#4B5563' : '#E5E7EB',
             },
         },
     },

@@ -121,10 +121,10 @@ const chartOptions = computed(() => {
                 display: true,
                 position: 'top',
                 labels: {
-                    color: isDarkMode.value ? '#E5E7EB' : '#374151',
+                    color: isDarkMode.value ? '#FFFFFF' : '#374151',
                     usePointStyle: true,
                     padding: 20,
-                    font: { size: 12 },
+                    font: { size: 12, weight: '600' },
                 },
             },
             tooltip: {
@@ -203,7 +203,7 @@ const hasData = computed(() => {
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" title="Xu hướng tiến độ theo thời gian: Overall Progress (%) và số goals hoàn thành">
                 Completion Trend
             </h3>
             <select
