@@ -69,6 +69,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Progress Logs
     Route::post('/goals/{goal}/progress-logs', [ProgressLogController::class, 'store'])->name('progress-logs.store');
+    Route::post('/goals/{goal}/progress-logs/increment', [ProgressLogController::class, 'increment'])->name('progress-logs.increment');
+    Route::post('/goals/{goal}/progress-logs/recalculate', [ProgressLogController::class, 'recalculate'])->name('progress-logs.recalculate');
     Route::put('/goals/{goal}/progress-logs/{progressLog}', [ProgressLogController::class, 'update'])->name('progress-logs.update');
     Route::delete('/goals/{goal}/progress-logs/{progressLog}', [ProgressLogController::class, 'destroy'])->name('progress-logs.destroy');
 

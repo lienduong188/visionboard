@@ -587,7 +587,7 @@ const deleteGoal = () => {
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center gap-2">
                                             <span class="text-lg font-semibold text-indigo-600 dark:text-indigo-400">
-                                                {{ formatNumber(log.value) }}
+                                                {{ formatNumber(log.new_value) }}
                                             </span>
                                             <span v-if="goal.unit" class="text-sm text-gray-500 dark:text-gray-400">
                                                 {{ goal.unit }}

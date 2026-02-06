@@ -19,6 +19,45 @@ const progressLogForm = useForm({
 
 const showAllProgressLogs = ref(false);
 
+// Quick increment
+const showQuickIncrementModal = ref(false);
+const quickIncrementNote = ref('');
+const isIncrementing = ref(false);
+
+const openQuickIncrement = () => {
+    quickIncrementNote.value = '';
+    showQuickIncrementModal.value = true;
+};
+
+const submitQuickIncrement = () => {
+    isIncrementing.value = true;
+    router.post(route('progress-logs.increment', props.goal.id), {
+        note: quickIncrementNote.value || null,
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showQuickIncrementModal.value = false;
+            quickIncrementNote.value = '';
+        },
+        onFinish: () => {
+            isIncrementing.value = false;
+        },
+    });
+};
+
+// Recalculate (count logs as current value)
+const isRecalculating = ref(false);
+const recalculate = () => {
+    if (!confirm('Recalculate progress? This will set current value = number of logs.')) return;
+    isRecalculating.value = true;
+    router.post(route('progress-logs.recalculate', props.goal.id), {}, {
+        preserveScroll: true,
+        onFinish: () => {
+            isRecalculating.value = false;
+        },
+    });
+};
+
 // Display value for formatted number input
 const displayNewValue = ref('');
 const onNewValueBlur = () => {
@@ -30,8 +69,8 @@ const openAddProgressLog = () => {
     editingProgressLog.value = null;
     progressLogForm.reset();
     progressLogForm.logged_at = new Date().toISOString().split('T')[0];
-    progressLogForm.new_value = props.goal.current_value || 0;
-    displayNewValue.value = formatForInput(props.goal.current_value || 0);
+    progressLogForm.new_value = '';
+    displayNewValue.value = '';
     showProgressLogModal.value = true;
 };
 
@@ -93,21 +132,43 @@ const formatDate = (date) => {
         <!-- Progress History -->
         <div>
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Progress History
-                    <span v-if="goal.progress_logs?.length" class="text-gray-500 dark:text-gray-400 font-normal">
-                        ({{ goal.progress_logs.length }} logs)
-                    </span>
-                </h3>
-                <button
-                    @click="openAddProgressLog"
-                    class="px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-1"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                    </svg>
-                    Add Log
-                </button>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Progress History
+                        <span v-if="goal.progress_logs?.length" class="text-gray-500 dark:text-gray-400 font-normal">
+                            ({{ goal.progress_logs.length }} logs)
+                        </span>
+                    </h3>
+                    <button
+                        v-if="goal.target_value"
+                        @click="recalculate"
+                        :disabled="isRecalculating"
+                        class="text-xs text-orange-500 hover:text-orange-600 hover:underline disabled:opacity-50"
+                        :title="goal.progress_logs?.length ? 'Đặt current value = số logs' : 'Reset current value về 0'"
+                    >
+                        {{ isRecalculating ? 'Recalculating...' : (goal.progress_logs?.length ? '🔄 Recalculate (count logs)' : '🔄 Reset to 0') }}
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <!-- Quick +1 Button -->
+                    <button
+                        v-if="goal.target_value && goal.unit"
+                        @click="openQuickIncrement"
+                        class="px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors flex items-center gap-1 font-medium"
+                        title="Quick add +1"
+                    >
+                        +1 {{ goal.unit }}
+                    </button>
+                    <button
+                        @click="openAddProgressLog"
+                        class="px-3 py-1.5 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 transition-colors flex items-center gap-1"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Add Log
+                    </button>
+                </div>
             </div>
 
             <div v-if="goal.progress_logs?.length" class="space-y-2">
@@ -250,6 +311,51 @@ const formatDate = (date) => {
                             class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50"
                         >
                             {{ editingProgressLog ? 'Update' : 'Add' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Increment Modal -->
+        <div
+            v-if="showQuickIncrementModal"
+            class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50"
+            @click.self="showQuickIncrementModal = false"
+        >
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm mx-4">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    Quick +1 {{ goal.unit }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {{ formatNumber(goal.current_value || 0) }} → {{ formatNumber((goal.current_value || 0) + 1) }} {{ goal.unit }}
+                </p>
+                <form @submit.prevent="submitQuickIncrement">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Note (optional)
+                        </label>
+                        <input
+                            v-model="quickIncrementNote"
+                            type="text"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+                            placeholder="e.g., Blog about Vue.js..."
+                        />
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button
+                            type="button"
+                            @click="showQuickIncrementModal = false"
+                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="isIncrementing"
+                            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 font-medium"
+                        >
+                            {{ isIncrementing ? 'Adding...' : '+1' }}
                         </button>
                     </div>
                 </form>

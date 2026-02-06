@@ -23,7 +23,6 @@ const form = useForm({
     cover_image: null,
     remove_cover_image: false,
     target_value: '',
-    current_value: 0,
     start_value: '',
     unit: '',
     start_date: '2026-01-01',
@@ -45,7 +44,6 @@ const syncFormWithGoal = () => {
         form.cover_image = null;
         form.remove_cover_image = false;
         form.target_value = props.goal.target_value || '';
-        form.current_value = props.goal.current_value || 0;
         form.start_value = props.goal.start_value || '';
         form.unit = props.goal.unit || '';
         form.start_date = formatDateForInput(props.goal.start_date) || '2026-01-01';
@@ -60,7 +58,6 @@ const syncFormWithGoal = () => {
         // Format display values
         displayStartValue.value = formatForInput(props.goal.start_value);
         displayTargetValue.value = formatForInput(props.goal.target_value);
-        displayCurrentValue.value = formatForInput(props.goal.current_value);
     }
 };
 
@@ -88,7 +85,6 @@ const editingChecklistTitle = ref('');
 // Display values for formatted number inputs
 const displayStartValue = ref('');
 const displayTargetValue = ref('');
-const displayCurrentValue = ref('');
 
 // Handle blur events to sync display -> form
 const onStartValueBlur = () => {
@@ -98,10 +94,6 @@ const onStartValueBlur = () => {
 const onTargetValueBlur = () => {
     form.target_value = parseFromInput(displayTargetValue.value);
     displayTargetValue.value = formatForInput(form.target_value);
-};
-const onCurrentValueBlur = () => {
-    form.current_value = parseFromInput(displayCurrentValue.value);
-    displayCurrentValue.value = formatForInput(form.current_value);
 };
 
 // Helper function to format date for input type="date" (YYYY-MM-DD)
@@ -380,19 +372,6 @@ defineExpose({
                         @blur="onTargetValueBlur"
                     />
                     <InputError :message="form.errors.target_value" class="mt-2" />
-                </div>
-                <div>
-                    <InputLabel for="modal_current_value" value="Current Value" />
-                    <TextInput
-                        id="modal_current_value"
-                        v-model="displayCurrentValue"
-                        type="text"
-                        inputmode="decimal"
-                        class="mt-1 block w-full"
-                        placeholder="VD: 25"
-                        @blur="onCurrentValueBlur"
-                    />
-                    <InputError :message="form.errors.current_value" class="mt-2" />
                 </div>
                 <div>
                     <InputLabel for="modal_unit" value="Unit" />

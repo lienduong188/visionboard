@@ -190,7 +190,6 @@ class GoalController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'remove_cover_image' => 'nullable|boolean',
             'target_value' => 'nullable|numeric',
-            'current_value' => 'nullable|numeric',
             'start_value' => 'nullable|numeric',
             'unit' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
@@ -202,10 +201,7 @@ class GoalController extends Controller
             'progress_mode' => 'nullable|in:value,milestone',
         ]);
 
-        // Default current_value: start_value if set, otherwise 0
-        if (!isset($validated['current_value']) || $validated['current_value'] === null || $validated['current_value'] === '') {
-            $validated['current_value'] = $validated['start_value'] ?? $goal->start_value ?? 0;
-        }
+        // Note: current_value is managed by progress logs, not editable in form
 
         // Check core goals limit (max 3)
         if ($request->boolean('is_core_goal') && !$goal->is_core_goal) {

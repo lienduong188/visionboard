@@ -9,6 +9,88 @@ use Illuminate\Http\Request;
 class ProgressLogController extends Controller
 {
     /**
+     * Recalculate: set current_value = number of logs (for counting goals like blogs).
+     */
+    public function recalculate(Goal $goal)
+    {
+        // Check ownership
+        if ($goal->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // Count logs as current value
+        $logCount = $goal->progressLogs()->count();
+        $newProgress = $goal->calculateProgressForValue((float) $logCount);
+
+        // Debug log
+        \Log::info("Recalculate Goal #{$goal->id}: logCount={$logCount}, newProgress={$newProgress}");
+
+        // Update goal
+        $goal->current_value = (float) $logCount;
+        $goal->progress = $newProgress;
+        $goal->save();
+
+        // Debug: confirm saved
+        $goal->refresh();
+        \Log::info("After save: current_value={$goal->current_value}, progress={$goal->progress}");
+
+        // Update all logs with correct cumulative values
+        $logs = $goal->progressLogs()->orderBy('logged_at', 'asc')->get();
+        $cumulative = 0;
+        foreach ($logs as $log) {
+            $cumulative++;
+            $log->update([
+                'previous_value' => $cumulative - 1,
+                'new_value' => $cumulative,
+                'previous_progress' => $goal->calculateProgressForValue($cumulative - 1),
+                'new_progress' => $goal->calculateProgressForValue($cumulative),
+            ]);
+        }
+
+        return back()->with('success', "Recalculated! Current value: {$logCount}");
+    }
+
+    /**
+     * Quick increment: add +1 to current value.
+     */
+    public function increment(Request $request, Goal $goal)
+    {
+        // Check ownership
+        if ($goal->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'note' => 'nullable|string|max:500',
+        ]);
+
+        // Calculate new value
+        $newValue = ($goal->current_value ?? 0) + 1;
+        $newProgress = $goal->calculateProgressForValue($newValue);
+
+        // Get previous values
+        $previousValue = $goal->current_value ?? 0;
+        $previousProgress = $goal->progress ?? 0;
+
+        // Create the log
+        $goal->progressLogs()->create([
+            'previous_value' => $previousValue,
+            'new_value' => $newValue,
+            'previous_progress' => $previousProgress,
+            'new_progress' => $newProgress,
+            'note' => $validated['note'] ?? null,
+            'logged_at' => now(),
+        ]);
+
+        // Update goal
+        $goal->current_value = $newValue;
+        $goal->progress = $newProgress;
+        $goal->save();
+
+        return back()->with('success', 'Progress +1 added!');
+    }
+
+    /**
      * Store a new progress log (with custom date).
      */
     public function store(Request $request, Goal $goal)
