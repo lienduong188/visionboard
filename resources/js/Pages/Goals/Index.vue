@@ -7,7 +7,7 @@ import GoalDetailsModal from '@/Components/GoalDetailsModal.vue';
 import ThemeWordsWaterfall from '@/Components/ThemeWordsWaterfall.vue';
 import ThemeWordsManager from '@/Components/ThemeWordsManager.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import draggable from 'vuedraggable';
 import { marked } from 'marked';
 
@@ -103,6 +103,24 @@ const onGoalSaved = () => {
 const onGoalDeleted = () => {
     router.reload({ preserveScroll: true });
 };
+
+// Auto-open edit modal if editGoal param is present in URL
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editGoalId = urlParams.get('editGoal');
+    if (editGoalId) {
+        const goalId = parseInt(editGoalId);
+        const goal = props.goals.find(g => g.id === goalId);
+        if (goal) {
+            selectedGoalId.value = goalId;
+            showEditModal.value = true;
+        }
+        // Clean up URL
+        const url = new URL(window.location);
+        url.searchParams.delete('editGoal');
+        window.history.replaceState({}, '', url);
+    }
+});
 
 // Responsive floating container size - full viewport
 const floatingWidth = ref(900);
