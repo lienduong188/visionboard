@@ -310,9 +310,11 @@ const onDrag = (event) => {
 const endDrag = () => {
     if (!draggingId.value) return;
 
+    const draggedId = draggingId.value;
+
     // Give the object velocity based on drag direction
     floatingObjects.value = floatingObjects.value.map(obj => {
-        if (obj.objectId !== draggingId.value) return obj;
+        if (obj.objectId !== draggedId) return obj;
         return {
             ...obj,
             vx: Math.max(-2, Math.min(2, dragVelocity.value.vx)),
@@ -327,14 +329,15 @@ const endDrag = () => {
     document.removeEventListener('mouseup', endDrag);
     document.removeEventListener('touchmove', onDrag);
     document.removeEventListener('touchend', endDrag);
-};
 
-const handleGoalClick = (goal) => {
-    // Only emit click if not dragged
+    // Handle tap (click without drag) - especially for touch devices
+    // where preventDefault on touchstart blocks the native click event
     if (!wasDragged.value) {
-        emit('goalClick', goal);
+        const obj = floatingObjects.value.find(o => o.objectId === draggedId);
+        if (obj && obj.type === 'goal') {
+            emit('goalClick', obj);
+        }
     }
-    // Reset flag for next interaction
     wasDragged.value = false;
 };
 
@@ -400,7 +403,6 @@ const floatingWords = computed(() => floatingObjects.value.filter(obj => obj.typ
             @touchstart="startDrag(goal.objectId, $event)"
         >
             <div
-                @click="handleGoalClick(goal)"
                 class="block cursor-pointer"
             >
                 <div
