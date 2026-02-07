@@ -255,7 +255,7 @@ class GoalController extends Controller
                 $goal->progress = 0;
             }
             $goal->save();
-        } elseif ($goal->progress_mode === 'value' && $goal->target_value && $goal->target_value > 0) {
+        } elseif ($goal->progress_mode === 'value') {
             // Tính theo current_value/target_value
             $goal->progress = $goal->calculateProgress();
             $goal->save();

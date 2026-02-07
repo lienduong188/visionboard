@@ -94,6 +94,12 @@ class Milestone extends Model
     protected function updateGoalProgress(): void
     {
         $goal = $this->goal;
+
+        // Nếu progress_mode = 'value', không cập nhật theo milestones
+        if ($goal->progress_mode === 'value') {
+            return;
+        }
+
         // Only count non-soft milestones for progress calculation
         $totalMilestones = $goal->milestones()->where('is_soft', false)->count();
 

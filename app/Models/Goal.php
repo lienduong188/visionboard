@@ -127,7 +127,7 @@ class Goal extends Model
     public function calculateProgress(): int
     {
         if (!$this->target_value || $this->target_value == 0) {
-            return $this->progress;
+            return 0;
         }
 
         // Decrease goal: progress = (start - current) / (start - target) * 100
