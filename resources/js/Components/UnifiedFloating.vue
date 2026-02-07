@@ -33,6 +33,12 @@ let animationId = null;
 // Center zone to avoid (where VISION BOARD 2026 text is)
 const centerAvoidRadius = 180;
 
+// Seeded random for deterministic positioning
+const seededRandom = (seed) => {
+    const x = Math.sin(seed * 9301 + 49297) * 233280;
+    return x - Math.floor(x);
+};
+
 // Calculate card size based on orbit_scale
 const getCardSize = (scale) => {
     const desktopSizes = [70, 100, 130, 170, 220];
@@ -58,9 +64,9 @@ const getRandomPosition = (size, index, total) => {
     const zoneWidth = (props.containerWidth - padding * 2) / cols;
     const zoneHeight = (props.containerHeight - padding * 2) / rows;
 
-    // Random position within zone
-    let x = padding + col * zoneWidth + Math.random() * zoneWidth;
-    let y = padding + row * zoneHeight + Math.random() * zoneHeight;
+    // Deterministic position within zone (seeded by index)
+    let x = padding + col * zoneWidth + seededRandom(index * 7 + 1) * zoneWidth;
+    let y = padding + row * zoneHeight + seededRandom(index * 7 + 3) * zoneHeight;
 
     // If too close to center, push outward
     const dx = x - centerX;
@@ -96,8 +102,8 @@ const initializeObjects = () => {
             objectId: `goal-${goal.id}`,
             x: pos.x,
             y: pos.y,
-            vx: (Math.random() - 0.5) * 0.8,
-            vy: (Math.random() - 0.5) * 0.8,
+            vx: (seededRandom(index * 13 + 5) - 0.5) * 0.8,
+            vy: (seededRandom(index * 13 + 7) - 0.5) * 0.8,
             size: cardSize,
         });
     });
@@ -112,8 +118,8 @@ const initializeObjects = () => {
             objectId: `word-${word.id}`,
             x: pos.x,
             y: pos.y,
-            vx: (Math.random() - 0.5) * 1.0,
-            vy: (Math.random() - 0.5) * 1.0,
+            vx: (seededRandom((props.goals.length + index) * 13 + 5) - 0.5) * 1.0,
+            vy: (seededRandom((props.goals.length + index) * 13 + 7) - 0.5) * 1.0,
             size: 60, // Word collision size
         });
     });
