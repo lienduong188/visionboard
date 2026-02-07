@@ -295,23 +295,29 @@ const matchesAllFilters = (goal) => {
     return categoryMatch && matchesTimeFilter(goal) && matchesStatusFilter(goal) && matchesPriorityFilter(goal);
 };
 
+// Status sort order for Plan view: In Progress → Not Started → Paused → Cancelled → Done
+const statusOrder = { in_progress: 0, not_started: 1, paused: 2, cancelled: 3, completed: 4 };
+const sortByStatus = (goals) => {
+    return [...goals].sort((a, b) => (statusOrder[a.status] ?? 99) - (statusOrder[b.status] ?? 99));
+};
+
 // Filter core goals based on all filters
 const filteredCoreGoals = computed(() => {
     const goals = props.coreGoals || [];
-    return goals.filter(matchesAllFilters);
+    return sortByStatus(goals.filter(matchesAllFilters));
 });
 
 // Filter regular goals based on all filters
 const filteredRegularGoals = computed(() => {
     const goals = props.regularGoals || [];
-    return goals.filter(matchesAllFilters);
+    return sortByStatus(goals.filter(matchesAllFilters));
 });
 
 // Local reactive copy of regular goals for drag & drop in Plan view
-const regularGoalsList = ref([...(props.regularGoals || [])]);
+const regularGoalsList = ref(sortByStatus(props.regularGoals || []));
 
 watch(() => props.regularGoals, (newGoals) => {
-    regularGoalsList.value = [...(newGoals || [])];
+    regularGoalsList.value = sortByStatus(newGoals || []);
 }, { deep: true });
 
 const saveOrder = () => {
