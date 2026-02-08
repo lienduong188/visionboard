@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 Install Node dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: 🏗️ Build assets
         run: npm run build
