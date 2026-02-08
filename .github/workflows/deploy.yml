@@ -27,31 +27,34 @@ jobs:
       - name: 🏗️ Build assets
         run: npm run build
 
-      - name: 🔑 Setup SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: 🚀 Deploy to Server via rsync
+      - name: 📦 Create deployment archive
         run: |
-          echo "Deploying files to server..."
-          rsync -avz --delete \
+          tar -czf deploy.tar.gz \
             --exclude='.git' \
             --exclude='node_modules' \
-            --exclude='storage/logs' \
-            --exclude='storage/framework/cache' \
-            --exclude='storage/framework/sessions' \
-            --exclude='storage/framework/views' \
+            --exclude='storage/logs/*' \
+            --exclude='storage/framework/cache/*' \
+            --exclude='storage/framework/sessions/*' \
+            --exclude='storage/framework/views/*' \
             --exclude='.env' \
             --exclude='.env.example' \
             --exclude='.env.production' \
             --exclude='tests' \
             --exclude='.github' \
             --exclude='vendor' \
-            -e "ssh -o StrictHostKeyChecking=no" \
-            ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:www/visionboard2026/
+            .
 
-      - name: ⚙️ Run deployment commands via SSH
+      - name: 🚀 Deploy to Server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "deploy.tar.gz"
+          target: "~/"
+
+      - name: ⚙️ Extract and setup on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -59,19 +62,37 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/www/visionboard2026
+            cd ~
+
+            # Backup current deployment (if exists)
+            if [ -d "www/visionboard2026" ]; then
+              echo "Backing up current deployment..."
+              cp -r www/visionboard2026 www/visionboard2026.backup
+            fi
+
+            # Extract new files
+            echo "Extracting new files..."
+            mkdir -p www/visionboard2026
+            tar -xzf deploy.tar.gz -C www/visionboard2026
+            rm deploy.tar.gz
+
+            cd www/visionboard2026
 
             # Fix permissions
+            echo "Setting permissions..."
             chmod -R 755 .
             chmod -R 775 storage bootstrap/cache
 
             # Run migrations
+            echo "Running migrations..."
             php artisan migrate --force
 
             # Create storage link if not exists
+            echo "Creating storage link..."
             php artisan storage:link
 
             # Clear and cache configs
+            echo "Caching configurations..."
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
