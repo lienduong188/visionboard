@@ -1,0 +1,93 @@
+name: Deploy to Sakura Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Cho phép trigger thủ công
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Install Node dependencies
+        run: npm ci
+
+      - name: 🏗️ Build assets
+        run: npm run build
+
+      - name: 🚀 Deploy to Server via SFTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          local-dir: ./
+          server-dir: /www/visionboard2026/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/storage/logs/**
+            **/storage/framework/cache/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
+            **/.env
+            **/.env.example
+            **/.env.production
+            **/tests/**
+            **/.github/**
+
+      - name: 🔑 Setup SSH key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: ⚙️ Run deployment commands via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~/www/visionboard2026
+
+            # Fix permissions
+            chmod -R 755 .
+            chmod -R 775 storage bootstrap/cache
+
+            # Run migrations
+            php artisan migrate --force
+
+            # Create storage link if not exists
+            php artisan storage:link
+
+            # Clear and cache configs
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+            php artisan cache:clear
+
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "✅ Deployment completed successfully!"
+
+      - name: ✅ Deployment Status
+        if: success()
+        run: echo "🎉 Deployment to https://duonglien.com/visionboard2026/ completed!"

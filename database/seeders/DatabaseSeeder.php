@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // Create default user (v!t)
         User::factory()->create([
             'name' => 'v!t',
+            'username' => 'lien-viboard',
             'email' => 'vit@example.com',
         ]);
 

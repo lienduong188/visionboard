@@ -90,6 +90,31 @@ php artisan migrate
 php artisan db:seed
 ```
 
+## Production Deployment
+
+### 🚀 GitHub Actions Auto-Deploy (Recommended)
+Automatically deploy to production on every push to `main` branch.
+
+See [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md) for setup instructions.
+
+```bash
+git push origin main
+# → Auto-build, deploy, and cache! 🎉
+```
+
+### 📦 Manual Deployment
+For manual upload via FTP/SSH, see:
+- [DEPLOYMENT.md](DEPLOYMENT.md) - Detailed deployment guide
+- [UPLOAD_GUIDE.md](UPLOAD_GUIDE.md) - FileZilla/SCP upload instructions
+
+**Live URL:** https://duonglien.com/visionboard2026/
+
+**Key Points:**
+- Configured for subfolder deployment with proper base paths
+- Session path and cookies configured for subfolder
+- Vite assets automatically use `/visionboard2026/build/` path
+- .htaccess forwards all requests to `public/` folder
+
 ## Categories
 1. Career & Finance
 2. Health & Fitness
