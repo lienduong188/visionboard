@@ -27,9 +27,17 @@ jobs:
       - name: 🏗️ Build assets
         run: npm run build
 
-      - name: 📦 Create deployment archive
+      - name: 🔑 Setup SSH key
         run: |
-          tar -czf deploy.tar.gz \
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: 🚀 Deploy files via tar+SSH pipe
+        run: |
+          echo "Creating tar and uploading to server..."
+          tar -czf - \
             --warning=no-file-changed \
             --exclude='.git' \
             --exclude='node_modules' \
@@ -43,19 +51,13 @@ jobs:
             --exclude='tests' \
             --exclude='.github' \
             --exclude='vendor' \
-            . || true
+            . | ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -p ${{ secrets.SSH_PORT }} \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+            "mkdir -p ~/www/visionboard2026 && cd ~/www/visionboard2026 && tar -xzf -"
 
-      - name: 🚀 Deploy to Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          source: "deploy.tar.gz"
-          target: "~/"
-
-      - name: ⚙️ Extract and setup on server
+      - name: ⚙️ Setup on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -63,21 +65,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~
-
-            # Backup current deployment (if exists)
-            if [ -d "www/visionboard2026" ]; then
-              echo "Backing up current deployment..."
-              cp -r www/visionboard2026 www/visionboard2026.backup
-            fi
-
-            # Extract new files
-            echo "Extracting new files..."
-            mkdir -p www/visionboard2026
-            tar -xzf deploy.tar.gz -C www/visionboard2026
-            rm deploy.tar.gz
-
-            cd www/visionboard2026
+            cd ~/www/visionboard2026
 
             # Fix permissions
             echo "Setting permissions..."
@@ -88,7 +76,7 @@ jobs:
             echo "Running migrations..."
             php artisan migrate --force
 
-            # Create storage link if not exists
+            # Create storage link
             echo "Creating storage link..."
             php artisan storage:link
 
