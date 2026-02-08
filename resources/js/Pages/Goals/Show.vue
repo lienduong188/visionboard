@@ -481,9 +481,9 @@ const formatFrequency = (reminder) => {
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
                     <!-- Cover Image -->
                     <div
-                        v-if="goal.cover_image"
+                        v-if="goal.cover_image_url"
                         class="h-64 bg-cover bg-center"
-                        :style="{ backgroundImage: `url(${goal.cover_image})` }"
+                        :style="{ backgroundImage: `url(${goal.cover_image_url})` }"
                     >
                         <div class="h-full w-full bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
                             <div>

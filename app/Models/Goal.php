@@ -48,6 +48,26 @@ class Goal extends Model
         'orbit_scale' => 'integer',
     ];
 
+    protected $appends = ['cover_image_url'];
+
+    /**
+     * Get the full URL for cover image (fix for subfolder deployment).
+     */
+    public function getCoverImageUrlAttribute(): ?string
+    {
+        if (!$this->cover_image) {
+            return null;
+        }
+
+        // If already full URL, return as is
+        if (str_starts_with($this->cover_image, 'http')) {
+            return $this->cover_image;
+        }
+
+        // Fix relative URL for production subfolder deployment
+        return config('app.url') . $this->cover_image;
+    }
+
     /**
      * Get the user that owns the goal.
      */

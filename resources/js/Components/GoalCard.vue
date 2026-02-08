@@ -72,9 +72,9 @@ const daysRemaining = computed(() => {
         >
             <!-- Cover Image -->
             <div
-                v-if="goal.cover_image"
+                v-if="goal.cover_image_url"
                 class="h-40 bg-cover bg-center"
-                :style="{ backgroundImage: `url(${goal.cover_image})` }"
+                :style="{ backgroundImage: `url(${goal.cover_image_url})` }"
             >
                 <div class="h-full w-full bg-gradient-to-t from-black/50 to-transparent"></div>
             </div>

@@ -35,7 +35,7 @@ const form = useForm({
 // Can set core goal if: already a core goal OR has less than 3 core goals
 const canSetCoreGoal = computed(() => props.goal.is_core_goal || props.coreGoalsCount < 3);
 
-const currentImage = ref(props.goal.cover_image);
+const currentImage = ref(props.goal.cover_image_url);
 const imagePreview = ref(null);
 const fileInput = ref(null);
 

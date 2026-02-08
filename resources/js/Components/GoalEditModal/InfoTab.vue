@@ -53,7 +53,7 @@ const syncFormWithGoal = () => {
         form.is_pinned = !!props.goal.is_pinned;
         form.is_core_goal = !!props.goal.is_core_goal;
         form.progress_mode = props.goal.progress_mode || 'value';
-        currentImage.value = props.goal.cover_image;
+        currentImage.value = props.goal.cover_image_url;
         imagePreview.value = null;
         // Format display values
         displayStartValue.value = formatForInput(props.goal.start_value);

@@ -109,9 +109,9 @@ const updateScale = (newScale) => {
                     :style="{ height: `${cardSize * 0.6}px` }"
                 >
                     <div
-                        v-if="goal.cover_image"
+                        v-if="goal.cover_image_url"
                         class="w-full h-full bg-cover bg-center"
-                        :style="{ backgroundImage: `url(${goal.cover_image})` }"
+                        :style="{ backgroundImage: `url(${goal.cover_image_url})` }"
                     >
                         <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
                     </div>

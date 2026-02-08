@@ -197,8 +197,8 @@ const deleteGoal = () => {
                     <!-- Cover Image / Header -->
                     <div
                         class="relative h-40 bg-cover bg-center flex-shrink-0"
-                        :style="goal.cover_image
-                            ? { backgroundImage: `url(${goal.cover_image})` }
+                        :style="goal.cover_image_url
+                            ? { backgroundImage: `url(${goal.cover_image_url})` }
                             : { backgroundColor: `${goal.category?.color}30` }"
                     >
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
