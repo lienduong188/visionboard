@@ -7,8 +7,8 @@ on:
   workflow_dispatch: # Cho phép trigger thủ công
 
 jobs:
-  deploy:
-    name: Deploy to Production
+  build:
+    name: Build Assets
     runs-on: ubuntu-latest
 
     steps:
@@ -27,37 +27,35 @@ jobs:
       - name: 🏗️ Build assets
         run: npm run build
 
-      - name: 🔑 Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      - name: 📤 Upload built assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-assets
+          path: public/build/
+          retention-days: 1
 
-      - name: 🚀 Deploy files via tar+SSH pipe
-        run: |
-          echo "Creating tar and uploading to server..."
-          tar -czf - \
-            --warning=no-file-changed \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='storage/logs/*' \
-            --exclude='storage/framework/cache/*' \
-            --exclude='storage/framework/sessions/*' \
-            --exclude='storage/framework/views/*' \
-            --exclude='.env' \
-            --exclude='.env.example' \
-            --exclude='.env.production' \
-            --exclude='tests' \
-            --exclude='.github' \
-            --exclude='vendor' \
-            . | ssh -i ~/.ssh/deploy_key \
-            -o StrictHostKeyChecking=no \
-            -p ${{ secrets.SSH_PORT }} \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
-            "mkdir -p ~/www/visionboard2026 && cd ~/www/visionboard2026 && tar -xzf -"
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
 
-      - name: ⚙️ Setup on server
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📥 Download built assets
+        uses: actions/download-artifact@v4
+        with:
+          name: built-assets
+          path: public/build/
+
+      - name: 📦 Create deployment package
+        run: |
+          mkdir -p deploy
+          cp -r app bootstrap config database public resources routes storage artisan composer.json composer.lock .htaccess deploy/
+          cd deploy && tar -czf ../deploy.tar.gz .
+
+      - name: 🚀 Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -65,22 +63,58 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/www/visionboard2026
+            echo "Preparing deployment directory..."
+            mkdir -p ~/www/visionboard2026_new
 
-            # Fix permissions
+      - name: 📤 Upload deployment package
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > deploy_key
+          chmod 600 deploy_key
+          scp -i deploy_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
+            deploy.tar.gz ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.tar.gz
+          rm deploy_key
+
+      - name: ⚙️ Extract and setup
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~
+
+            # Extract to temp directory
+            echo "Extracting files..."
+            tar -xzf deploy.tar.gz -C www/visionboard2026_new/
+            rm deploy.tar.gz
+
+            # Backup current if exists
+            if [ -d "www/visionboard2026" ]; then
+              echo "Backing up current deployment..."
+              rm -rf www/visionboard2026_backup
+              cp -r www/visionboard2026 www/visionboard2026_backup
+            fi
+
+            # Move new deployment to production
+            echo "Activating new deployment..."
+            rm -rf www/visionboard2026
+            mv www/visionboard2026_new www/visionboard2026
+
+            cd www/visionboard2026
+
+            # Set permissions
             echo "Setting permissions..."
             chmod -R 755 .
             chmod -R 775 storage bootstrap/cache
 
-            # Run migrations
+            # Run Laravel commands
             echo "Running migrations..."
             php artisan migrate --force
 
-            # Create storage link
-            echo "Creating storage link..."
+            echo "Setting up storage link..."
             php artisan storage:link
 
-            # Clear and cache configs
             echo "Caching configurations..."
             php artisan config:clear
             php artisan route:clear
