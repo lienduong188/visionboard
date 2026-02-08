@@ -27,34 +27,29 @@ jobs:
       - name: 🏗️ Build assets
         run: npm run build
 
-      - name: 🚀 Deploy to Server via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftps
-          port: 21
-          local-dir: ./
-          server-dir: /www/visionboard2026/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/storage/logs/**
-            **/storage/framework/cache/**
-            **/storage/framework/sessions/**
-            **/storage/framework/views/**
-            **/.env
-            **/.env.example
-            **/.env.production
-            **/tests/**
-            **/.github/**
-
       - name: 🔑 Setup SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: 🚀 Deploy to Server via rsync
+        run: |
+          echo "Deploying files to server..."
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='storage/logs' \
+            --exclude='storage/framework/cache' \
+            --exclude='storage/framework/sessions' \
+            --exclude='storage/framework/views' \
+            --exclude='.env' \
+            --exclude='.env.example' \
+            --exclude='.env.production' \
+            --exclude='tests' \
+            --exclude='.github' \
+            --exclude='vendor' \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:www/visionboard2026/
 
       - name: ⚙️ Run deployment commands via SSH
         uses: appleboy/ssh-action@v1.0.3
