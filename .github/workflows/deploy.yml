@@ -89,11 +89,27 @@ jobs:
             tar -xzf deploy.tar.gz -C www/visionboard2026_new/
             rm deploy.tar.gz
 
-            # Backup current if exists
+            # Preserve .env and storage from current deployment
             if [ -d "www/visionboard2026" ]; then
               echo "Backing up current deployment..."
               rm -rf www/visionboard2026_backup
               cp -r www/visionboard2026 www/visionboard2026_backup
+
+              echo "Preserving .env file..."
+              if [ -f "www/visionboard2026/.env" ]; then
+                cp www/visionboard2026/.env www/visionboard2026_new/.env
+              fi
+
+              echo "Preserving storage uploads..."
+              if [ -d "www/visionboard2026/storage/app" ]; then
+                rm -rf www/visionboard2026_new/storage/app
+                cp -r www/visionboard2026/storage/app www/visionboard2026_new/storage/app
+              fi
+
+              echo "Preserving vendor directory..."
+              if [ -d "www/visionboard2026/vendor" ]; then
+                cp -r www/visionboard2026/vendor www/visionboard2026_new/vendor
+              fi
             fi
 
             # Move new deployment to production
