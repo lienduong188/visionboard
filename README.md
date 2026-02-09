@@ -107,12 +107,11 @@ For manual upload via FTP/SSH, see:
 - [DEPLOYMENT.md](DEPLOYMENT.md) - Detailed deployment guide
 - [UPLOAD_GUIDE.md](UPLOAD_GUIDE.md) - FileZilla/SCP upload instructions
 
-**Live URL:** https://duonglien.com/visionboard2026/
+**Live URL:** https://visionboard.duonglien.com/
 
 **Key Points:**
-- Configured for subfolder deployment with proper base paths
-- Session path and cookies configured for subfolder
-- Vite assets automatically use `/visionboard2026/build/` path
+- Deployed as subdomain `visionboard.duonglien.com`
+- Session path and cookies configured for subdomain
 - .htaccess forwards all requests to `public/` folder
 
 ## Categories

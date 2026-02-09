@@ -129,4 +129,4 @@ jobs:
 
       - name: ✅ Deployment Status
         if: success()
-        run: echo "🎉 Deployment to https://duonglien.com/visionboard2026/ completed!"
+        run: echo "🎉 Deployment to https://visionboard.duonglien.com/ completed!"

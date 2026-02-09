@@ -148,7 +148,7 @@ vi .env
 **Sửa các dòng sau trong .env:**
 ```env
 APP_KEY=base64:...  # Sẽ generate ở bước sau
-APP_URL=https://duonglien.com/visionboard2026
+APP_URL=https://visionboard.duonglien.com
 
 DB_DATABASE=your_database_name
 DB_USERNAME=your_db_username
@@ -199,25 +199,16 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-### 3.10. Setup symlink cho subfolder
-```bash
-# Di chuyển đến document root (portfolio root)
-cd ~/www/
-
-# Tạo symlink
-ln -s ~/www/visionboard2026/public visionboard2026
-
-# Kiểm tra
-ls -la | grep visionboard2026
-# Phải thấy: visionboard2026 -> /home/username/www/visionboard2026/public
-```
+### 3.10. Setup web server cho subdomain
+Cần config VirtualHost cho `visionboard.duonglien.com` trỏ DocumentRoot đến `/home/username/www/visionboard2026/public`.
+Xem chi tiết trong [DEPLOYMENT.md](DEPLOYMENT.md#8--cấu-hình-web-server).
 
 ---
 
 ## Bước 4: Kiểm tra
 
 ### 4.1. Test trên browser
-Mở: https://duonglien.com/visionboard2026/
+Mở: https://visionboard.duonglien.com/
 
 ### 4.2. Nếu vẫn lỗi, check logs
 ```bash
@@ -260,8 +251,8 @@ php artisan config:cache
 ### Assets không load (404)
 ```bash
 # Kiểm tra .env
-APP_URL=https://duonglien.com/visionboard2026
-ASSET_URL=https://duonglien.com/visionboard2026
+APP_URL=https://visionboard.duonglien.com
+ASSET_URL=https://visionboard.duonglien.com
 
 # Clear cache
 php artisan config:clear && php artisan config:cache
@@ -343,4 +334,4 @@ php artisan route:cache
 
 Nếu gặp vấn đề về server configuration (Apache Alias, permissions, etc.):
 - Check Sakura control panel
-- Hoặc contact support với thông tin: Cần setup subfolder `/visionboard2026/` trỏ đến `/home/username/www/visionboard2026/public`
+- Hoặc contact support với thông tin: Cần setup subdomain `visionboard.duonglien.com` trỏ đến `/home/username/www/visionboard2026/public`

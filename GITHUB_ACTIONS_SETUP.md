@@ -172,7 +172,7 @@ php artisan route:cache
 
 # Symlink
 cd ~/www
-ln -s ~/www/visionboard2026/public visionboard2026
+# Nếu dùng subdomain, cần setup VirtualHost trỏ DocumentRoot đến ~/www/visionboard2026/public
 ```
 
 ---
@@ -197,7 +197,7 @@ git push origin main
 
 ### 5.3. Nếu thành công
 ✅ Thấy dấu tích xanh → Deploy thành công!
-🌐 Mở https://duonglien.com/visionboard2026/ để kiểm tra
+🌐 Mở https://visionboard.duonglien.com/ để kiểm tra
 
 ### 5.4. Nếu lỗi
 ❌ Thấy dấu X đỏ → Click vào xem log lỗi:
@@ -221,7 +221,7 @@ git commit -m "Your commit message"
 git push origin main
 
 # 3. GitHub Actions tự động deploy!
-# Chờ 2-3 phút, vào https://duonglien.com/visionboard2026/ để xem
+# Chờ 2-3 phút, vào https://visionboard.duonglien.com/ để xem
 ```
 
 **Không cần:**

@@ -1,6 +1,6 @@
 # 🚀 VisionBoard 2026 - Production Deployment Guide
 
-## 📋 Checklist Deploy lên Sakura Server (Subfolder)
+## 📋 Checklist Deploy lên Sakura Server (Subdomain)
 
 ### 1. ⚙️ Cấu hình .env trên Server
 
@@ -11,7 +11,7 @@ APP_NAME="VisionBoard 2026"
 APP_ENV=production
 APP_KEY=base64:YOUR_APP_KEY_HERE
 APP_DEBUG=false
-APP_URL=https://duonglien.com/visionboard2026
+APP_URL=https://visionboard.duonglien.com
 
 # Database
 DB_CONNECTION=mysql
@@ -21,10 +21,10 @@ DB_DATABASE=your_database_name
 DB_USERNAME=your_database_user
 DB_PASSWORD=your_database_password
 
-# Session (QUAN TRỌNG cho subfolder)
+# Session
 SESSION_DRIVER=database
 SESSION_LIFETIME=120
-SESSION_PATH=/visionboard2026/
+SESSION_PATH=/
 SESSION_DOMAIN=.duonglien.com
 SESSION_SECURE_COOKIE=true
 
@@ -44,8 +44,8 @@ MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS="noreply@duonglien.com"
 MAIL_FROM_NAME="${APP_NAME}"
 
-# Asset URL (QUAN TRỌNG cho subfolder)
-ASSET_URL=https://duonglien.com/visionboard2026
+# Asset URL
+ASSET_URL=https://visionboard.duonglien.com
 
 # Logging
 LOG_CHANNEL=daily
@@ -53,19 +53,16 @@ LOG_LEVEL=error
 ```
 
 **⚠️ Lưu ý quan trọng:**
-- `APP_URL` phải là full URL với subfolder
-- `SESSION_PATH` phải là `/visionboard2026/` để cookies hoạt động
+- `APP_URL` phải là full URL của subdomain
+- `SESSION_PATH=/` vì subdomain serve từ root
 - `ASSET_URL` để Laravel biết đường dẫn assets
 - `APP_DEBUG=false` trên production
 
 ### 2. 🏗️ Build Assets (chạy local trước khi upload)
 
 ```bash
-# Build với base path cho subfolder
 npm run build
 ```
-
-Vite sẽ tự động dùng base path `/visionboard2026/build/` (đã config trong vite.config.js)
 
 ### 3. 📤 Upload Files lên Server
 
@@ -143,44 +140,31 @@ File `.htaccess` ở root đã có (forward sang public/):
 
 #### B. Cấu hình VirtualHost (hoặc trong panel)
 
-**QUAN TRỌNG:** Để không ảnh hưởng portfolio, bạn cần:
+Cần tạo VirtualHost riêng cho subdomain `visionboard.duonglien.com`:
 
-1. **Document root chính** (portfolio): `/home/username/www/`
-2. **VisionBoard subfolder**: `/home/username/www/visionboard2026/public`
-
-**Option 1: Dùng Alias trong Apache config**
+**Apache config:**
 ```apache
-# Trong config của duonglien.com
 <VirtualHost *:443>
-    ServerName duonglien.com
-    DocumentRoot /home/username/www/portfolio
+    ServerName visionboard.duonglien.com
+    DocumentRoot /home/username/www/visionboard2026/public
 
-    # Portfolio giữ nguyên
-    <Directory /home/username/www/portfolio>
-        AllowOverride All
-        Require all granted
-    </Directory>
-
-    # VisionBoard subfolder
-    Alias /visionboard2026 /home/username/www/visionboard2026/public
     <Directory /home/username/www/visionboard2026/public>
         AllowOverride All
         Require all granted
         Options -MultiViews -Indexes
     </Directory>
+
+    SSLEngine on
+    SSLCertificateFile /path/to/cert.pem
+    SSLCertificateKeyFile /path/to/key.pem
 </VirtualHost>
 ```
 
-**Option 2: Symlink (dễ hơn nếu không access được config)**
-```bash
-# Từ thư mục portfolio root
-cd ~/www/portfolio  # hoặc document root chính
-ln -s ~/www/visionboard2026/public visionboard2026
-```
+**Lưu ý:** Cần setup DNS record (A hoặc CNAME) cho `visionboard.duonglien.com` trỏ về server.
 
 ### 9. ✅ Kiểm tra
 
-1. **Check trang web**: https://duonglien.com/visionboard2026/
+1. **Check trang web**: https://visionboard.duonglien.com/
 2. **Check assets load**: Mở DevTools → Network, xem các file CSS/JS có load được không
 3. **Check login**: Thử đăng nhập/đăng ký
 4. **Check portfolio**: Đảm bảo https://duonglien.com/ vẫn hoạt động bình thường
@@ -202,13 +186,13 @@ tail -f /var/log/nginx/error.log    # Nginx
 - ✗ File permissions sai (storage/ không writable)
 - ✗ Chưa chạy `php artisan storage:link`
 - ✗ Database connection sai
-- ✗ `.env` không đúng `APP_URL` hoặc `SESSION_PATH`
+- ✗ `.env` không đúng `APP_URL`
 
 #### Assets không load (404)
 ```bash
 # Check .env
-APP_URL=https://duonglien.com/visionboard2026
-ASSET_URL=https://duonglien.com/visionboard2026
+APP_URL=https://visionboard.duonglien.com
+ASSET_URL=https://visionboard.duonglien.com
 
 # Clear cache
 php artisan config:clear
@@ -218,7 +202,7 @@ php artisan config:cache
 #### Login không hoạt động (session mất)
 ```bash
 # Check .env
-SESSION_PATH=/visionboard2026/
+SESSION_PATH=/
 SESSION_DOMAIN=.duonglien.com
 
 # Clear session
