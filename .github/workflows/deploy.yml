@@ -84,12 +84,25 @@ jobs:
           script: |
             cd ~
 
+            # Verify deployment package exists
+            if [ ! -f "deploy.tar.gz" ]; then
+              echo "❌ ERROR: deploy.tar.gz not found! Aborting to prevent data loss."
+              exit 1
+            fi
+
             # Extract to temp directory
             echo "Extracting files..."
             tar -xzf deploy.tar.gz -C www/visionboard2026_new/
             rm deploy.tar.gz
 
-            # Preserve .env and storage from current deployment
+            # Verify extraction succeeded (check for artisan file)
+            if [ ! -f "www/visionboard2026_new/artisan" ]; then
+              echo "❌ ERROR: Extraction failed - artisan not found! Aborting."
+              rm -rf www/visionboard2026_new
+              exit 1
+            fi
+
+            # Preserve .env, storage and vendor from current deployment
             if [ -d "www/visionboard2026" ]; then
               echo "Backing up current deployment..."
               rm -rf www/visionboard2026_backup
@@ -119,6 +132,9 @@ jobs:
 
             cd www/visionboard2026
 
+            # Create storage/logs if missing
+            mkdir -p storage/logs
+
             # Set permissions
             echo "Setting permissions..."
             chmod -R 755 .
@@ -129,7 +145,7 @@ jobs:
             php artisan migrate --force
 
             echo "Setting up storage link..."
-            php artisan storage:link
+            php artisan storage:link 2>/dev/null || true
 
             echo "Caching configurations..."
             php artisan config:clear
