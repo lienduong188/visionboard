@@ -49,115 +49,132 @@ jobs:
           name: built-assets
           path: public/build/
 
-      - name: 📦 Create deployment package
+      - name: 📦 Create deployment package and deploy script
         run: |
           mkdir -p deploy
-          cp -r app bootstrap config database public resources routes storage artisan composer.json composer.lock .htaccess deploy/
+          cp -r app bootstrap config database public resources routes storage artisan composer.json composer.lock .htaccess index.php deploy/
           cd deploy && tar -czf ../deploy.tar.gz .
+          cd ..
 
-      - name: 🚀 Deploy to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            echo "Preparing deployment directory..."
-            mkdir -p ~/www/visionboard2026_new
+          # Create deploy script (runs with bash on server)
+          cat > deploy.sh << 'SCRIPT'
+          #!/bin/bash
+          set -e
+          cd ~
 
-      - name: 📤 Upload deployment package
+          # Verify deployment package exists
+          if [ ! -f "deploy.tar.gz" ]; then
+            echo "❌ ERROR: deploy.tar.gz not found! Aborting."
+            exit 1
+          fi
+
+          # Extract to temp directory
+          echo "Extracting files..."
+          mkdir -p www/visionboard2026_new
+          tar -xzf deploy.tar.gz -C www/visionboard2026_new/
+          rm deploy.tar.gz
+
+          # Verify extraction succeeded
+          if [ ! -f "www/visionboard2026_new/artisan" ]; then
+            echo "❌ ERROR: Extraction failed - artisan not found! Aborting."
+            rm -rf www/visionboard2026_new
+            exit 1
+          fi
+
+          # Preserve .env, storage and vendor from current deployment
+          CURRENT_DIR=""
+          if [ -d "www/visionboard2026" ] && [ -f "www/visionboard2026/artisan" ]; then
+            CURRENT_DIR="www/visionboard2026"
+          elif [ -f "www/artisan" ]; then
+            CURRENT_DIR="www"
+          fi
+
+          if [ -n "$CURRENT_DIR" ]; then
+            echo "Found current deployment at ~/$CURRENT_DIR"
+
+            if [ -f "$CURRENT_DIR/.env" ]; then
+              echo "Preserving .env file..."
+              cp "$CURRENT_DIR/.env" www/visionboard2026_new/.env
+            fi
+
+            if [ -d "$CURRENT_DIR/storage/app" ]; then
+              echo "Preserving storage uploads..."
+              rm -rf www/visionboard2026_new/storage/app
+              cp -r "$CURRENT_DIR/storage/app" www/visionboard2026_new/storage/app
+            fi
+
+            if [ -d "$CURRENT_DIR/vendor" ]; then
+              echo "Preserving vendor directory..."
+              cp -r "$CURRENT_DIR/vendor" www/visionboard2026_new/vendor
+            fi
+          else
+            echo "⚠️ No current deployment found, deploying fresh"
+          fi
+
+          # Backup current deployment if exists
+          if [ -d "www/visionboard2026" ]; then
+            echo "Backing up current deployment..."
+            rm -rf www/visionboard2026_backup
+            mv www/visionboard2026 www/visionboard2026_backup
+          fi
+
+          # Move new deployment to production
+          echo "Activating new deployment..."
+          mv www/visionboard2026_new www/visionboard2026
+
+          cd www/visionboard2026
+
+          # Create storage dirs if missing
+          mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
+
+          # Set permissions
+          echo "Setting permissions..."
+          chmod -R 755 .
+          chmod -R 775 storage bootstrap/cache
+
+          # Regenerate autoloader
+          echo "Regenerating autoloader..."
+          composer dump-autoload --optimize 2>/dev/null || true
+
+          # Run Laravel commands
+          echo "Running migrations..."
+          php artisan migrate --force
+
+          echo "Setting up storage link..."
+          php artisan storage:link 2>/dev/null || true
+
+          echo "Caching configurations..."
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+          php artisan cache:clear
+
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+          # Cleanup deploy script
+          rm -f ~/deploy.sh
+
+          echo "✅ Deployment completed successfully!"
+          SCRIPT
+
+      - name: 📤 Upload files to server
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > deploy_key
           chmod 600 deploy_key
           scp -i deploy_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
-            deploy.tar.gz ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/deploy.tar.gz
+            deploy.tar.gz deploy.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/
           rm deploy_key
 
-      - name: ⚙️ Extract and setup
+      - name: ⚙️ Run deploy script
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd ~
-
-            # Verify deployment package exists
-            if [ ! -f "deploy.tar.gz" ]; then
-              echo "❌ ERROR: deploy.tar.gz not found! Aborting to prevent data loss."
-              exit 1
-            fi
-
-            # Extract to temp directory
-            echo "Extracting files..."
-            tar -xzf deploy.tar.gz -C www/visionboard2026_new/
-            rm deploy.tar.gz
-
-            # Verify extraction succeeded (check for artisan file)
-            if [ ! -f "www/visionboard2026_new/artisan" ]; then
-              echo "❌ ERROR: Extraction failed - artisan not found! Aborting."
-              rm -rf www/visionboard2026_new
-              exit 1
-            fi
-
-            # Preserve .env, storage and vendor from current deployment
-            if [ -d "www/visionboard2026" ]; then
-              echo "Backing up current deployment..."
-              rm -rf www/visionboard2026_backup
-              cp -r www/visionboard2026 www/visionboard2026_backup
-
-              echo "Preserving .env file..."
-              if [ -f "www/visionboard2026/.env" ]; then
-                cp www/visionboard2026/.env www/visionboard2026_new/.env
-              fi
-
-              echo "Preserving storage uploads..."
-              if [ -d "www/visionboard2026/storage/app" ]; then
-                rm -rf www/visionboard2026_new/storage/app
-                cp -r www/visionboard2026/storage/app www/visionboard2026_new/storage/app
-              fi
-
-              echo "Preserving vendor directory..."
-              if [ -d "www/visionboard2026/vendor" ]; then
-                cp -r www/visionboard2026/vendor www/visionboard2026_new/vendor
-              fi
-            fi
-
-            # Move new deployment to production
-            echo "Activating new deployment..."
-            rm -rf www/visionboard2026
-            mv www/visionboard2026_new www/visionboard2026
-
-            cd www/visionboard2026
-
-            # Create storage/logs if missing
-            mkdir -p storage/logs
-
-            # Set permissions
-            echo "Setting permissions..."
-            chmod -R 755 .
-            chmod -R 775 storage bootstrap/cache
-
-            # Run Laravel commands
-            echo "Running migrations..."
-            php artisan migrate --force
-
-            echo "Setting up storage link..."
-            php artisan storage:link 2>/dev/null || true
-
-            echo "Caching configurations..."
-            php artisan config:clear
-            php artisan route:clear
-            php artisan view:clear
-            php artisan cache:clear
-
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-
-            echo "✅ Deployment completed successfully!"
+          script: bash ~/deploy.sh
 
       - name: ✅ Deployment Status
         if: success()
