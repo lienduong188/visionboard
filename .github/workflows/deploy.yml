@@ -124,6 +124,10 @@ jobs:
 
           cd www/visionboard2026
 
+          # Remove .env.production to prevent it from overriding .env
+          # Laravel auto-loads .env.{APP_ENV} which causes placeholder values to override real ones
+          rm -f .env.production
+
           # Create storage dirs if missing
           mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
 
@@ -153,6 +157,13 @@ jobs:
           php artisan route:cache
           php artisan view:cache
 
+          # Verify config cache has correct APP_KEY
+          CACHED_KEY=$(grep "'key'" bootstrap/cache/config.php 2>/dev/null | head -1)
+          if echo "$CACHED_KEY" | grep -q "YOUR_APP_KEY_HERE"; then
+            echo "❌ ERROR: Config cache has placeholder APP_KEY! Check .env file."
+            exit 1
+          fi
+
           # Cleanup deploy script
           rm -f ~/deploy.sh
 
@@ -175,6 +186,18 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: bash ~/deploy.sh
+
+      - name: 🔍 Health Check
+        if: success()
+        run: |
+          echo "Waiting 5s for server to stabilize..."
+          sleep 5
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://visionboard.duonglien.com/login)
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ Health check passed! HTTP $HTTP_STATUS"
+          else
+            echo "⚠️ Health check returned HTTP $HTTP_STATUS - site may need manual check"
+          fi
 
       - name: ✅ Deployment Status
         if: success()

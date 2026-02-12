@@ -53,7 +53,7 @@ Xem chi tiết trong [DEPLOYMENT.md](DEPLOYMENT.md) và [UPLOAD_GUIDE.md](UPLOAD
 
 **Quick checklist:**
 1. Upload code lên server tại `/home/username/www/visionboard2026/`
-2. Tạo `.env` production (copy từ `.env.production`)
+2. Tạo `.env` production (copy từ `.env.production.example`)
 3. Set permissions: `chmod -R 775 storage bootstrap/cache`
 4. Run migrations: `php artisan migrate --force`
 5. Link storage: `php artisan storage:link`

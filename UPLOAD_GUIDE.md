@@ -137,7 +137,7 @@ ls -la
 ### 3.4. Tạo file .env
 ```bash
 # Copy từ template
-cp .env.production .env
+cp .env.production.example .env
 
 # Edit file .env
 nano .env

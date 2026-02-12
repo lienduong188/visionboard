@@ -153,7 +153,7 @@ composer install --no-dev --optimize-autoloader
 cd ~/www/visionboard2026
 
 # Tạo .env
-cp .env.production .env
+cp .env.production.example .env
 nano .env  # Sửa database credentials
 
 # Generate key
