@@ -116,7 +116,7 @@ const renderMemo = (memo) => {
 
 // Tab class helper
 const tabClass = (tab) => {
-    const base = 'flex-1 px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap text-center';
+    const base = 'flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap text-center';
     if (activeTab.value === tab) {
         return `${base} border-indigo-500 text-indigo-600 dark:text-indigo-400`;
     }
@@ -184,7 +184,7 @@ const deleteGoal = () => {
         >
             <div
                 v-if="show && goal"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
             >
                 <!-- Backdrop -->
                 <div
@@ -272,18 +272,18 @@ const deleteGoal = () => {
                     </div>
 
                     <!-- Tab Navigation -->
-                    <div class="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0">
+                    <div class="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 scrollbar-hide">
                         <button @click="activeTab = 'info'" :class="tabClass('info')">
                             📋 Info
                         </button>
                         <button @click="activeTab = 'milestones'" :class="tabClass('milestones')">
-                            🎯 Milestones
+                            🎯 <span class="sm:hidden">Miles.</span><span class="hidden sm:inline">Milestones</span>
                             <span v-if="goal.milestones?.length" class="ml-1 text-xs opacity-70">
                                 ({{ completedMilestones }}/{{ totalMilestones }})
                             </span>
                         </button>
                         <button @click="activeTab = 'reminders'" :class="tabClass('reminders')">
-                            🔔 Reminders
+                            🔔 <span class="sm:hidden">Remind</span><span class="hidden sm:inline">Reminders</span>
                             <span v-if="activeRemindersCount" class="ml-1 text-xs text-green-500">
                                 ({{ activeRemindersCount }})
                             </span>
@@ -295,7 +295,7 @@ const deleteGoal = () => {
                             </span>
                         </button>
                         <button @click="activeTab = 'history'" :class="tabClass('history')">
-                            📈 History
+                            📈 <span class="sm:hidden">Hist.</span><span class="hidden sm:inline">History</span>
                         </button>
                     </div>
 
