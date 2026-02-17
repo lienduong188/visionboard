@@ -11,6 +11,7 @@ use App\Http\Controllers\ProgressLogController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReviewSettingController;
 use App\Http\Controllers\GoalReferenceController;
+use App\Http\Controllers\DailyOutputController;
 use App\Http\Controllers\ThemeWordController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +92,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Review Settings
     Route::get('/settings/reviews', [ReviewSettingController::class, 'show'])->name('settings.reviews');
     Route::put('/settings/reviews', [ReviewSettingController::class, 'update'])->name('settings.reviews.update');
+
+    // Daily Output Tracking
+    Route::get('/tracking-output', [DailyOutputController::class, 'index'])->name('tracking-output.index');
+    Route::post('/tracking-output', [DailyOutputController::class, 'store'])->name('tracking-output.store');
+    Route::put('/tracking-output/{dailyOutput}', [DailyOutputController::class, 'update'])->name('tracking-output.update');
+    Route::patch('/tracking-output/{dailyOutput}/status', [DailyOutputController::class, 'toggleStatus'])->name('tracking-output.toggle-status');
+    Route::delete('/tracking-output/{dailyOutput}', [DailyOutputController::class, 'destroy'])->name('tracking-output.destroy');
+    Route::post('/tracking-output/rest-day', [DailyOutputController::class, 'markRestDay'])->name('tracking-output.rest-day');
 
     // Theme Words
     Route::post('/theme-words', [ThemeWordController::class, 'store'])->name('theme-words.store');

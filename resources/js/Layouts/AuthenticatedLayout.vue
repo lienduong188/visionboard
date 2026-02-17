@@ -70,6 +70,12 @@ const isPlanActive = computed(() => {
                                     Plan
                                 </NavLink>
                                 <NavLink
+                                    :href="route('tracking-output.index')"
+                                    :active="route().current('tracking-output.index')"
+                                >
+                                    Output
+                                </NavLink>
+                                <NavLink
                                     :href="route('analytics.index')"
                                     :active="route().current('analytics.index')"
                                 >
@@ -206,6 +212,12 @@ const isPlanActive = computed(() => {
                             :active="isPlanActive"
                         >
                             Plan
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('tracking-output.index')"
+                            :active="route().current('tracking-output.index')"
+                        >
+                            Output
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('analytics.index')"

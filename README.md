@@ -69,6 +69,14 @@ Personal vision board web application to track 2026 goals.
 - **Export Goals:**
   - **CSV Export** - Export all goals with milestones to CSV file
   - **PDF Export** - Beautiful PDF report with stats, core goals, and other goals
+- **Daily Output Tracker** - Track daily outputs with streak system:
+  - Tracking period: 17/2/2026 → 6/2/2027 (lunar calendar cycle, ~355 days)
+  - Multiple outputs per day with categories, duration, rating, notes
+  - Link outputs to existing goals
+  - Plan ahead: schedule tomorrow's outputs, mark done/skipped later
+  - **Streak System** - "Earn Your Rest": 7 consecutive days = 1 rest day (max bank 3)
+  - **Two Views**: List view (grouped by day) + Calendar heatmap (GitHub-style)
+  - Stats: streak, rest days, completion rate, avg time/day, category distribution
 
 ## Local Development
 ```bash

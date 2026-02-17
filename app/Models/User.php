@@ -73,4 +73,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(ThemeWord::class)->orderBy('sort_order');
     }
+
+    public function dailyOutputs(): HasMany
+    {
+        return $this->hasMany(DailyOutput::class)->orderByDesc('output_date');
+    }
+
+    public function outputRestDays(): HasMany
+    {
+        return $this->hasMany(OutputRestDay::class);
+    }
 }

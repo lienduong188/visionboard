@@ -76,7 +76,7 @@ php artisan db:seed
 - `app/Http/Controllers/GoalController.php` - Goals CRUD
 - `app/Models/Goal.php` - Goal model with relationships
 - `resources/js/Pages/Goals/Index.vue` - Main vision board (VisionBoard, Plan views)
-- `resources/js/Layouts/AuthenticatedLayout.vue` - Layout với navigation (VisionBoard, Today, Plan, Analytics)
+- `resources/js/Layouts/AuthenticatedLayout.vue` - Layout với navigation (VisionBoard, Today, Plan, Output, Analytics)
 - `resources/js/Components/GoalCard.vue` - Goal card component
 - `resources/js/Components/UnifiedFloating.vue` - Unified floating animation cho cả Core Goals và Theme Words với collision detection
 - `resources/js/Components/GoalEditModal.vue` - Tabbed modal để quản lý goal (5 tabs: Info, Milestones, Reminders, References, History)
@@ -99,7 +99,7 @@ php artisan db:seed
   - **Danh mục**: Filter theo category
   - **Active Filters Summary**: Hiển thị các filter đang áp dụng với nút xóa
 - [x] **Core Goals System** - Đánh dấu tối đa 3 goals làm "trục trung tâm" (is_core_goal)
-- [x] Navigation Links - VisionBoard, Today, Plan, Analytics nằm trực tiếp trong navigation bar (không có Dashboard)
+- [x] Navigation Links - VisionBoard, Today, Plan, Output, Analytics nằm trực tiếp trong navigation bar (không có Dashboard)
 - [x] **Today View** - Xem tất cả việc cần làm hôm nay và sắp tới:
   - **Stats Cards**: Overdue, Due Today, This Week, Total
   - **3 Sections**: Overdue (quá hạn), Due Today (hôm nay), This Week (7 ngày tới)
@@ -180,6 +180,31 @@ php artisan db:seed
   - **Dark** (🌙) - Theme tối
   - **Hope** (🌿) - Theme xanh Emerald/Mint, mang ý nghĩa hy vọng
   - Theme switcher dropdown trong navbar, lưu preference vào localStorage
+- [x] **Daily Output Tracker** - Trang tracking output hàng ngày (`/tracking-output`):
+  - **Tracking Period**: 17/2/2026 → 6/2/2027 (chu kỳ âm lịch ~355 ngày)
+  - **Multiple outputs/day**: Mỗi ngày có thể ghi nhiều output
+  - **Output Categories** (hardcoded): 💻 Coding, ✍️ Writing, 🎥 Video, 📚 Study, 🏃 Training, 🎨 Creative, 💼 Career, 🧘 Wellness, 🔧 Other
+  - **Duration Presets**: 30', 60', 90', 120'
+  - **Goal Linking**: Liên kết output với goal hiện có
+  - **Rating**: Đánh giá 1-5 sao
+  - **Status**: Planned → Done / Skipped
+  - **Plan Ahead**: Lên plan cho ngày mai, đánh dấu done/skipped sau
+  - **Streak System**: "Earn Your Rest" - 7 ngày liên tiếp = 1 rest day (max bank 3)
+  - **Two Views**: List view (grouped by day) + Calendar heatmap (GitHub-style)
+  - **Stats**: Streak, rest days, completion rate, avg time/day, total outputs, category distribution
+  - **Category Filter**: Lọc outputs theo category
+
+## Key Daily Output Tracker Components
+- `app/Http/Controllers/DailyOutputController.php` - CRUD + streak + rest day
+- `app/Models/DailyOutput.php` - Output model với categories constants
+- `app/Models/OutputRestDay.php` - Rest day model
+- `app/Services/StreakCalculator.php` - Tính streak, heatmap data
+- `resources/js/Pages/TrackingOutput/Index.vue` - Trang chính
+- `resources/js/Components/TrackingOutput/OutputStatsBar.vue` - Stats cards
+- `resources/js/Components/TrackingOutput/DayOutputGroup.vue` - Card nhóm theo ngày
+- `resources/js/Components/TrackingOutput/OutputItemCard.vue` - Item card
+- `resources/js/Components/TrackingOutput/OutputFormModal.vue` - Modal add/edit
+- `resources/js/Components/TrackingOutput/CalendarHeatmap.vue` - Calendar heatmap
 
 ## Key Theme Components
 - `resources/js/Components/ThemeSwitcher.vue` - Dropdown chọn theme
@@ -280,6 +305,7 @@ php artisan db:seed
 - [x] Weekly/Monthly Review emails
 - [x] Export Goals (CSV & PDF) - Xuất danh sách goals ra file CSV hoặc PDF
 - [x] **Multi-theme System** - Hỗ trợ 3 themes: Light, Dark, Hope (Emerald/Mint)
+- [x] **Daily Output Tracker** - Tracking output hàng ngày với streak system, calendar heatmap
 - [ ] Import goals
 - [ ] Push notifications
 - [ ] Share goals publicly

@@ -132,6 +132,11 @@ class Goal extends Model
         return $this->hasMany(GoalReference::class)->orderBy('sort_order');
     }
 
+    public function dailyOutputs(): HasMany
+    {
+        return $this->hasMany(DailyOutput::class);
+    }
+
     /**
      * Check if this is a decrease goal (e.g., reduce body fat).
      */
