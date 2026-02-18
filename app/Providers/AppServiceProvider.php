@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Goal;
 use App\Policies\GoalPolicy;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force all Carbon instances to use Asia/Tokyo timezone
+        Carbon::setLocale('ja');
+        date_default_timezone_set('Asia/Tokyo');
+
         Vite::prefetch(concurrency: 3);
 
         // Force HTTPS when APP_URL uses https

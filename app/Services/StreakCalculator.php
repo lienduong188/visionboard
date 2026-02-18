@@ -24,7 +24,7 @@ class StreakCalculator
      */
     public function calculate(): array
     {
-        $today = Carbon::today()->min($this->endDate);
+        $today = Carbon::now('Asia/Tokyo')->startOfDay()->min($this->endDate);
 
         if ($today->lt($this->startDate)) {
             return [
@@ -63,7 +63,7 @@ class StreakCalculator
 
         // Only count up to yesterday for streak breaks.
         // Today is still in progress, so don't penalize missing output yet.
-        $yesterday = Carbon::today()->subDay()->min($this->endDate);
+        $yesterday = Carbon::now('Asia/Tokyo')->startOfDay()->subDay()->min($this->endDate);
         $cursor = $this->startDate->copy();
 
         while ($cursor->lte($yesterday)) {
@@ -93,7 +93,7 @@ class StreakCalculator
         }
 
         // If today has output, count it toward the streak
-        $todayStr = Carbon::today()->format('Y-m-d');
+        $todayStr = Carbon::now('Asia/Tokyo')->format('Y-m-d');
         if (isset($activeDates[$todayStr])) {
             $tempStreak++;
             $consecutiveForEarn++;

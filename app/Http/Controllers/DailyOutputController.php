@@ -15,7 +15,7 @@ class DailyOutputController extends Controller
     {
         $user = $request->user();
         $view = $request->get('view', 'list');
-        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $date = $request->get('date', Carbon::now('Asia/Tokyo')->format('Y-m-d'));
 
         // Get all outputs within tracking period
         $allOutputs = DailyOutput::with('goal:id,title,category_id', 'goal.category:id,name,icon,color')
@@ -215,8 +215,8 @@ class DailyOutputController extends Controller
             ->distinct('output_date')
             ->count('output_date');
 
-        // Rate counts up to yesterday (today is still in progress)
-        $yesterday = Carbon::yesterday()->min($endDate);
+        // Rate counts up to yesterday JST (today is still in progress)
+        $yesterday = Carbon::now('Asia/Tokyo')->startOfDay()->subDay()->min($endDate);
         $daysSinceStart = max(1, (int) $startDate->diffInDays($yesterday) + 1);
 
         $categoryDist = DailyOutput::where('user_id', $userId)
