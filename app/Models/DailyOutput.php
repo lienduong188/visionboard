@@ -36,6 +36,7 @@ class DailyOutput extends Model
         'duration',
         'note',
         'output_link',
+        'image_path',
         'rating',
         'status',
         'sort_order',

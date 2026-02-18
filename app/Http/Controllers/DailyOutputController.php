@@ -7,6 +7,7 @@ use App\Models\OutputRestDay;
 use App\Services\StreakCalculator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DailyOutputController extends Controller
@@ -72,29 +73,27 @@ class DailyOutputController extends Controller
             'duration' => 'required|integer|min:1|max:1440',
             'note' => 'nullable|string|max:1000',
             'output_link' => 'nullable|url|max:500',
+            'image' => 'nullable|image|max:5120',
             'rating' => 'nullable|integer|min:1|max:5',
             'status' => 'required|in:planned,done,skipped',
         ]);
 
-        // Clean empty strings to null
-        if (empty($validated['output_link'])) {
-            $validated['output_link'] = null;
+        if (empty($validated['output_link'])) $validated['output_link'] = null;
+        if (empty($validated['note'])) $validated['note'] = null;
+
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('daily-outputs', 'public');
         }
-        if (empty($validated['note'])) {
-            $validated['note'] = null;
-        }
+        unset($validated['image']);
 
         $validated['user_id'] = $request->user()->id;
         $validated['sort_order'] = DailyOutput::where('user_id', $request->user()->id)
             ->where('output_date', $validated['output_date'])
             ->count();
 
-        // Verify goal belongs to user
         if (isset($validated['goal_id'])) {
             $goal = $request->user()->goals()->find($validated['goal_id']);
-            if (!$goal) {
-                $validated['goal_id'] = null;
-            }
+            if (!$goal) $validated['goal_id'] = null;
         }
 
         DailyOutput::create($validated);
@@ -115,16 +114,24 @@ class DailyOutputController extends Controller
             'duration' => 'required|integer|min:1|max:1440',
             'note' => 'nullable|string|max:1000',
             'output_link' => 'nullable|url|max:500',
+            'image' => 'nullable|image|max:5120',
             'rating' => 'nullable|integer|min:1|max:5',
             'status' => 'required|in:planned,done,skipped',
         ]);
 
-        if (empty($validated['output_link'])) {
-            $validated['output_link'] = null;
+        if (empty($validated['output_link'])) $validated['output_link'] = null;
+        if (empty($validated['note'])) $validated['note'] = null;
+
+        if ($request->hasFile('image')) {
+            if ($dailyOutput->image_path) {
+                Storage::disk('public')->delete($dailyOutput->image_path);
+            }
+            $validated['image_path'] = $request->file('image')->store('daily-outputs', 'public');
+        } elseif ($request->boolean('remove_image') && $dailyOutput->image_path) {
+            Storage::disk('public')->delete($dailyOutput->image_path);
+            $validated['image_path'] = null;
         }
-        if (empty($validated['note'])) {
-            $validated['note'] = null;
-        }
+        unset($validated['image']);
 
         $dailyOutput->update($validated);
 
@@ -135,6 +142,10 @@ class DailyOutputController extends Controller
     {
         if ($dailyOutput->user_id !== $request->user()->id) {
             abort(403);
+        }
+
+        if ($dailyOutput->image_path) {
+            Storage::disk('public')->delete($dailyOutput->image_path);
         }
 
         $dailyOutput->delete();

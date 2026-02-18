@@ -86,6 +86,21 @@ const formatDuration = (minutes) => {
             🔗
         </a>
 
+        <!-- Image thumbnail -->
+        <a
+            v-if="output.image_path"
+            :href="'/storage/' + output.image_path"
+            target="_blank"
+            class="flex-shrink-0"
+            title="View image"
+        >
+            <img
+                :src="'/storage/' + output.image_path"
+                class="h-7 w-7 rounded object-cover border border-gray-200 dark:border-gray-600 hover:opacity-80 transition-opacity"
+                alt=""
+            />
+        </a>
+
         <!-- Actions (show on hover) -->
         <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
             <button

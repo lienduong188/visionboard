@@ -26,11 +26,19 @@ const form = ref({
     output_date: '',
 });
 
+const imageFile = ref(null);
+const imagePreview = ref(null);
+const removeImage = ref(false);
+
 const isEditing = computed(() => !!props.output);
 
 // Reset form when modal opens
 watch(() => props.show, (val) => {
     if (val) {
+        imageFile.value = null;
+        imagePreview.value = null;
+        removeImage.value = false;
+
         if (props.output) {
             form.value = {
                 title: props.output.title,
@@ -72,25 +80,57 @@ const setRating = (r) => {
     form.value.rating = form.value.rating === r ? null : r;
 };
 
+const onImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    imageFile.value = file;
+    removeImage.value = false;
+    const reader = new FileReader();
+    reader.onload = (ev) => { imagePreview.value = ev.target.result; };
+    reader.readAsDataURL(file);
+};
+
+const handleRemoveImage = () => {
+    imageFile.value = null;
+    imagePreview.value = null;
+    removeImage.value = true;
+};
+
+const currentImageUrl = computed(() => {
+    if (imagePreview.value) return imagePreview.value;
+    if (!removeImage.value && props.output?.image_path) {
+        return '/storage/' + props.output.image_path;
+    }
+    return null;
+});
+
 const submit = () => {
     if (!form.value.title.trim()) return;
 
-    // Clean empty strings to null
-    const data = {
-        ...form.value,
-        output_link: form.value.output_link || null,
-        note: form.value.note || null,
-        goal_id: form.value.goal_id || null,
-        rating: form.value.rating || null,
-    };
+    const data = new FormData();
+    data.append('title', form.value.title);
+    data.append('category', form.value.category);
+    data.append('duration', form.value.duration);
+    data.append('output_date', form.value.output_date);
+    data.append('status', form.value.status);
+    if (form.value.goal_id) data.append('goal_id', form.value.goal_id);
+    if (form.value.note) data.append('note', form.value.note);
+    if (form.value.output_link) data.append('output_link', form.value.output_link);
+    if (form.value.rating) data.append('rating', form.value.rating);
+    if (imageFile.value) data.append('image', imageFile.value);
+    if (removeImage.value) data.append('remove_image', '1');
 
     if (isEditing.value) {
-        router.put(route('tracking-output.update', props.output.id), data, {
+        // Inertia PUT không hỗ trợ FormData → dùng POST + _method spoofing
+        data.append('_method', 'PUT');
+        router.post(route('tracking-output.update', props.output.id), data, {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => emit('close'),
         });
     } else {
         router.post(route('tracking-output.store'), data, {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => emit('close'),
         });
@@ -287,6 +327,38 @@ const close = () => emit('close');
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                             placeholder="https://..."
                         />
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Image
+                        </label>
+
+                        <!-- Current / Preview image -->
+                        <div v-if="currentImageUrl" class="mb-2 relative inline-block">
+                            <img
+                                :src="currentImageUrl"
+                                class="h-32 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-600"
+                                alt="Output image"
+                            />
+                            <button
+                                type="button"
+                                @click="handleRemoveImage"
+                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                title="Remove image"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <input
+                            type="file"
+                            accept="image/*"
+                            @change="onImageChange"
+                            class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/30 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/50 cursor-pointer"
+                        />
+                        <p class="text-xs text-gray-400 mt-1">Max 5MB. JPG, PNG, WebP, GIF...</p>
                     </div>
 
                     <!-- Actions -->
