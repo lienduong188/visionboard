@@ -109,12 +109,44 @@ const formatDateForInput = (dateValue) => {
     return dateStr;
 };
 
-const handleImageChange = (e) => {
+const resizeImage = (file) => {
+    return new Promise((resolve) => {
+        const MAX_DIMENSION = 1920;
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            let { width, height } = img;
+            if (width <= MAX_DIMENSION && height <= MAX_DIMENSION) {
+                resolve(file);
+                return;
+            }
+            if (width > height) {
+                height = Math.round(height * MAX_DIMENSION / width);
+                width = MAX_DIMENSION;
+            } else {
+                width = Math.round(width * MAX_DIMENSION / height);
+                height = MAX_DIMENSION;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            canvas.toBlob((blob) => {
+                resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+            }, 'image/jpeg', 0.85);
+        };
+        img.src = url;
+    });
+};
+
+const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-        form.cover_image = file;
+        const resized = await resizeImage(file);
+        form.cover_image = resized;
         form.remove_cover_image = false;
-        imagePreview.value = URL.createObjectURL(file);
+        imagePreview.value = URL.createObjectURL(resized);
     }
 };
 
@@ -132,10 +164,36 @@ const submit = () => {
     if (!props.goal || processing.value) return;
 
     processing.value = true;
-    router.post(route('goals.update', props.goal.id), {
-        _method: 'put',
-        ...form.data(),
-    }, {
+
+    // Build FormData explicitly to ensure File objects are properly included
+    const data = new FormData();
+    data.append('_method', 'put');
+    data.append('category_id', form.category_id || '');
+    data.append('title', form.title || '');
+    data.append('description', form.description || '');
+    data.append('slogan', form.slogan || '');
+    if (form.cover_image instanceof File) {
+        data.append('cover_image', form.cover_image);
+    }
+    if (form.remove_cover_image) {
+        data.append('remove_cover_image', '1');
+    }
+    if (form.target_value !== '' && form.target_value !== null && form.target_value !== undefined) {
+        data.append('target_value', String(form.target_value));
+    }
+    if (form.start_value !== '' && form.start_value !== null && form.start_value !== undefined) {
+        data.append('start_value', String(form.start_value));
+    }
+    data.append('unit', form.unit || '');
+    if (form.start_date) data.append('start_date', form.start_date);
+    if (form.target_date) data.append('target_date', form.target_date);
+    data.append('priority', form.priority || 'medium');
+    data.append('status', form.status || 'not_started');
+    data.append('is_pinned', form.is_pinned ? '1' : '0');
+    data.append('is_core_goal', form.is_core_goal ? '1' : '0');
+    data.append('progress_mode', form.progress_mode || 'value');
+
+    router.post(route('goals.update', props.goal.id), data, {
         forceFormData: true,
         preserveScroll: true,
         onSuccess: () => {
