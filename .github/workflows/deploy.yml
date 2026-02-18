@@ -95,6 +95,11 @@ jobs:
             if [ -f "$CURRENT_DIR/.env" ]; then
               echo "Preserving .env file..."
               cp "$CURRENT_DIR/.env" www/visionboard2026_new/.env
+              # Ensure APP_TIMEZONE is set to Asia/Tokyo
+              grep -q "APP_TIMEZONE" www/visionboard2026_new/.env \
+                && sed -i 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Asia\/Tokyo/' www/visionboard2026_new/.env \
+                || echo "APP_TIMEZONE=Asia/Tokyo" >> www/visionboard2026_new/.env
+              echo "Ensured APP_TIMEZONE=Asia/Tokyo in .env"
             fi
 
             if [ -d "$CURRENT_DIR/storage/app" ]; then
