@@ -98,14 +98,14 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
         <!-- Empty state -->
         <div v-else class="px-4 py-6 text-center">
             <p class="text-sm text-gray-400 dark:text-gray-500">
-                {{ isRestDay ? '😴 Rest day - recharging!' : 'No outputs yet' }}
+                {{ isRestDay ? '😴 Rest day - recharging!' : 'No outputs for this day' }}
             </p>
             <button
                 v-if="!isRestDay"
                 @click="emit('add', date)"
                 class="mt-2 text-sm text-indigo-500 hover:text-indigo-700"
             >
-                + Add your first output
+                + Add output
             </button>
         </div>
     </div>
