@@ -28,7 +28,7 @@ watch(() => props.goal?.id, () => {
 
 // Tab class helper
 const tabClass = (tab) => {
-    const base = 'shrink-0 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold border-b-3 transition-colors whitespace-nowrap text-center flex items-center justify-center gap-1';
+    const base = 'shrink-0 px-4 sm:px-5 py-3 min-h-[52px] text-sm font-semibold border-b-3 transition-colors whitespace-nowrap text-center flex items-center justify-center gap-1.5';
     if (activeTab.value === tab) {
         return `${base} border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800`;
     }
@@ -202,32 +202,29 @@ const handleDeleteCancel = () => {
                             <!-- Tab Navigation -->
                             <div class="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 scrollbar-hide">
                                 <button @click="activeTab = 'info'" :class="tabClass('info')">
-                                    Info
+                                    📋 Info
                                 </button>
                                 <button @click="activeTab = 'milestones'" :class="tabClass('milestones')">
-                                    <span class="sm:hidden">Miles.</span>
-                                    <span class="hidden sm:inline">Milestones</span>
-                                    <span v-if="goal.milestones?.length" class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
+                                    🎯 Miles.
+                                    <span v-if="goal.milestones?.length" class="px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
                                         {{ goal.milestones.filter(m => m.is_completed).length }}/{{ goal.milestones.length }}
                                     </span>
                                 </button>
                                 <button @click="activeTab = 'reminders'" :class="tabClass('reminders')">
-                                    <span class="sm:hidden">Remind</span>
-                                    <span class="hidden sm:inline">Reminders</span>
-                                    <span v-if="activeRemindersCount" class="ml-1 px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full">
+                                    🔔 Remind
+                                    <span v-if="activeRemindersCount" class="px-1.5 py-0.5 text-xs bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded-full">
                                         {{ activeRemindersCount }}
                                     </span>
                                 </button>
                                 <button @click="activeTab = 'references'" :class="tabClass('references')">
-                                    Refs
-                                    <span v-if="goal.references?.length" class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
+                                    📎 Refs
+                                    <span v-if="goal.references?.length" class="px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
                                         {{ goal.references.length }}
                                     </span>
                                 </button>
                                 <button @click="activeTab = 'history'" :class="tabClass('history')">
-                                    <span class="sm:hidden">Hist.</span>
-                                    <span class="hidden sm:inline">History</span>
-                                    <span v-if="goal.progress_logs?.length" class="ml-1 px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
+                                    📈 Hist.
+                                    <span v-if="goal.progress_logs?.length" class="px-1.5 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 rounded-full">
                                         {{ goal.progress_logs.length }}
                                     </span>
                                 </button>
