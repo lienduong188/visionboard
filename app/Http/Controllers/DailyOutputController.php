@@ -219,6 +219,13 @@ class DailyOutputController extends Controller
         $yesterday = Carbon::now('Asia/Tokyo')->startOfDay()->subDay()->min($endDate);
         $daysSinceStart = max(1, (int) $startDate->diffInDays($yesterday) + 1);
 
+        // Recount activeDays up to yesterday only (consistent with daysSinceStart)
+        $activeDaysUpToYesterday = DailyOutput::where('user_id', $userId)
+            ->where('status', 'done')
+            ->whereBetween('output_date', [$startDate, $yesterday])
+            ->distinct('output_date')
+            ->count('output_date');
+
         $categoryDist = DailyOutput::where('user_id', $userId)
             ->where('status', 'done')
             ->whereBetween('output_date', [$startDate, $endDate])
@@ -231,7 +238,7 @@ class DailyOutputController extends Controller
             'total_outputs' => $totalOutputs,
             'total_duration' => (int) $totalDuration,
             'active_days' => $activeDays,
-            'completion_rate' => round(($activeDays / $daysSinceStart) * 100),
+            'completion_rate' => round(($activeDaysUpToYesterday / $daysSinceStart) * 100),
             'avg_duration_per_day' => $activeDays > 0 ? round($totalDuration / $activeDays) : 0,
             'category_distribution' => $categoryDist,
         ];

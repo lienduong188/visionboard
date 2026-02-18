@@ -4,6 +4,7 @@ import OutputStatsBar from '@/Components/TrackingOutput/OutputStatsBar.vue';
 import DayOutputGroup from '@/Components/TrackingOutput/DayOutputGroup.vue';
 import OutputFormModal from '@/Components/TrackingOutput/OutputFormModal.vue';
 import CalendarHeatmap from '@/Components/TrackingOutput/CalendarHeatmap.vue';
+import SpinWheel from '@/Components/TrackingOutput/SpinWheel.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
@@ -24,7 +25,9 @@ const viewMode = ref(props.currentView || 'list');
 const showFormModal = ref(false);
 const editingOutput = ref(null);
 const defaultDate = ref(null);
+const defaultTitle = ref(null);
 const categoryFilter = ref('all');
+const showSpinWheel = ref(false);
 
 // Get sorted dates (desc) from outputs
 const sortedDates = computed(() => {
@@ -82,10 +85,17 @@ const isRestDay = (date) => {
 };
 
 // Modal handlers
-const openAddModal = (date) => {
+const openAddModal = (date, title = null) => {
     editingOutput.value = null;
     defaultDate.value = date || today;
+    defaultTitle.value = title;
     showFormModal.value = true;
+};
+
+// Spin wheel handler
+const onWheelResult = (label) => {
+    showSpinWheel.value = false;
+    openAddModal(today, label);
 };
 
 const openEditModal = (output) => {
@@ -97,6 +107,7 @@ const openEditModal = (output) => {
 const closeModal = () => {
     showFormModal.value = false;
     editingOutput.value = null;
+    defaultTitle.value = null;
     defaultDate.value = null;
 };
 
@@ -173,12 +184,20 @@ const switchView = (view) => {
                                 </button>
                             </div>
 
+                            <!-- Spin Wheel Button -->
+                            <button
+                                @click="showSpinWheel = true"
+                                class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
+                            >
+                                🎰 Spin
+                            </button>
+
                             <!-- Add Button -->
                             <button
                                 @click="openAddModal(today)"
                                 class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
                             >
-                                + Add Output
+                                + Add
                             </button>
                         </div>
                     </div>
@@ -285,7 +304,15 @@ const switchView = (view) => {
             :goals="goals"
             :duration-presets="durationPresets"
             :default-date="defaultDate"
+            :default-title="defaultTitle"
             @close="closeModal"
+        />
+
+        <!-- Spin Wheel Modal -->
+        <SpinWheel
+            :show="showSpinWheel"
+            @close="showSpinWheel = false"
+            @result="onWheelResult"
         />
     </AuthenticatedLayout>
 </template>

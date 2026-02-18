@@ -9,6 +9,7 @@ const props = defineProps({
     goals: Array,
     durationPresets: Array,
     defaultDate: { type: String, default: null },
+    defaultTitle: { type: String, default: null },
 });
 
 const emit = defineEmits(['close']);
@@ -46,7 +47,7 @@ watch(() => props.show, (val) => {
             const now = new Date();
             const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             form.value = {
-                title: '',
+                title: props.defaultTitle || '',
                 category: 'coding',
                 goal_id: null,
                 duration: 60,
