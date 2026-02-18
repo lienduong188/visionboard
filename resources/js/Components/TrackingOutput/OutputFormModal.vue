@@ -201,7 +201,7 @@ const close = () => emit('close');
                             v-model="form.output_date"
                             type="date"
                             min="2026-02-17"
-                            max="2027-02-06"
+                            max="2027-02-05"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                         />
                     </div>

@@ -51,7 +51,7 @@ const tomorrow = getLocalDateStr(tomorrowDate);
 // Build list of dates to show (today + tomorrow + dates with outputs)
 const displayDates = computed(() => {
     const trackingStart = '2026-02-17';
-    const trackingEnd = '2027-02-06';
+    const trackingEnd = '2027-02-05';
 
     // Collect unique dates: today, tomorrow, and all dates with outputs
     const dateSet = new Set([today, tomorrow, ...sortedDates.value]);
@@ -154,7 +154,7 @@ const switchView = (view) => {
                                 Daily Output Tracker
                             </h1>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                17/2/2026 → 6/2/2027
+                                17/2/2026 → 5/2/2027
                                 <span v-if="streakData.day_number > 0">
                                     &middot; Day #{{ streakData.day_number }} / {{ streakData.total_days }}
                                 </span>

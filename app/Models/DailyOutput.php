@@ -25,7 +25,7 @@ class DailyOutput extends Model
     const DURATION_PRESETS = [30, 60, 90, 120];
 
     const TRACKING_START = '2026-02-17';
-    const TRACKING_END = '2027-02-06';
+    const TRACKING_END = '2027-02-05';
 
     protected $fillable = [
         'user_id',

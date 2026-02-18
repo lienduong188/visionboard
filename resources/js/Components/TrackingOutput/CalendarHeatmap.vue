@@ -219,7 +219,7 @@ const isToday = (day) => day && day.date === today;
                         v-for="(month, idx) in gridData.months"
                         :key="idx"
                         class="text-[10px] text-gray-500 dark:text-gray-400 overflow-hidden whitespace-nowrap select-none pl-1"
-                        :class="idx > 0 ? 'border-l border-gray-300 dark:border-gray-600' : ''"
+                        :class="idx > 0 ? 'border-l-2 border-gray-400 dark:border-gray-500' : ''"
                         :style="{ flex: month.spanWeeks }"
                     >{{ month.name }}</div>
                 </div>
@@ -230,7 +230,7 @@ const isToday = (day) => day && day.date === today;
                         v-for="(week, wIdx) in gridData.weeks"
                         :key="wIdx"
                         class="flex flex-col flex-1"
-                        :class="gridData.monthStartWeeks.has(wIdx) ? 'border-l border-gray-300 dark:border-gray-600' : ''"
+                        :class="gridData.monthStartWeeks.has(wIdx) ? 'border-l-2 border-gray-400 dark:border-gray-500' : ''"
                         style="gap: 3px; min-width: 6px;"
                     >
                         <div
