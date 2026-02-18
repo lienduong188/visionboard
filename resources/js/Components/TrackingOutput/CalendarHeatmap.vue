@@ -61,7 +61,10 @@ const gridData = computed(() => {
         spanWeeks: (i + 1 < months.length ? months[i + 1].weekIndex : weeks.length) - m.weekIndex,
     }));
 
-    return { weeks, months: monthsWithSpan };
+    // Set of weekIndices that start a new month (for border rendering)
+    const monthStartWeeks = new Set(monthsWithSpan.slice(1).map(m => m.weekIndex));
+
+    return { weeks, months: monthsWithSpan, monthStartWeeks };
 });
 
 const now = new Date();
@@ -110,7 +113,8 @@ const isToday = (day) => day && day.date === today;
                     <div
                         v-for="(month, idx) in gridData.months"
                         :key="idx"
-                        class="text-[10px] text-gray-500 dark:text-gray-400 overflow-hidden whitespace-nowrap select-none"
+                        class="text-[10px] text-gray-500 dark:text-gray-400 overflow-hidden whitespace-nowrap select-none pl-1"
+                        :class="idx > 0 ? 'border-l border-gray-300 dark:border-gray-600' : ''"
                         :style="{ flex: month.spanWeeks }"
                     >{{ month.name }}</div>
                 </div>
@@ -121,6 +125,7 @@ const isToday = (day) => day && day.date === today;
                         v-for="(week, wIdx) in gridData.weeks"
                         :key="wIdx"
                         class="flex flex-col flex-1"
+                        :class="gridData.monthStartWeeks.has(wIdx) ? 'border-l border-gray-300 dark:border-gray-600' : ''"
                         style="gap: 3px; min-width: 6px;"
                     >
                         <div
