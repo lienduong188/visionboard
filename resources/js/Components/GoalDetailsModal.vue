@@ -116,7 +116,7 @@ const renderMemo = (memo) => {
 
 // Tab class helper
 const tabClass = (tab) => {
-    const base = 'flex-1 min-w-0 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap text-center';
+    const base = 'shrink-0 px-4 sm:px-5 py-3 min-h-[52px] text-sm font-semibold border-b-2 transition-colors whitespace-nowrap text-center flex items-center justify-center gap-1';
     if (activeTab.value === tab) {
         return `${base} border-indigo-500 text-indigo-600 dark:text-indigo-400`;
     }

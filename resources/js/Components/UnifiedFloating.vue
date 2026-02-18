@@ -84,7 +84,7 @@ const initializeObjects = () => {
     const totalCount = props.goals.length + props.words.length;
 
     // Add goals (place in outer areas) - fixed size for all core goals
-    const goalSize = props.isMobile ? 105 : 190;
+    const goalSize = props.isMobile ? 125 : 240;
     props.goals.forEach((goal, index) => {
         const cardSize = goalSize;
         const pos = getRandomPosition(cardSize, index, totalCount);
