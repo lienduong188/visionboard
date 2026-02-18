@@ -39,14 +39,6 @@ const seededRandom = (seed) => {
     return x - Math.floor(x);
 };
 
-// Calculate card size based on orbit_scale
-const getCardSize = (scale) => {
-    const desktopSizes = [70, 100, 130, 170, 220];
-    const mobileSizes = [45, 55, 65, 80, 95];
-    const sizes = props.isMobile ? mobileSizes : desktopSizes;
-    return sizes[(scale || 3) - 1] || (props.isMobile ? 65 : 130);
-};
-
 // Get random position avoiding center
 const getRandomPosition = (size, index, total) => {
     const padding = size / 2 + 30;
@@ -91,9 +83,10 @@ const initializeObjects = () => {
     const allObjects = [];
     const totalCount = props.goals.length + props.words.length;
 
-    // Add goals (place in outer areas)
+    // Add goals (place in outer areas) - fixed size for all core goals
+    const goalSize = props.isMobile ? 80 : 160;
     props.goals.forEach((goal, index) => {
-        const cardSize = getCardSize(goal.orbit_scale);
+        const cardSize = goalSize;
         const pos = getRandomPosition(cardSize, index, totalCount);
 
         allObjects.push({

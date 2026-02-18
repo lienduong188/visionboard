@@ -28,7 +28,7 @@ watch(() => props.goal?.id, () => {
 
 // Tab class helper
 const tabClass = (tab) => {
-    const base = 'flex-1 min-w-0 px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-semibold border-b-3 transition-colors whitespace-nowrap text-center flex items-center justify-center gap-1';
+    const base = 'shrink-0 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-semibold border-b-3 transition-colors whitespace-nowrap text-center flex items-center justify-center gap-1';
     if (activeTab.value === tab) {
         return `${base} border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800`;
     }
@@ -50,9 +50,13 @@ const progressColor = computed(() => {
     return 'bg-red-500';
 });
 
-// Close modal with confirmation
+// Close modal - only confirm if InfoTab has unsaved changes
 const close = () => {
-    showExitConfirm.value = true;
+    if (infoTabRef.value?.isDirty) {
+        showExitConfirm.value = true;
+    } else {
+        confirmClose();
+    }
 };
 
 // Actually close the modal

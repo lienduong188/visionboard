@@ -288,6 +288,29 @@ const deleteChecklist = (checklist) => {
     });
 };
 
+// Detect if form has unsaved changes vs saved goal data
+const isDirty = computed(() => {
+    if (!props.goal) return false;
+    return (
+        form.category_id != props.goal.category_id ||
+        form.title !== (props.goal.title || '') ||
+        form.description !== (props.goal.description || '') ||
+        form.slogan !== (props.goal.slogan || '') ||
+        form.cover_image !== null ||
+        form.remove_cover_image ||
+        String(form.target_value) !== String(props.goal.target_value || '') ||
+        String(form.start_value) !== String(props.goal.start_value || '') ||
+        form.unit !== (props.goal.unit || '') ||
+        form.start_date !== (formatDateForInput(props.goal.start_date) || '2026-01-01') ||
+        form.target_date !== (formatDateForInput(props.goal.target_date) || '2026-12-31') ||
+        form.priority !== props.goal.priority ||
+        form.status !== props.goal.status ||
+        !!form.is_pinned !== !!props.goal.is_pinned ||
+        !!form.is_core_goal !== !!props.goal.is_core_goal ||
+        form.progress_mode !== (props.goal.progress_mode || 'value')
+    );
+});
+
 // Expose for parent
 defineExpose({
     submit,
@@ -296,6 +319,7 @@ defineExpose({
     confirmDelete,
     deleteGoal,
     cancelDelete,
+    isDirty,
 });
 </script>
 
