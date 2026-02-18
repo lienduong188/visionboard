@@ -8,16 +8,16 @@ const props = defineProps({
 
 const emit = defineEmits(['select-date']);
 
-// Build grid data: weeks as columns, days as rows (Mon-Sun)
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 const gridData = computed(() => {
     if (!props.heatmap || props.heatmap.length === 0) return { weeks: [], months: [] };
 
     const weeks = [];
-    const months = [];
     let currentWeek = [];
-    let lastMonth = -1;
 
-    // Pad first week with empty cells
+    // Pad first week with null cells to align to Monday
     const firstDate = new Date(props.heatmap[0].date + 'T00:00:00');
     const firstDow = (firstDate.getDay() + 6) % 7; // Mon=0, Sun=6
     for (let i = 0; i < firstDow; i++) {
@@ -26,29 +26,42 @@ const gridData = computed(() => {
 
     props.heatmap.forEach((day) => {
         const d = new Date(day.date + 'T00:00:00');
-        const dow = (d.getDay() + 6) % 7; // Mon=0
-        const month = d.getMonth();
-
-        // Track month labels
-        if (month !== lastMonth) {
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            months.push({ name: monthNames[month], weekIndex: weeks.length });
-            lastMonth = month;
-        }
+        const dow = (d.getDay() + 6) % 7;
 
         if (dow === 0 && currentWeek.length > 0) {
-            weeks.push(currentWeek);
+            weeks.push([...currentWeek]);
             currentWeek = [];
         }
-
         currentWeek.push(day);
     });
 
     if (currentWeek.length > 0) {
+        // Pad last week to 7 days
+        while (currentWeek.length < 7) currentWeek.push(null);
         weeks.push(currentWeek);
     }
 
-    return { weeks, months };
+    // Build month labels based on actual week positions
+    const months = [];
+    let lastMonth = -1;
+    weeks.forEach((week, weekIdx) => {
+        const firstDay = week.find(d => d !== null);
+        if (firstDay) {
+            const month = new Date(firstDay.date + 'T00:00:00').getMonth();
+            if (month !== lastMonth) {
+                months.push({ name: MONTH_NAMES[month], weekIndex: weekIdx });
+                lastMonth = month;
+            }
+        }
+    });
+
+    // Add spanWeeks for proportional flex layout
+    const monthsWithSpan = months.map((m, i) => ({
+        ...m,
+        spanWeeks: (i + 1 < months.length ? months[i + 1].weekIndex : weeks.length) - m.weekIndex,
+    }));
+
+    return { weeks, months: monthsWithSpan };
 });
 
 const now = new Date();
@@ -79,47 +92,46 @@ const isToday = (day) => day && day.date === today;
 
 <template>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
-        <div class="overflow-x-auto">
-            <!-- Month labels -->
-            <div class="flex mb-1 ml-8" style="gap: 0;">
+        <div class="flex w-full min-w-0">
+            <!-- Weekday labels column -->
+            <div class="flex flex-col shrink-0 pt-6 mr-2" style="gap: 3px; width: 22px;">
                 <div
-                    v-for="(month, idx) in gridData.months"
-                    :key="idx"
-                    class="text-xs text-gray-500 dark:text-gray-400"
-                    :style="{ position: 'absolute', left: (month.weekIndex * 17 + 32) + 'px' }"
-                >
-                    {{ month.name }}
-                </div>
+                    v-for="label in DAY_LABELS"
+                    :key="label"
+                    class="text-[9px] text-gray-400 dark:text-gray-500 text-right leading-none select-none"
+                    style="height: 12px; line-height: 12px;"
+                >{{ label }}</div>
             </div>
 
-            <div class="relative mt-5">
-                <!-- Weekday labels -->
-                <div class="absolute left-0 top-0 flex flex-col" style="gap: 3px;">
-                    <div class="h-[14px] w-7 text-[10px] text-gray-400 dark:text-gray-500 leading-[14px]">Mon</div>
-                    <div class="h-[14px] w-7"></div>
-                    <div class="h-[14px] w-7 text-[10px] text-gray-400 dark:text-gray-500 leading-[14px]">Wed</div>
-                    <div class="h-[14px] w-7"></div>
-                    <div class="h-[14px] w-7 text-[10px] text-gray-400 dark:text-gray-500 leading-[14px]">Fri</div>
-                    <div class="h-[14px] w-7"></div>
-                    <div class="h-[14px] w-7 text-[10px] text-gray-400 dark:text-gray-500 leading-[14px]">Sun</div>
+            <!-- Grid area: month labels + week columns -->
+            <div class="flex-1 min-w-0">
+                <!-- Month labels: proportional flex matching week columns -->
+                <div class="flex" style="height: 20px; margin-bottom: 2px;">
+                    <div
+                        v-for="(month, idx) in gridData.months"
+                        :key="idx"
+                        class="text-[10px] text-gray-500 dark:text-gray-400 overflow-hidden whitespace-nowrap select-none"
+                        :style="{ flex: month.spanWeeks }"
+                    >{{ month.name }}</div>
                 </div>
 
-                <!-- Grid -->
-                <div class="ml-8 flex" style="gap: 3px;">
+                <!-- Week columns: flex-1 fills full width -->
+                <div class="flex" style="gap: 3px;">
                     <div
                         v-for="(week, wIdx) in gridData.weeks"
                         :key="wIdx"
-                        class="flex flex-col"
-                        style="gap: 3px;"
+                        class="flex flex-col flex-1"
+                        style="gap: 3px; min-width: 6px;"
                     >
                         <div
                             v-for="(day, dIdx) in week"
                             :key="dIdx"
-                            class="w-[14px] h-[14px] rounded-sm cursor-pointer transition-all hover:ring-2 hover:ring-indigo-400"
+                            class="w-full rounded-sm cursor-pointer transition-all hover:ring-1 hover:ring-indigo-400"
                             :class="[
                                 getCellClass(day),
                                 isToday(day) ? 'ring-2 ring-indigo-500' : '',
                             ]"
+                            style="aspect-ratio: 1;"
                             :title="getTooltip(day)"
                             @click="day && emit('select-date', day.date)"
                         />
