@@ -200,7 +200,7 @@ const handleDeleteCancel = () => {
                             </div>
 
                             <!-- Tab Navigation -->
-                            <div class="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 scrollbar-hide">
+                            <div class="flex shrink-0 overflow-x-auto border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 scrollbar-hide">
                                 <button @click="activeTab = 'info'" :class="tabClass('info')">
                                     📋 Info
                                 </button>
