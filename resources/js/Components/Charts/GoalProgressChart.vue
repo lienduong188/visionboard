@@ -39,29 +39,31 @@ const chartData = computed(() => {
         };
     }
 
-    // Sort logs by new_progress ascending (primary) then logged_at ascending (secondary)
-    // This ensures chart always shows a non-decreasing progress line,
-    // regardless of the order logs were entered by the user
+    // Sort logs by logged_at ascending (chronological x-axis)
     const sortedLogs = [...props.progressLogs].sort(
-        (a, b) => a.new_progress - b.new_progress || new Date(a.logged_at) - new Date(b.logged_at)
+        (a, b) => new Date(a.logged_at) - new Date(b.logged_at)
     );
 
     // Add starting point if goal has start_date
     if (props.goal?.start_date) {
         const startDate = new Date(props.goal.start_date);
         const firstLogDate = new Date(sortedLogs[0].logged_at);
-
-        // Only add start point if it's before the first log
         if (startDate < firstLogDate) {
             labels.push(formatDate(startDate));
             data.push(0);
         }
     }
 
-    // Add log points
-    sortedLogs.forEach(log => {
+    // Assign rank-based progress to ensure monotonically increasing line.
+    // Each log represents one achievement in chronological order,
+    // so the K-th log (sorted by date) = K/N * current_progress.
+    // This handles backdated entries correctly (logged_at != entry time).
+    const n = sortedLogs.length;
+    const finalProgress = props.goal.progress || 0;
+
+    sortedLogs.forEach((log, index) => {
         labels.push(formatDate(log.logged_at));
-        data.push(log.new_progress);
+        data.push(Math.round(((index + 1) / n) * finalProgress * 10) / 10);
     });
 
     // Add current point if different from last log date
