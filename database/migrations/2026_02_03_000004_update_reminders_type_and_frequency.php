@@ -12,15 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Update type enum to reminder purpose (progress, deadline, custom)
-        DB::statement("ALTER TABLE reminders MODIFY COLUMN type ENUM('progress', 'deadline', 'custom') DEFAULT 'progress'");
+        // MODIFY COLUMN is MySQL-only syntax; SQLite uses TEXT for string/enum columns anyway
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE reminders MODIFY COLUMN type ENUM('progress', 'deadline', 'custom') DEFAULT 'progress'");
+        }
 
-        // Add new columns for better frequency handling (like Google Calendar)
+        // Add new columns (guard against re-running on partially migrated DB)
         Schema::table('reminders', function (Blueprint $table) {
-            // For weekly: which days (1=Mon, 7=Sun), e.g., "1,3,5" for Mon/Wed/Fri
-            $table->string('weekly_days', 20)->nullable()->after('frequency');
-            // For monthly: which day of month (1-31), e.g., "1" for 1st, "15" for 15th
-            $table->tinyInteger('monthly_day')->nullable()->after('weekly_days');
+            if (!Schema::hasColumn('reminders', 'weekly_days')) {
+                $table->string('weekly_days', 20)->nullable()->after('frequency');
+            }
+            if (!Schema::hasColumn('reminders', 'monthly_day')) {
+                $table->tinyInteger('monthly_day')->nullable()->after('weekly_days');
+            }
         });
     }
 
@@ -29,10 +33,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE reminders MODIFY COLUMN type ENUM('email', 'push', 'both') DEFAULT 'both'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE reminders MODIFY COLUMN type ENUM('email', 'push', 'both') DEFAULT 'both'");
+        }
 
         Schema::table('reminders', function (Blueprint $table) {
-            $table->dropColumn(['weekly_days', 'monthly_day']);
+            $cols = array_filter(['weekly_days', 'monthly_day'], fn($col) => Schema::hasColumn('reminders', $col));
+            if ($cols) {
+                $table->dropColumn(array_values($cols));
+            }
         });
     }
 };
