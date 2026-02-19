@@ -202,38 +202,38 @@ const isToday = (day) => day && day.date === today;
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 sm:p-6">
         <!-- overflow-x-auto để scroll ngang trên mobile, min-w đảm bảo cell đủ lớn -->
         <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <div class="flex min-w-[780px]">
+            <div class="flex min-w-[1100px]">
                 <!-- Weekday labels column -->
-                <div class="flex flex-col shrink-0 pt-6 mr-2" style="gap: 3px; width: 26px;">
+                <div class="flex flex-col shrink-0 pt-7 mr-2" style="gap: 4px; width: 30px;">
                     <div
                         v-for="label in DAY_LABELS"
                         :key="label"
-                        class="text-[10px] text-gray-400 dark:text-gray-500 text-right leading-none select-none"
-                        style="height: 13px; line-height: 13px;"
+                        class="text-[11px] text-gray-400 dark:text-gray-500 text-right leading-none select-none"
+                        style="height: 17px; line-height: 17px;"
                     >{{ label }}</div>
                 </div>
 
                 <!-- Grid area: month labels + week columns -->
                 <div class="flex-1 min-w-0">
                     <!-- Month labels: proportional flex matching week columns -->
-                    <div class="flex" style="height: 20px; margin-bottom: 2px;">
+                    <div class="flex" style="height: 22px; margin-bottom: 3px;">
                         <div
                             v-for="(month, idx) in gridData.months"
                             :key="idx"
-                            class="text-[11px] text-gray-500 dark:text-gray-400 overflow-hidden whitespace-nowrap select-none pl-1"
+                            class="text-xs text-gray-500 dark:text-gray-400 overflow-hidden whitespace-nowrap select-none pl-1"
                             :class="idx > 0 ? 'border-l-2 border-gray-400 dark:border-gray-500' : ''"
                             :style="{ flex: month.spanWeeks }"
                         >{{ month.name }}</div>
                     </div>
 
                     <!-- Week columns: flex-1 fills full width -->
-                    <div class="flex" style="gap: 3px;">
+                    <div class="flex" style="gap: 4px;">
                         <div
                             v-for="(week, wIdx) in gridData.weeks"
                             :key="wIdx"
                             class="flex flex-col flex-1"
                             :class="gridData.monthStartWeeks.has(wIdx) ? 'border-l-2 border-gray-400 dark:border-gray-500' : ''"
-                            style="gap: 3px; min-width: 8px;"
+                            style="gap: 4px; min-width: 10px;"
                         >
                             <div
                                 v-for="(day, dIdx) in week"
