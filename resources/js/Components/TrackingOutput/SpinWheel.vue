@@ -336,7 +336,7 @@ onMounted(() => {
                             class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                             :class="{ 'animate-pulse': isSpinning }"
                         >
-                            {{ isSpinning ? 'Đang quay...' : (result ? 'Quay lại' : 'QUAY!') }}
+                            {{ isSpinning ? 'Đang về bờ...' : (result ? 'Về bờ nữa!!' : 'Về bờ!!') }}
                         </button>
                         <button
                             v-if="result && !isSpinning"
