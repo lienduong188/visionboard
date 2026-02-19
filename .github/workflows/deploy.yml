@@ -118,6 +118,12 @@ jobs:
               rm -rf www/visionboard2026_new/storage/app
               cp -r "$CURRENT_DIR/storage/app" www/visionboard2026_new/storage/app
             fi
+
+            # Preserve SQLite database (critical - do not wipe user data!)
+            if [ -f "$CURRENT_DIR/database/database.sqlite" ]; then
+              echo "Preserving SQLite database..."
+              cp "$CURRENT_DIR/database/database.sqlite" www/visionboard2026_new/database/database.sqlite
+            fi
           else
             echo "⚠️ No current deployment found, deploying fresh"
           fi
