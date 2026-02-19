@@ -15,6 +15,16 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo, pdo_mysql, pdo_sqlite
+          tools: composer:v2
+
+      - name: 📦 Install PHP dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
+
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -27,11 +37,13 @@ jobs:
       - name: 🏗️ Build assets
         run: npm run build
 
-      - name: 📤 Upload built assets
+      - name: 📤 Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: built-assets
-          path: public/build/
+          path: |
+            public/build/
+            vendor/
           retention-days: 1
 
   deploy:
@@ -43,16 +55,15 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 📥 Download built assets
+      - name: 📥 Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: built-assets
-          path: public/build/
 
       - name: 📦 Create deployment package and deploy script
         run: |
           mkdir -p deploy
-          cp -r app bootstrap config database public resources routes storage artisan composer.json composer.lock .htaccess index.php deploy/
+          cp -r app bootstrap config database public resources routes storage vendor artisan composer.json composer.lock .htaccess index.php deploy/
           cd deploy && tar -czf ../deploy.tar.gz .
           cd ..
 
@@ -81,7 +92,7 @@ jobs:
             exit 1
           fi
 
-          # Preserve .env, storage and vendor from current deployment
+          # Preserve .env and storage from current deployment (vendor comes fresh from CI)
           CURRENT_DIR=""
           if [ -d "www/visionboard2026" ] && [ -f "www/visionboard2026/artisan" ]; then
             CURRENT_DIR="www/visionboard2026"
@@ -107,11 +118,6 @@ jobs:
               rm -rf www/visionboard2026_new/storage/app
               cp -r "$CURRENT_DIR/storage/app" www/visionboard2026_new/storage/app
             fi
-
-            if [ -d "$CURRENT_DIR/vendor" ]; then
-              echo "Preserving vendor directory..."
-              cp -r "$CURRENT_DIR/vendor" www/visionboard2026_new/vendor
-            fi
           else
             echo "⚠️ No current deployment found, deploying fresh"
           fi
@@ -130,7 +136,6 @@ jobs:
           cd www/visionboard2026
 
           # Remove .env.production to prevent it from overriding .env
-          # Laravel auto-loads .env.{APP_ENV} which causes placeholder values to override real ones
           rm -f .env.production
 
           # Create storage dirs if missing
@@ -140,10 +145,6 @@ jobs:
           echo "Setting permissions..."
           chmod -R 755 .
           chmod -R 775 storage bootstrap/cache
-
-          # Regenerate autoloader
-          echo "Regenerating autoloader..."
-          composer dump-autoload --optimize 2>/dev/null || true
 
           # Run Laravel commands
           echo "Running migrations..."
