@@ -39,9 +39,11 @@ const chartData = computed(() => {
         };
     }
 
-    // Sort logs by date ascending
+    // Sort logs by new_progress ascending (primary) then logged_at ascending (secondary)
+    // This ensures chart always shows a non-decreasing progress line,
+    // regardless of the order logs were entered by the user
     const sortedLogs = [...props.progressLogs].sort(
-        (a, b) => new Date(a.logged_at) - new Date(b.logged_at)
+        (a, b) => a.new_progress - b.new_progress || new Date(a.logged_at) - new Date(b.logged_at)
     );
 
     // Add starting point if goal has start_date
