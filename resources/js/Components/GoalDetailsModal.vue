@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { formatNumber } from '@/utils/formatNumber';
 import { marked } from 'marked';
+import GoalProgressChart from '@/Components/Charts/GoalProgressChart.vue';
 
 // Markdown config
 marked.setOptions({ breaks: true, gfm: true });
@@ -578,9 +579,18 @@ const deleteGoal = () => {
 
                         <!-- HISTORY TAB -->
                         <div v-show="activeTab === 'history'">
+                            <!-- Progress Chart -->
+                            <div class="mb-4">
+                                <GoalProgressChart
+                                    :goal="goal"
+                                    :progress-logs="goal.progress_logs || []"
+                                />
+                            </div>
+
+                            <!-- Logs list -->
                             <div v-if="goal.progress_logs?.length" class="space-y-2">
                                 <div
-                                    v-for="log in goal.progress_logs.slice().reverse().slice(0, 20)"
+                                    v-for="log in goal.progress_logs.slice().sort((a,b) => new Date(b.logged_at||b.created_at) - new Date(a.logged_at||a.created_at)).slice(0, 20)"
                                     :key="log.id"
                                     class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3"
                                 >
