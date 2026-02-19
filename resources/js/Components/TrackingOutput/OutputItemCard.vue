@@ -35,7 +35,7 @@ const formatDuration = (minutes) => {
 
 <template>
     <div
-        class="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 group transition-colors"
+        class="flex items-start gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 group transition-colors"
         :class="{
             'opacity-50': output.status === 'skipped',
         }"
@@ -43,80 +43,84 @@ const formatDuration = (minutes) => {
         <!-- Status toggle -->
         <button
             @click="toggleStatus"
-            class="text-lg flex-shrink-0 hover:scale-110 transition-transform"
+            class="text-lg flex-shrink-0 hover:scale-110 transition-transform mt-0.5"
             :title="output.status === 'done' ? 'Mark as planned' : 'Mark as done'"
         >
             {{ statusIcon[output.status] || '⬜' }}
         </button>
 
         <!-- Category badge -->
-        <span class="text-sm flex-shrink-0" :title="category.label">
+        <span class="text-sm flex-shrink-0 mt-0.5" :title="category.label">
             {{ category.icon }}
         </span>
 
-        <!-- Title + Goal link -->
+        <!-- Right: Title + meta row -->
         <div class="flex-1 min-w-0">
+            <!-- Title -->
             <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
                 :class="{ 'line-through': output.status === 'skipped' }">
                 {{ output.title }}
             </div>
+            <!-- Goal link -->
             <div v-if="output.goal" class="text-xs text-gray-500 dark:text-gray-400 truncate">
                 → {{ output.goal.title }}
             </div>
-        </div>
 
-        <!-- Duration -->
-        <span class="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 font-mono">
-            {{ formatDuration(output.duration) }}
-        </span>
+            <!-- Meta row: duration, rating, link, image, actions -->
+            <div class="flex items-center gap-2 mt-1 flex-wrap">
+                <!-- Duration -->
+                <span class="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                    {{ formatDuration(output.duration) }}
+                </span>
 
-        <!-- Rating -->
-        <div v-if="output.rating" class="flex-shrink-0 text-xs text-yellow-500">
-            {{ '⭐'.repeat(output.rating) }}
-        </div>
+                <!-- Rating -->
+                <span v-if="output.rating" class="text-xs text-yellow-500">
+                    {{ '⭐'.repeat(output.rating) }}
+                </span>
 
-        <!-- Output link -->
-        <a
-            v-if="output.output_link"
-            :href="output.output_link"
-            target="_blank"
-            class="text-blue-500 hover:text-blue-700 flex-shrink-0"
-            title="View output"
-        >
-            🔗
-        </a>
+                <!-- Output link -->
+                <a
+                    v-if="output.output_link"
+                    :href="output.output_link"
+                    target="_blank"
+                    class="text-blue-500 hover:text-blue-700"
+                    title="View output"
+                >
+                    🔗
+                </a>
 
-        <!-- Image thumbnail -->
-        <a
-            v-if="output.image_path"
-            :href="'/storage/' + output.image_path"
-            target="_blank"
-            class="flex-shrink-0"
-            title="View image"
-        >
-            <img
-                :src="'/storage/' + output.image_path"
-                class="h-7 w-7 rounded object-cover border border-gray-200 dark:border-gray-600 hover:opacity-80 transition-opacity"
-                alt=""
-            />
-        </a>
+                <!-- Image thumbnail -->
+                <a
+                    v-if="output.image_path"
+                    :href="'/storage/' + output.image_path"
+                    target="_blank"
+                    title="View image"
+                >
+                    <img
+                        :src="'/storage/' + output.image_path"
+                        class="h-6 w-6 rounded object-cover border border-gray-200 dark:border-gray-600 hover:opacity-80 transition-opacity"
+                        alt=""
+                    />
+                </a>
 
-        <!-- Actions (show on hover) -->
-        <div class="flex-shrink-0 opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
-            <button
-                @click="emit('edit', output)"
-                class="text-gray-400 hover:text-blue-500 text-sm"
-                title="Edit"
-            >
-                ✏️
-            </button>
-            <button
-                @click="emit('delete', output.id)"
-                class="text-gray-400 hover:text-red-500 text-sm"
-                title="Delete"
-            >
-                🗑️
-            </button>
+                <!-- Actions: luôn hiện trên mobile, hover trên desktop -->
+                <div class="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <button
+                        @click="emit('edit', output)"
+                        class="text-gray-400 hover:text-blue-500 text-sm"
+                        title="Edit"
+                    >
+                        ✏️
+                    </button>
+                    <button
+                        @click="emit('delete', output.id)"
+                        class="text-gray-400 hover:text-red-500 text-sm"
+                        title="Delete"
+                    >
+                        🗑️
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
