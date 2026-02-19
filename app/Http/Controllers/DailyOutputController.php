@@ -110,6 +110,7 @@ class DailyOutputController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'category' => 'required|string|in:' . implode(',', array_keys(DailyOutput::CATEGORIES)),
+            'output_date' => 'required|date|after_or_equal:' . DailyOutput::TRACKING_START . '|before_or_equal:' . DailyOutput::TRACKING_END,
             'goal_id' => 'nullable|exists:goals,id',
             'duration' => 'required|integer|min:1|max:1440',
             'note' => 'nullable|string|max:1000',
