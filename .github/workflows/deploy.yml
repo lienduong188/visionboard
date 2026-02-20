@@ -106,11 +106,18 @@ jobs:
             if [ -f "$CURRENT_DIR/.env" ]; then
               echo "Preserving .env file..."
               cp "$CURRENT_DIR/.env" www/visionboard2026_new/.env
-              # Ensure APP_TIMEZONE is set to Asia/Tokyo
+              # Ensure APP_TIMEZONE is set to Asia/Tokyo (FreeBSD sed requires -i '')
               grep -q "APP_TIMEZONE" www/visionboard2026_new/.env \
-                && sed -i 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Asia\/Tokyo/' www/visionboard2026_new/.env \
+                && sed -i '' 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Asia\/Tokyo/' www/visionboard2026_new/.env \
                 || echo "APP_TIMEZONE=Asia/Tokyo" >> www/visionboard2026_new/.env
               echo "Ensured APP_TIMEZONE=Asia/Tokyo in .env"
+              # Ensure APP_URL is correct (prevent wrong domain for image URLs)
+              grep -q "APP_URL" www/visionboard2026_new/.env \
+                && sed -i '' 's|^APP_URL=.*|APP_URL=https://visionboard.duonglien.com|' www/visionboard2026_new/.env \
+                || echo "APP_URL=https://visionboard.duonglien.com" >> www/visionboard2026_new/.env
+              # Remove ASSET_URL if set (should inherit from APP_URL)
+              sed -i '' '/^ASSET_URL=/d' www/visionboard2026_new/.env 2>/dev/null || true
+              echo "Ensured APP_URL=https://visionboard.duonglien.com in .env"
             fi
 
             if [ -d "$CURRENT_DIR/storage/app" ]; then
