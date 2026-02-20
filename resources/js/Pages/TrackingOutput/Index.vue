@@ -6,6 +6,7 @@ import OutputFormModal from '@/Components/TrackingOutput/OutputFormModal.vue';
 import CalendarHeatmap from '@/Components/TrackingOutput/CalendarHeatmap.vue';
 import SpinWheel from '@/Components/TrackingOutput/SpinWheel.vue';
 import { Head, router } from '@inertiajs/vue3';
+import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
 import { ref, computed } from 'vue';
 
 const props = defineProps({
@@ -152,9 +153,12 @@ const switchView = (view) => {
         <div v-if="isPublic" class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
                 <span class="font-semibold text-gray-900 dark:text-white">🚀 v!t's Daily Output Tracker</span>
-                <a :href="route('login')" class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
-                    Login →
-                </a>
+                <div class="flex items-center gap-3">
+                    <ThemeSwitcher />
+                    <a :href="route('login')" class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                        Login →
+                    </a>
+                </div>
             </div>
         </div>
 
