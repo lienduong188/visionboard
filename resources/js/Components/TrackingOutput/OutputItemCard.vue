@@ -4,6 +4,7 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps({
     output: Object,
     categories: Object,
+    isPublic: Boolean,
 });
 
 const emit = defineEmits(['edit', 'delete']);
@@ -42,9 +43,10 @@ const formatDuration = (minutes) => {
     >
         <!-- Status toggle -->
         <button
-            @click="toggleStatus"
-            class="text-lg flex-shrink-0 hover:scale-110 transition-transform mt-0.5"
-            :title="output.status === 'done' ? 'Mark as planned' : 'Mark as done'"
+            @click="!isPublic && toggleStatus()"
+            class="text-lg flex-shrink-0 transition-transform mt-0.5"
+            :class="!isPublic ? 'hover:scale-110 cursor-pointer' : 'cursor-default'"
+            :title="isPublic ? output.status : (output.status === 'done' ? 'Mark as planned' : 'Mark as done')"
         >
             {{ statusIcon[output.status] || '⬜' }}
         </button>
@@ -103,8 +105,8 @@ const formatDuration = (minutes) => {
                     />
                 </a>
 
-                <!-- Actions: luôn hiện trên mobile, hover trên desktop -->
-                <div class="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <!-- Actions: ẩn khi public view -->
+                <div v-if="!isPublic" class="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                     <button
                         @click="emit('edit', output)"
                         class="text-gray-400 hover:text-blue-500 text-sm"

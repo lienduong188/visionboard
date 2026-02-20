@@ -10,6 +10,7 @@ const props = defineProps({
     isTomorrow: Boolean,
     isRestDay: Boolean,
     dayNumber: Number,
+    isPublic: Boolean,
 });
 
 const emit = defineEmits(['add', 'edit', 'delete', 'toggle-rest']);
@@ -75,6 +76,7 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
                     {{ doneCount }} done
                 </span>
                 <button
+                    v-if="!isPublic"
                     @click="emit('add', date)"
                     class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 font-medium"
                 >
@@ -90,6 +92,7 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
                 :key="output.id"
                 :output="output"
                 :categories="categories"
+                :is-public="isPublic"
                 @edit="emit('edit', $event)"
                 @delete="emit('delete', $event)"
             />
@@ -101,7 +104,7 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
                 {{ isRestDay ? '😴 Rest day - recharging!' : 'No outputs for this day' }}
             </p>
             <button
-                v-if="!isRestDay"
+                v-if="!isRestDay && !isPublic"
                 @click="emit('add', date)"
                 class="mt-2 text-sm text-indigo-500 hover:text-indigo-700"
             >

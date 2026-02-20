@@ -63,6 +63,48 @@ class DailyOutputController extends Controller
         ]);
     }
 
+    public function publicIndex(Request $request)
+    {
+        // Personal app - get the first user's data publicly
+        $user = \App\Models\User::first();
+        if (!$user) abort(404);
+
+        $view = $request->get('view', 'list');
+        $date = $request->get('date', Carbon::now('Asia/Tokyo')->format('Y-m-d'));
+
+        $allOutputs = DailyOutput::with('goal:id,title,category_id', 'goal.category:id,name,icon,color')
+            ->where('user_id', $user->id)
+            ->whereBetween('output_date', [DailyOutput::TRACKING_START, DailyOutput::TRACKING_END])
+            ->orderBy('output_date', 'desc')
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy(fn($o) => $o->output_date->format('Y-m-d'));
+
+        $calculator = new StreakCalculator($user->id);
+        $streakData = $calculator->calculate();
+        $heatmap = $calculator->getHeatmapData();
+        $stats = $this->getStats($user->id);
+
+        $restDays = OutputRestDay::where('user_id', $user->id)
+            ->whereBetween('rest_date', [DailyOutput::TRACKING_START, DailyOutput::TRACKING_END])
+            ->pluck('rest_date')
+            ->map(fn($d) => $d->format('Y-m-d'));
+
+        return Inertia::render('TrackingOutput/Index', [
+            'outputs' => $allOutputs,
+            'streakData' => $streakData,
+            'stats' => $stats,
+            'heatmap' => $heatmap,
+            'goals' => [],
+            'restDays' => $restDays,
+            'currentDate' => $date,
+            'currentView' => $view,
+            'categories' => DailyOutput::CATEGORIES,
+            'durationPresets' => DailyOutput::DURATION_PRESETS,
+            'isPublic' => true,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

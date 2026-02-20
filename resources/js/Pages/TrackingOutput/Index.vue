@@ -19,6 +19,7 @@ const props = defineProps({
     currentView: String,
     categories: Object,
     durationPresets: Array,
+    isPublic: { type: Boolean, default: false },
 });
 
 const viewMode = ref(props.currentView || 'list');
@@ -143,7 +144,20 @@ const switchView = (view) => {
 <template>
     <Head title="Daily Output Tracker" />
 
-    <AuthenticatedLayout>
+    <component
+        :is="isPublic ? 'div' : AuthenticatedLayout"
+        :class="isPublic ? 'min-h-screen bg-gray-100 dark:bg-gray-900' : ''"
+    >
+        <!-- Public header (only when not logged in) -->
+        <div v-if="isPublic" class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+                <span class="font-semibold text-gray-900 dark:text-white">🚀 v!t's Daily Output Tracker</span>
+                <a :href="route('login')" class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    Login →
+                </a>
+            </div>
+        </div>
+
         <div class="py-6 sm:py-8">
             <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
                 <!-- Header -->
@@ -184,16 +198,18 @@ const switchView = (view) => {
                                 </button>
                             </div>
 
-                            <!-- Spin Wheel Button -->
+                            <!-- Spin Wheel Button (owner only) -->
                             <button
+                                v-if="!isPublic"
                                 @click="showSpinWheel = true"
                                 class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all"
                             >
                                 🎰 Spin
                             </button>
 
-                            <!-- Add Button -->
+                            <!-- Add Button (owner only) -->
                             <button
+                                v-if="!isPublic"
                                 @click="openAddModal(today)"
                                 class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
                             >
@@ -254,6 +270,7 @@ const switchView = (view) => {
                             :is-tomorrow="isTomorrow(date)"
                             :is-rest-day="isRestDay(date)"
                             :day-number="getDayNumber(date)"
+                            :is-public="isPublic"
                             @add="openAddModal"
                             @edit="openEditModal"
                             @delete="deleteOutput"
@@ -264,19 +281,13 @@ const switchView = (view) => {
                     <!-- Empty state -->
                     <div v-if="displayDates.length === 0" class="text-center py-12">
                         <p class="text-gray-400 dark:text-gray-500 text-lg">
-                            No outputs yet. Start tracking your daily outputs!
+                            No outputs yet.
                         </p>
-                        <button
-                            @click="openAddModal(today)"
-                            class="mt-4 px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
-                        >
-                            + Add Your First Output
-                        </button>
                     </div>
                 </div>
 
-                <!-- Rest Day Toggle (for today) -->
-                <div class="mt-6 text-center">
+                <!-- Rest Day Toggle (owner only) -->
+                <div v-if="!isPublic" class="mt-6 text-center">
                     <button
                         @click="toggleRestDay(today)"
                         class="text-sm transition-colors"
@@ -296,8 +307,9 @@ const switchView = (view) => {
             </div>
         </div>
 
-        <!-- Form Modal -->
+        <!-- Form Modal (owner only) -->
         <OutputFormModal
+            v-if="!isPublic"
             :show="showFormModal"
             :output="editingOutput"
             :categories="categories"
@@ -308,11 +320,12 @@ const switchView = (view) => {
             @close="closeModal"
         />
 
-        <!-- Spin Wheel Modal -->
+        <!-- Spin Wheel Modal (owner only) -->
         <SpinWheel
+            v-if="!isPublic"
             :show="showSpinWheel"
             @close="showSpinWheel = false"
             @result="onWheelResult"
         />
-    </AuthenticatedLayout>
+    </component>
 </template>

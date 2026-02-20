@@ -20,6 +20,9 @@ Route::get('/', function () {
     return redirect()->route('goals.index');
 });
 
+// Public output page (no auth required)
+Route::get('/output', [DailyOutputController::class, 'publicIndex'])->name('output.public');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard redirects to goals
     Route::get('/dashboard', function () {
