@@ -152,17 +152,17 @@ jobs:
           chmod -R 755 .
           chmod -R 775 storage bootstrap/cache
 
-          # Run data restore if exists (one-time restore from local MySQL)
+          # Run Laravel commands
+          echo "Running migrations..."
+          php artisan migrate --force
+
+          # Run data restore AFTER migrations (schema must be up-to-date first)
           if [ -f "database/restore.sql" ]; then
             echo "Running data restore..."
             sqlite3 database/database.sqlite < database/restore.sql
             rm database/restore.sql
             echo "Data restore complete!"
           fi
-
-          # Run Laravel commands
-          echo "Running migrations..."
-          php artisan migrate --force
 
           echo "Setting up storage link..."
           php artisan storage:link 2>/dev/null || true
