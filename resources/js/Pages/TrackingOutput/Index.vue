@@ -202,6 +202,15 @@ const switchView = (view) => {
                         </div>
 
                         <div class="flex items-center gap-2">
+                            <!-- Analytics Link -->
+                            <Link
+                                v-if="!isPublic"
+                                :href="route('tracking-output.analytics')"
+                                class="px-3 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors border border-indigo-200 dark:border-indigo-700"
+                            >
+                                📊 Analytics
+                            </Link>
+
                             <!-- View Toggle -->
                             <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                                 <button

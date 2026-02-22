@@ -97,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/settings/reviews', [ReviewSettingController::class, 'update'])->name('settings.reviews.update');
 
     // Daily Output Tracking
+    Route::get('/tracking-output/analytics', [DailyOutputController::class, 'analytics'])->name('tracking-output.analytics');
     Route::get('/tracking-output', [DailyOutputController::class, 'index'])->name('tracking-output.index');
     Route::post('/tracking-output', [DailyOutputController::class, 'store'])->name('tracking-output.store');
     Route::put('/tracking-output/{dailyOutput}', [DailyOutputController::class, 'update'])->name('tracking-output.update');

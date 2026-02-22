@@ -248,6 +248,157 @@ class DailyOutputController extends Controller
         return back()->with('error', 'Rest day marked but NOT earned - this will reset your streak!');
     }
 
+    public function analytics(Request $request)
+    {
+        $user = $request->user();
+        $startDate = DailyOutput::TRACKING_START;
+        $endDate = DailyOutput::TRACKING_END;
+        $categories = DailyOutput::CATEGORIES;
+
+        // All done outputs
+        $outputs = DailyOutput::where('user_id', $user->id)
+            ->where('status', 'done')
+            ->whereBetween('output_date', [$startDate, $endDate])
+            ->selectRaw('category, duration, rating, output_date')
+            ->get();
+
+        $totalTime = $outputs->sum('duration');
+
+        // Per-category stats
+        $categoryStats = [];
+        foreach ($categories as $key => $cat) {
+            $catOutputs = $outputs->where('category', $key);
+            $catTime = $catOutputs->sum('duration');
+            $catCount = $catOutputs->count();
+            $avgRating = $catCount > 0 ? round($catOutputs->avg('rating'), 1) : null;
+            $flywheel = $cat['impact'] * $cat['compound'];
+            $timeRatio = $totalTime > 0 ? round($catTime / $totalTime * 100, 1) : 0;
+            $weightedScore = round($catTime * $flywheel / 100);
+
+            $categoryStats[$key] = [
+                'key' => $key,
+                'icon' => $cat['icon'],
+                'label' => $cat['label'],
+                'impact' => $cat['impact'],
+                'compound' => $cat['compound'],
+                'flywheel' => $flywheel,
+                'total_time' => $catTime,
+                'total_count' => $catCount,
+                'avg_rating' => $avgRating,
+                'time_ratio' => $timeRatio,
+                'weighted_score' => $weightedScore,
+            ];
+        }
+
+        // Sort by flywheel desc for ranking
+        $ranked = collect($categoryStats)->sortByDesc('flywheel')->values();
+
+        // Total weighted score
+        $totalWeightedScore = collect($categoryStats)->sum('weighted_score');
+
+        // Weekly flywheel trend (last 8 weeks)
+        $weeklyTrend = [];
+        $trackingStart = Carbon::parse($startDate);
+        $now = Carbon::now('Asia/Tokyo');
+        // Build week buckets from tracking start
+        $weekStart = $trackingStart->copy()->startOfWeek(Carbon::MONDAY);
+        $weekCount = 0;
+        while ($weekStart->lte($now) && $weekCount < 12) {
+            $weekEnd = $weekStart->copy()->endOfWeek(Carbon::SUNDAY);
+            $weekStr = $weekStart->format('M d');
+            $weekOutputs = $outputs->filter(function ($o) use ($weekStart, $weekEnd) {
+                $d = Carbon::parse($o->output_date);
+                return $d->between($weekStart, $weekEnd);
+            });
+            $weekWeighted = 0;
+            foreach ($weekOutputs as $o) {
+                $flywheel = $categories[$o->category]['impact'] * $categories[$o->category]['compound'];
+                $weekWeighted += round($o->duration * $flywheel / 100);
+            }
+            $weeklyTrend[] = [
+                'week' => $weekStr,
+                'weighted_score' => $weekWeighted,
+                'total_time' => $weekOutputs->sum('duration'),
+            ];
+            $weekStart->addWeek();
+            $weekCount++;
+        }
+
+        // Recommendations
+        $recommendations = [];
+        foreach ($categoryStats as $key => $stat) {
+            $flywheel = $stat['flywheel'];
+            $timeRatio = $stat['time_ratio'];
+            $catTime = $stat['total_time'];
+
+            if ($catTime === 0 && $flywheel >= 56) {
+                $recommendations[] = [
+                    'category' => $key,
+                    'icon' => $stat['icon'],
+                    'label' => $stat['label'],
+                    'type' => 'untapped',
+                    'priority' => 'high',
+                    'message' => "Chưa khám phá! Flywheel {$flywheel}/100 - tiềm năng tích lũy rất cao.",
+                    'action' => 'Bắt đầu ngay, dù chỉ 30 phút/tuần.',
+                ];
+            } elseif ($flywheel >= 63 && $timeRatio < 15 && $catTime > 0) {
+                $recommendations[] = [
+                    'category' => $key,
+                    'icon' => $stat['icon'],
+                    'label' => $stat['label'],
+                    'type' => 'underinvested',
+                    'priority' => 'high',
+                    'message' => "Flywheel {$flywheel}/100 nhưng chỉ {$timeRatio}% thời gian. Đang bỏ lỡ compound effect.",
+                    'action' => 'Tăng lên ít nhất 20% tổng thời gian.',
+                ];
+            } elseif ($flywheel >= 49 && $timeRatio >= 15 && $timeRatio <= 35) {
+                $recommendations[] = [
+                    'category' => $key,
+                    'icon' => $stat['icon'],
+                    'label' => $stat['label'],
+                    'type' => 'balanced',
+                    'priority' => 'good',
+                    'message' => "Flywheel {$flywheel}/100 với {$timeRatio}% thời gian. Cân bằng tốt!",
+                    'action' => 'Duy trì và tăng chất lượng (rating).',
+                ];
+            } elseif ($flywheel >= 49 && $timeRatio > 35) {
+                $recommendations[] = [
+                    'category' => $key,
+                    'icon' => $stat['icon'],
+                    'label' => $stat['label'],
+                    'type' => 'champion',
+                    'priority' => 'great',
+                    'message' => "🏆 Flywheel {$flywheel}/100 với {$timeRatio}% thời gian. Activity chủ lực!",
+                    'action' => 'Tiếp tục! Đây là vòng quay mạnh nhất.',
+                ];
+            } elseif ($flywheel < 36 && $timeRatio > 20) {
+                $recommendations[] = [
+                    'category' => $key,
+                    'icon' => $stat['icon'],
+                    'label' => $stat['label'],
+                    'type' => 'overinvested',
+                    'priority' => 'warning',
+                    'message' => "Flywheel chỉ {$flywheel}/100 nhưng chiếm {$timeRatio}% thời gian.",
+                    'action' => 'Cân nhắc giảm xuống dưới 15% để tái đầu tư vào activities có flywheel cao hơn.',
+                ];
+            }
+        }
+
+        // Sort recommendations by priority
+        $priorityOrder = ['warning' => 0, 'high' => 1, 'good' => 2, 'great' => 3];
+        usort($recommendations, fn($a, $b) => ($priorityOrder[$a['priority']] ?? 9) <=> ($priorityOrder[$b['priority']] ?? 9));
+
+        return Inertia::render('TrackingOutput/Analytics', [
+            'categoryStats' => array_values($categoryStats),
+            'ranked' => $ranked,
+            'totalWeightedScore' => $totalWeightedScore,
+            'totalTime' => $totalTime,
+            'weeklyTrend' => $weeklyTrend,
+            'recommendations' => $recommendations,
+            'categories' => $categories,
+        ]);
+    }
+
     private function getStats(int $userId): array
     {
         $startDate = DailyOutput::TRACKING_START;

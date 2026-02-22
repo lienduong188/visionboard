@@ -10,16 +10,19 @@ class DailyOutput extends Model
 {
     use HasFactory;
 
+    // impact: Tác động dài hạn (1-10)
+    // compound: Khả năng tích lũy theo thời gian (1-10)
+    // flywheel = impact × compound (max 100)
     const CATEGORIES = [
-        'coding'   => ['icon' => '💻', 'label' => 'Coding'],
-        'writing'  => ['icon' => '✍️', 'label' => 'Writing'],
-        'video'    => ['icon' => '🎥', 'label' => 'Video'],
-        'study'    => ['icon' => '📚', 'label' => 'Study'],
-        'training' => ['icon' => '🏃', 'label' => 'Training'],
-        'creative' => ['icon' => '🎨', 'label' => 'Creative'],
-        'career'   => ['icon' => '💼', 'label' => 'Career'],
-        'wellness' => ['icon' => '🧘', 'label' => 'Wellness'],
-        'other'    => ['icon' => '🔧', 'label' => 'Other'],
+        'coding'   => ['icon' => '💻', 'label' => 'Coding',   'impact' => 9, 'compound' => 9],
+        'writing'  => ['icon' => '✍️', 'label' => 'Writing',  'impact' => 8, 'compound' => 9],
+        'career'   => ['icon' => '💼', 'label' => 'Career',   'impact' => 9, 'compound' => 7],
+        'study'    => ['icon' => '📚', 'label' => 'Study',    'impact' => 7, 'compound' => 8],
+        'video'    => ['icon' => '🎥', 'label' => 'Video',    'impact' => 7, 'compound' => 7],
+        'training' => ['icon' => '🏃', 'label' => 'Training', 'impact' => 8, 'compound' => 5],
+        'creative' => ['icon' => '🎨', 'label' => 'Creative', 'impact' => 6, 'compound' => 6],
+        'wellness' => ['icon' => '🧘', 'label' => 'Wellness', 'impact' => 7, 'compound' => 5],
+        'other'    => ['icon' => '🔧', 'label' => 'Other',    'impact' => 4, 'compound' => 3],
     ];
 
     const DURATION_PRESETS = [30, 60, 90, 120];
