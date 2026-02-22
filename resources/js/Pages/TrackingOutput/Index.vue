@@ -5,7 +5,7 @@ import DayOutputGroup from '@/Components/TrackingOutput/DayOutputGroup.vue';
 import OutputFormModal from '@/Components/TrackingOutput/OutputFormModal.vue';
 import CalendarHeatmap from '@/Components/TrackingOutput/CalendarHeatmap.vue';
 import SpinWheel from '@/Components/TrackingOutput/SpinWheel.vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
 import { ref, computed } from 'vue';
 
