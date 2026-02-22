@@ -2,6 +2,8 @@
 import { ref, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 
+const formErrors = ref({});
+
 const props = defineProps({
     show: Boolean,
     output: { type: Object, default: null },
@@ -48,6 +50,7 @@ const toLocalDateStr = (dateStr) => {
 // Reset form when modal opens
 watch(() => props.show, (val) => {
     if (val) {
+        formErrors.value = {};
         imageFile.value = null;
         imagePreview.value = null;
         removeImage.value = false;
@@ -140,12 +143,14 @@ const submit = () => {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => emit('close'),
+            onError: (errors) => { formErrors.value = errors; },
         });
     } else {
         router.post(route('tracking-output.store'), data, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => emit('close'),
+            onError: (errors) => { formErrors.value = errors; },
         });
     }
 };
@@ -372,6 +377,13 @@ const close = () => emit('close');
                             class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/30 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/50 cursor-pointer"
                         />
                         <p class="text-xs text-gray-400 mt-1">Max 5MB. JPG, PNG, WebP, GIF...</p>
+                    </div>
+
+                    <!-- Validation errors -->
+                    <div v-if="Object.keys(formErrors).length > 0" class="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
+                        <p v-for="(msg, field) in formErrors" :key="field" class="text-sm text-red-600 dark:text-red-400">
+                            {{ msg }}
+                        </p>
                     </div>
 
                     <!-- Actions -->
