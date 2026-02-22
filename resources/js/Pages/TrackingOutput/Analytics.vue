@@ -89,26 +89,26 @@ const hoveredBubble = ref(null);
         </template>
 
         <div class="py-6">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-6">
 
                 <!-- Top KPI Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
                         <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ totalWeightedScore.toLocaleString() }}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tổng Flywheel Score</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Tổng Flywheel Score</div>
                         <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">∑ (time × flywheel/100)</div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
                         <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ fmtTime(totalTime) }}</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tổng thời gian</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Tổng thời gian</div>
                         <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Tất cả categories</div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                        <div class="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                        <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
                             {{ ranked.find(r => r.total_time > 0)?.icon || '—' }}
                             {{ ranked.find(r => r.total_time > 0)?.label || 'Chưa có' }}
                         </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Top Flywheel Activity</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Top Flywheel Activity</div>
                         <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                             {{ ranked.find(r => r.total_time > 0) ? `Score ${ranked.find(r => r.total_time > 0).flywheel}/100` : '' }}
                         </div>
@@ -117,16 +117,15 @@ const hoveredBubble = ref(null);
                         <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">
                             {{ categoryStats.filter(c => c.total_time > 0).length }}/{{ categoryStats.length }}
                         </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Categories đã làm</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Categories đã làm</div>
                         <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Độ đa dạng output</div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Flywheel Matrix -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Ma trận Flywheel</h3>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Trục Y = Impact dài hạn · Trục X = Khả năng tích lũy · Kích thước = Thời gian đầu tư</p>
+                <!-- Flywheel Matrix -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Ma trận Flywheel</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-3">Trục Y = Impact dài hạn · Trục X = Khả năng tích lũy · Kích thước = Thời gian đầu tư</p>
                         <div class="relative overflow-x-auto">
                             <svg :width="svgWidth" :height="svgHeight" class="w-full max-w-full">
                                 <!-- Grid lines -->
@@ -218,87 +217,86 @@ const hoveredBubble = ref(null);
                                 </g>
                             </svg>
                         </div>
-                    </div>
+                </div>
 
-                    <!-- Category Rankings -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Giá trị vòng quay theo Category</h3>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mb-3">Flywheel = Impact × Compound · Màu thanh = Weighted Score (time × flywheel)</p>
-                        <div class="space-y-3">
-                            <div v-for="(cat, idx) in ranked" :key="cat.key" class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400 dark:text-gray-500 w-4 shrink-0">{{ idx + 1 }}</span>
-                                <span class="text-base shrink-0">{{ cat.icon }}</span>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center justify-between mb-0.5">
-                                        <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ cat.label }}</span>
-                                        <div class="flex items-center gap-2 text-xs">
-                                            <span class="text-gray-400">{{ fmtTime(cat.total_time) }}</span>
-                                            <span class="font-semibold"
-                                                :class="cat.flywheel >= 63 ? 'text-emerald-600 dark:text-emerald-400' : cat.flywheel >= 40 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'">
-                                                {{ cat.flywheel }}/100
-                                            </span>
-                                        </div>
+                <!-- Category Rankings -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Giá trị vòng quay theo Category</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Flywheel = Impact × Compound · Màu thanh = Weighted Score (time × flywheel)</p>
+                    <div class="space-y-4">
+                        <div v-for="(cat, idx) in ranked" :key="cat.key" class="flex items-center gap-3">
+                            <span class="text-sm text-gray-400 dark:text-gray-500 w-5 shrink-0">{{ idx + 1 }}</span>
+                            <span class="text-xl shrink-0">{{ cat.icon }}</span>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ cat.label }}</span>
+                                    <div class="flex items-center gap-3 text-sm">
+                                        <span class="text-gray-400">{{ fmtTime(cat.total_time) }}</span>
+                                        <span class="font-semibold"
+                                            :class="cat.flywheel >= 63 ? 'text-emerald-600 dark:text-emerald-400' : cat.flywheel >= 40 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'">
+                                            {{ cat.flywheel }}/100
+                                        </span>
                                     </div>
-                                    <!-- Flywheel score bar (fixed) -->
-                                    <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full mb-1">
-                                        <div class="h-1.5 rounded-full transition-all duration-500"
-                                            :class="cat.flywheel >= 63 ? 'bg-emerald-400' : cat.flywheel >= 40 ? 'bg-indigo-400' : 'bg-gray-300'"
-                                            :style="{ width: cat.flywheel + '%' }"></div>
-                                    </div>
-                                    <!-- Weighted score bar (actual usage) -->
-                                    <div class="h-1 bg-gray-100 dark:bg-gray-700 rounded-full">
-                                        <div class="h-1 rounded-full bg-amber-400 transition-all duration-500"
-                                            :style="{ width: totalWeightedScore > 0 ? (cat.weighted_score / totalWeightedScore * 100) + '%' : '0%' }"></div>
-                                    </div>
-                                    <div class="flex justify-between text-xs text-gray-400 mt-0.5">
-                                        <span>I={{ cat.impact }} × C={{ cat.compound }}</span>
-                                        <span>Weighted: {{ cat.weighted_score }}</span>
-                                    </div>
+                                </div>
+                                <!-- Flywheel score bar (fixed) -->
+                                <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full mb-1">
+                                    <div class="h-2 rounded-full transition-all duration-500"
+                                        :class="cat.flywheel >= 63 ? 'bg-emerald-400' : cat.flywheel >= 40 ? 'bg-indigo-400' : 'bg-gray-300'"
+                                        :style="{ width: cat.flywheel + '%' }"></div>
+                                </div>
+                                <!-- Weighted score bar (actual usage) -->
+                                <div class="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full">
+                                    <div class="h-1.5 rounded-full bg-amber-400 transition-all duration-500"
+                                        :style="{ width: totalWeightedScore > 0 ? (cat.weighted_score / totalWeightedScore * 100) + '%' : '0%' }"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>I={{ cat.impact }} × C={{ cat.compound }}</span>
+                                    <span>Weighted: {{ cat.weighted_score }}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex gap-4 text-xs text-gray-400">
-                            <div class="flex items-center gap-1">
-                                <div class="w-3 h-1.5 bg-emerald-400 rounded"></div> Flywheel score
-                            </div>
-                            <div class="flex items-center gap-1">
-                                <div class="w-3 h-1 bg-amber-400 rounded"></div> Thời gian × Flywheel
-                            </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex gap-5 text-sm text-gray-400">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-4 h-2 bg-emerald-400 rounded"></div> Flywheel score
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-4 h-1.5 bg-amber-400 rounded"></div> Thời gian × Flywheel
                         </div>
                     </div>
                 </div>
 
                 <!-- Recommendations -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">💡 Gợi ý tối ưu vòng quay</h3>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">Dựa trên ma trận Flywheel, đây là những điều chỉnh nên làm:</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">💡 Gợi ý tối ưu vòng quay</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Dựa trên ma trận Flywheel, đây là những điều chỉnh nên làm:</p>
                     <div v-if="recommendations.length === 0" class="text-sm text-gray-400 text-center py-4">
                         Chưa có đủ data để phân tích. Hãy thêm nhiều outputs hơn!
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="flex flex-col gap-3">
                         <div v-for="rec in recommendations" :key="rec.category"
-                            class="rounded-lg p-3 border"
+                            class="rounded-lg p-4 border"
                             :class="[priorityConfig[rec.priority]?.bg, priorityConfig[rec.priority]?.border]">
                             <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="text-lg">{{ rec.icon }}</span>
-                                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-200">{{ rec.label }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xl">{{ rec.icon }}</span>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">{{ rec.label }}</span>
                                 </div>
-                                <span class="text-xs px-1.5 py-0.5 rounded-full font-medium"
+                                <span class="text-xs px-2 py-0.5 rounded-full font-medium shrink-0"
                                     :class="priorityConfig[rec.priority]?.badge">
                                     {{ priorityConfig[rec.priority]?.icon }} {{ priorityConfig[rec.priority]?.label }}
                                 </span>
                             </div>
-                            <p class="text-xs text-gray-600 dark:text-gray-300 mb-2">{{ rec.message }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 italic">→ {{ rec.action }}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{ rec.message }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 italic">→ {{ rec.action }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Weekly Flywheel Trend -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">📈 Xu hướng Flywheel Score theo tuần</h3>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mb-4">Flywheel score tích lũy mỗi tuần (thời gian × giá trị tích lũy)</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">📈 Xu hướng Flywheel Score theo tuần</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Flywheel score tích lũy mỗi tuần (thời gian × giá trị tích lũy)</p>
                     <div class="flex items-end gap-1 h-32 overflow-x-auto pb-6 relative">
                         <div v-for="(week, idx) in weeklyTrend" :key="idx"
                             class="flex flex-col items-center gap-1 flex-shrink-0"
@@ -320,74 +318,74 @@ const hoveredBubble = ref(null);
 
                 <!-- Category Detail Table -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Chi tiết Giá trị Vòng quay</h3>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-4">Chi tiết Giá trị Vòng quay</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
-                                <tr class="text-xs text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700">
-                                    <th class="text-left pb-2">Category</th>
-                                    <th class="text-center pb-2">Impact</th>
-                                    <th class="text-center pb-2">Compound</th>
-                                    <th class="text-center pb-2">Flywheel</th>
-                                    <th class="text-right pb-2">Thời gian</th>
-                                    <th class="text-right pb-2">% Tổng</th>
-                                    <th class="text-right pb-2">Outputs</th>
-                                    <th class="text-right pb-2">Avg ⭐</th>
-                                    <th class="text-right pb-2">Weighted</th>
+                                <tr class="text-sm text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                                    <th class="text-left pb-3">Category</th>
+                                    <th class="text-center pb-3">Impact</th>
+                                    <th class="text-center pb-3">Compound</th>
+                                    <th class="text-center pb-3">Flywheel</th>
+                                    <th class="text-right pb-3">Thời gian</th>
+                                    <th class="text-right pb-3">% Tổng</th>
+                                    <th class="text-right pb-3">Outputs</th>
+                                    <th class="text-right pb-3">Avg ⭐</th>
+                                    <th class="text-right pb-3">Weighted</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="cat in ranked" :key="cat.key"
                                     class="border-b border-gray-50 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                    <td class="py-2">
+                                    <td class="py-3">
                                         <span class="mr-1.5">{{ cat.icon }}</span>
                                         <span class="font-medium text-gray-700 dark:text-gray-200">{{ cat.label }}</span>
                                     </td>
-                                    <td class="text-center py-2">
+                                    <td class="text-center py-3">
                                         <div class="flex items-center justify-center gap-1">
                                             <div class="h-2 rounded-sm bg-indigo-400"
                                                 :style="{ width: (cat.impact / 10 * 40) + 'px' }"></div>
-                                            <span class="text-xs text-gray-500">{{ cat.impact }}</span>
+                                            <span class="text-sm text-gray-500">{{ cat.impact }}</span>
                                         </div>
                                     </td>
-                                    <td class="text-center py-2">
+                                    <td class="text-center py-3">
                                         <div class="flex items-center justify-center gap-1">
                                             <div class="h-2 rounded-sm bg-amber-400"
                                                 :style="{ width: (cat.compound / 10 * 40) + 'px' }"></div>
-                                            <span class="text-xs text-gray-500">{{ cat.compound }}</span>
+                                            <span class="text-sm text-gray-500">{{ cat.compound }}</span>
                                         </div>
                                     </td>
-                                    <td class="text-center py-2">
-                                        <span class="font-bold text-sm"
+                                    <td class="text-center py-3">
+                                        <span class="font-bold"
                                             :class="cat.flywheel >= 63 ? 'text-emerald-600 dark:text-emerald-400' : cat.flywheel >= 40 ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400'">
                                             {{ cat.flywheel }}
                                         </span>
                                         <span class="text-xs text-gray-300 dark:text-gray-600">/100</span>
                                     </td>
-                                    <td class="text-right py-2 text-gray-600 dark:text-gray-300">{{ fmtTime(cat.total_time) }}</td>
-                                    <td class="text-right py-2">
-                                        <span class="text-xs px-1.5 py-0.5 rounded-full"
+                                    <td class="text-right py-3 text-gray-600 dark:text-gray-300">{{ fmtTime(cat.total_time) }}</td>
+                                    <td class="text-right py-3">
+                                        <span class="text-sm px-2 py-0.5 rounded-full"
                                             :class="cat.time_ratio >= 20 ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300' : 'text-gray-400'">
                                             {{ cat.time_ratio }}%
                                         </span>
                                     </td>
-                                    <td class="text-right py-2 text-gray-500 dark:text-gray-400">{{ cat.total_count }}</td>
-                                    <td class="text-right py-2 text-gray-500 dark:text-gray-400">
+                                    <td class="text-right py-3 text-gray-500 dark:text-gray-400">{{ cat.total_count }}</td>
+                                    <td class="text-right py-3 text-gray-500 dark:text-gray-400">
                                         {{ cat.avg_rating ? cat.avg_rating + ' ⭐' : '—' }}
                                     </td>
-                                    <td class="text-right py-2 font-semibold text-amber-600 dark:text-amber-400">{{ cat.weighted_score }}</td>
+                                    <td class="text-right py-3 font-semibold text-amber-600 dark:text-amber-400">{{ cat.weighted_score }}</td>
                                 </tr>
                             </tbody>
                             <tfoot>
                                 <tr class="border-t-2 border-gray-200 dark:border-gray-600">
-                                    <td colspan="4" class="pt-2 text-xs text-gray-400">Tổng cộng</td>
-                                    <td class="text-right pt-2 font-semibold text-gray-700 dark:text-gray-200">{{ fmtTime(totalTime) }}</td>
-                                    <td class="text-right pt-2 text-gray-400">100%</td>
-                                    <td class="text-right pt-2 font-semibold text-gray-700 dark:text-gray-200">
+                                    <td colspan="4" class="pt-3 text-sm text-gray-400">Tổng cộng</td>
+                                    <td class="text-right pt-3 font-semibold text-gray-700 dark:text-gray-200">{{ fmtTime(totalTime) }}</td>
+                                    <td class="text-right pt-3 text-gray-400">100%</td>
+                                    <td class="text-right pt-3 font-semibold text-gray-700 dark:text-gray-200">
                                         {{ categoryStats.reduce((s, c) => s + c.total_count, 0) }}
                                     </td>
                                     <td></td>
-                                    <td class="text-right pt-2 font-bold text-amber-600 dark:text-amber-400">{{ totalWeightedScore }}</td>
+                                    <td class="text-right pt-3 font-bold text-amber-600 dark:text-amber-400">{{ totalWeightedScore }}</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -396,8 +394,8 @@ const hoveredBubble = ref(null);
 
                 <!-- Flywheel Explanation -->
                 <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-5 border border-indigo-100 dark:border-indigo-800">
-                    <h3 class="text-sm font-semibold text-indigo-800 dark:text-indigo-300 mb-2">📖 Cách đọc Ma trận Flywheel</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-indigo-700 dark:text-indigo-300">
+                    <h3 class="text-base font-semibold text-indigo-800 dark:text-indigo-300 mb-3">📖 Cách đọc Ma trận Flywheel</h3>
+                    <div class="flex flex-col gap-3 text-sm text-indigo-700 dark:text-indigo-300">
                         <div>
                             <p class="font-semibold mb-1">🟢 Flywheel Zone (cao-cao)</p>
                             <p class="text-indigo-600 dark:text-indigo-400">Impact cao + Compound cao = Hoạt động vàng. Mỗi phút bỏ ra tạo ra giá trị tích lũy theo thời gian. Ưu tiên số 1.</p>
