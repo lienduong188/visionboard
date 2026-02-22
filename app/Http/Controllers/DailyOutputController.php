@@ -250,8 +250,8 @@ class DailyOutputController extends Controller
 
     private function getStats(int $userId): array
     {
-        $startDate = Carbon::parse(DailyOutput::TRACKING_START);
-        $endDate = Carbon::parse(DailyOutput::TRACKING_END);
+        $startDate = DailyOutput::TRACKING_START;
+        $endDate = DailyOutput::TRACKING_END;
 
         $totalOutputs = DailyOutput::where('user_id', $userId)
             ->where('status', 'done')
@@ -270,13 +270,14 @@ class DailyOutputController extends Controller
             ->count('output_date');
 
         // Rate counts up to yesterday JST (today is still in progress)
-        $yesterday = Carbon::now('Asia/Tokyo')->startOfDay()->subDay()->min($endDate);
-        $daysSinceStart = max(1, (int) $startDate->diffInDays($yesterday) + 1);
+        $yesterday = Carbon::now('Asia/Tokyo')->startOfDay()->subDay();
+        $yesterdayStr = $yesterday->lte(Carbon::parse($endDate)) ? $yesterday->format('Y-m-d') : $endDate;
+        $daysSinceStart = max(1, (int) Carbon::parse($startDate)->diffInDays($yesterday) + 1);
 
         // Recount activeDays up to yesterday only (consistent with daysSinceStart)
         $activeDaysUpToYesterday = DailyOutput::where('user_id', $userId)
             ->where('status', 'done')
-            ->whereBetween('output_date', [$startDate, $yesterday])
+            ->whereBetween('output_date', [$startDate, $yesterdayStr])
             ->distinct('output_date')
             ->count('output_date');
 

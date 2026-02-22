@@ -41,7 +41,7 @@ class StreakCalculator
         // Get all dates with at least 1 "done" output
         $activeDates = DailyOutput::where('user_id', $this->userId)
             ->where('status', 'done')
-            ->whereBetween('output_date', [$this->startDate, $today])
+            ->whereBetween('output_date', [$this->startDate->format('Y-m-d'), $today->format('Y-m-d')])
             ->selectRaw('DISTINCT output_date')
             ->pluck('output_date')
             ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
@@ -50,7 +50,7 @@ class StreakCalculator
 
         // Get all rest days
         $restDays = OutputRestDay::where('user_id', $this->userId)
-            ->whereBetween('rest_date', [$this->startDate, $today])
+            ->whereBetween('rest_date', [$this->startDate->format('Y-m-d'), $today->format('Y-m-d')])
             ->get()
             ->keyBy(fn($r) => $r->rest_date->format('Y-m-d'));
 
@@ -127,7 +127,7 @@ class StreakCalculator
     {
         $outputs = DailyOutput::where('user_id', $this->userId)
             ->where('status', 'done')
-            ->whereBetween('output_date', [$this->startDate, $this->endDate])
+            ->whereBetween('output_date', [$this->startDate->format('Y-m-d'), $this->endDate->format('Y-m-d')])
             ->selectRaw('output_date, COUNT(*) as count, SUM(duration) as total_duration')
             ->groupBy('output_date')
             ->get()
