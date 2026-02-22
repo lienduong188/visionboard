@@ -55,8 +55,22 @@ const displayDates = computed(() => {
     const trackingStart = '2026-02-17';
     const trackingEnd = '2027-02-05';
 
-    // Collect unique dates: today, tomorrow, and all dates with outputs
-    const dateSet = new Set([today, tomorrow, ...sortedDates.value]);
+    const dateSet = new Set();
+
+    // Add tomorrow and all dates with outputs (kể cả planned tương lai)
+    dateSet.add(tomorrow);
+    for (const d of sortedDates.value) dateSet.add(d);
+
+    // Thêm tất cả ngày từ tracking start đến hôm nay (kể cả ngày bị miss)
+    const cur = new Date(trackingStart + 'T00:00:00');
+    const todayDate = new Date(today + 'T00:00:00');
+    while (cur <= todayDate) {
+        const y = cur.getFullYear();
+        const m = String(cur.getMonth() + 1).padStart(2, '0');
+        const d = String(cur.getDate()).padStart(2, '0');
+        dateSet.add(`${y}-${m}-${d}`);
+        cur.setDate(cur.getDate() + 1);
+    }
 
     // Filter within tracking range and sort desc
     return [...dateSet]
@@ -84,6 +98,14 @@ const getDayNumber = (date) => {
 
 const isRestDay = (date) => {
     return props.restDays?.includes(date);
+};
+
+// Ngày bị miss: đã qua, không có output done, không phải rest day
+const isMissed = (date) => {
+    if (date >= today) return false;
+    if (props.restDays?.includes(date)) return false;
+    const outputs = props.outputs?.[date] || [];
+    return !outputs.some(o => o.status === 'done');
 };
 
 // Modal handlers
@@ -273,6 +295,7 @@ const switchView = (view) => {
                             :is-today="isToday(date)"
                             :is-tomorrow="isTomorrow(date)"
                             :is-rest-day="isRestDay(date)"
+                            :is-missed="isMissed(date)"
                             :day-number="getDayNumber(date)"
                             :is-public="isPublic"
                             @add="openAddModal"

@@ -9,6 +9,7 @@ const props = defineProps({
     isToday: Boolean,
     isTomorrow: Boolean,
     isRestDay: Boolean,
+    isMissed: Boolean,
     dayNumber: Number,
     isPublic: Boolean,
 });
@@ -67,6 +68,9 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
                 <span v-if="isRestDay" class="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded">
                     😴 Rest
                 </span>
+                <span v-if="isMissed" class="text-xs bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 px-1.5 py-0.5 rounded">
+                    ✗ Missed
+                </span>
             </div>
             <div class="flex items-center gap-3">
                 <span v-if="totalDuration" class="text-xs text-gray-500 dark:text-gray-400 font-mono">
@@ -100,8 +104,8 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
 
         <!-- Empty state -->
         <div v-else class="px-4 py-6 text-center">
-            <p class="text-sm text-gray-400 dark:text-gray-500">
-                {{ isRestDay ? '😴 Rest day - recharging!' : 'No outputs for this day' }}
+            <p class="text-sm" :class="isMissed ? 'text-red-400 dark:text-red-500' : 'text-gray-400 dark:text-gray-500'">
+                {{ isRestDay ? '😴 Rest day - recharging!' : isMissed ? '✗ Bỏ lỡ ngày này' : 'No outputs for this day' }}
             </p>
             <button
                 v-if="!isRestDay && !isPublic"
