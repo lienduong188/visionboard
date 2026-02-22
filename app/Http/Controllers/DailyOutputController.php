@@ -25,7 +25,7 @@ class DailyOutputController extends Controller
             ->orderBy('output_date', 'desc')
             ->orderBy('sort_order')
             ->get()
-            ->groupBy(fn($o) => $o->output_date->format('Y-m-d'));
+            ->groupBy('output_date');
 
         // Streak & stats
         $calculator = new StreakCalculator($user->id);
@@ -78,7 +78,7 @@ class DailyOutputController extends Controller
             ->orderBy('output_date', 'desc')
             ->orderBy('sort_order')
             ->get()
-            ->groupBy(fn($o) => $o->output_date->format('Y-m-d'));
+            ->groupBy('output_date');
 
         $calculator = new StreakCalculator($user->id);
         $streakData = $calculator->calculate();

@@ -43,7 +43,7 @@ class DailyOutput extends Model
     ];
 
     protected $casts = [
-        'output_date' => 'date',
+        'output_date' => 'string',
         'duration' => 'integer',
         'rating' => 'integer',
         'sort_order' => 'integer',

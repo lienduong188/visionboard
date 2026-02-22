@@ -32,6 +32,19 @@ const removeImage = ref(false);
 
 const isEditing = computed(() => !!props.output);
 
+// Parse date string thành YYYY-MM-DD theo local timezone (tránh UTC shift)
+const toLocalDateStr = (dateStr) => {
+    if (!dateStr) return '';
+    // Nếu đã là YYYY-MM-DD thì dùng luôn
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Có timezone info → parse và lấy theo local time
+    const d = new Date(dateStr);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+};
+
 // Reset form when modal opens
 watch(() => props.show, (val) => {
     if (val) {
@@ -49,7 +62,7 @@ watch(() => props.show, (val) => {
                 output_link: props.output.output_link || '',
                 rating: props.output.rating,
                 status: props.output.status,
-                output_date: props.output.output_date?.split('T')[0] || props.output.output_date,
+                output_date: toLocalDateStr(props.output.output_date),
             };
         } else {
             const now = new Date();

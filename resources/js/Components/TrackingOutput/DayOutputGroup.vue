@@ -93,7 +93,7 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
                 :output="output"
                 :categories="categories"
                 :is-public="isPublic"
-                @edit="emit('edit', $event)"
+                @edit="emit('edit', { ...$event, output_date: date })"
                 @delete="emit('delete', $event)"
             />
         </div>
