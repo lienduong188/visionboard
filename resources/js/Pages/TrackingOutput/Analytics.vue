@@ -234,6 +234,26 @@ const hoveredBubble = ref(null);
                                 </g>
                             </svg>
                         </div>
+
+                    <!-- Flywheel Explanation -->
+                    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                        <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
+                            <p class="font-semibold text-emerald-700 dark:text-emerald-400 mb-1">🟢 Flywheel Zone</p>
+                            <p class="text-emerald-600 dark:text-emerald-500 text-xs">Impact cao + Compound cao. Hoạt động vàng — tích lũy mãi mãi. Ưu tiên số 1.</p>
+                        </div>
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3">
+                            <p class="font-semibold text-indigo-700 dark:text-indigo-400 mb-1">🟣 High Impact</p>
+                            <p class="text-indigo-600 dark:text-indigo-500 text-xs">Impact cao, Compound thấp. Quan trọng nhưng không tích lũy. Làm vừa đủ.</p>
+                        </div>
+                        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
+                            <p class="font-semibold text-amber-700 dark:text-amber-400 mb-1">🟡 High Compound</p>
+                            <p class="text-amber-600 dark:text-amber-500 text-xs">Compound cao, Impact chưa rõ. Đang xây kỹ năng — cần pivot để tăng impact.</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
+                            <p class="font-semibold text-gray-600 dark:text-gray-400 mb-1">⬜ Low Priority</p>
+                            <p class="text-gray-500 dark:text-gray-500 text-xs">Cả hai thấp. Tránh đầu tư nhiều thời gian. Chỉ làm khi cần.</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Category Rankings -->
@@ -409,28 +429,6 @@ const hoveredBubble = ref(null);
                     </div>
                 </div>
 
-                <!-- Flywheel Explanation -->
-                <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-5 border border-indigo-100 dark:border-indigo-800">
-                    <h3 class="text-base font-semibold text-indigo-800 dark:text-indigo-300 mb-3">📖 Cách đọc Ma trận Flywheel</h3>
-                    <div class="flex flex-col gap-3 text-sm text-indigo-700 dark:text-indigo-300">
-                        <div>
-                            <p class="font-semibold mb-1">🟢 Flywheel Zone (cao-cao)</p>
-                            <p class="text-indigo-600 dark:text-indigo-400">Impact cao + Compound cao = Hoạt động vàng. Mỗi phút bỏ ra tạo ra giá trị tích lũy theo thời gian. Ưu tiên số 1.</p>
-                        </div>
-                        <div>
-                            <p class="font-semibold mb-1">🟣 High Impact (cao-thấp)</p>
-                            <p class="text-indigo-600 dark:text-indigo-400">Impact cao nhưng compound thấp = Quan trọng nhưng không tích lũy tốt. Làm vừa đủ, không quá nhiều.</p>
-                        </div>
-                        <div>
-                            <p class="font-semibold mb-1">🟡 High Compound (thấp-cao)</p>
-                            <p class="text-indigo-600 dark:text-indigo-400">Compound cao nhưng impact thấp = Có thể xây dựng kỹ năng nhưng chưa rõ giá trị. Cần xem xét lại.</p>
-                        </div>
-                        <div>
-                            <p class="font-semibold mb-1">⬜ Low Priority (thấp-thấp)</p>
-                            <p class="text-indigo-600 dark:text-indigo-400">Cả hai đều thấp = Tránh đầu tư nhiều thời gian vào đây. Chỉ làm khi cần thiết.</p>
-                        </div>
-                    </div>
-                </div>
 
             </div>
         </div>
