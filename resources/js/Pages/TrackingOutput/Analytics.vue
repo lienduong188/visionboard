@@ -62,10 +62,26 @@ const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighte
 
 // Quadrant labels
 const quadrants = [
-    { x: padL + innerW * 0.02, y: padT + innerH * 0.05, label: 'HIGH IMPACT', sub: 'Low Compound', color: '#6366f1' },
-    { x: padL + innerW * 0.52, y: padT + innerH * 0.05, label: '🔥 FLYWHEEL ZONE', sub: 'High × High', color: '#10b981' },
-    { x: padL + innerW * 0.02, y: padT + innerH * 0.56, label: 'LOW PRIORITY', sub: 'Low × Low', color: '#9ca3af' },
-    { x: padL + innerW * 0.52, y: padT + innerH * 0.56, label: 'HIGH COMPOUND', sub: 'Low Impact', color: '#f59e0b' },
+    {
+        x: padL + innerW * 0.02, y: padT + innerH * 0.05,
+        label: 'HIGH IMPACT', sub: 'Low Compound', color: '#6366f1',
+        desc: 'Impact cao, Compound thấp\nTạo ra thay đổi lớn nhưng không tích lũy theo thời gian.\nVD: Movement — sức khỏe tốt nhưng bỏ 1 tuần là xuống ngay.\n→ Quan trọng, nhưng đừng over-invest thêm giờ vào đây.',
+    },
+    {
+        x: padL + innerW * 0.52, y: padT + innerH * 0.05,
+        label: '🔥 FLYWHEEL ZONE', sub: 'High × High', color: '#10b981',
+        desc: 'Impact cao + Compound cao = Vòng quay vàng!\nMỗi giờ đầu tư hôm nay tạo ra giá trị tích lũy mãi mãi.\nVD: Writing, Learning — bài viết & kiến thức compound theo thời gian.\n→ Ưu tiên số 1. Đầu tư nhiều nhất vào đây.',
+    },
+    {
+        x: padL + innerW * 0.02, y: padT + innerH * 0.56,
+        label: 'LOW PRIORITY', sub: 'Low × Low', color: '#9ca3af',
+        desc: 'Impact thấp + Compound thấp\nKhông tạo giá trị lớn, không tích lũy.\n→ Hạn chế tối đa thời gian bỏ vào đây.',
+    },
+    {
+        x: padL + innerW * 0.52, y: padT + innerH * 0.56,
+        label: 'HIGH COMPOUND', sub: 'Low Impact', color: '#f59e0b',
+        desc: 'Compound cao nhưng Impact chưa rõ\nTích lũy được nhưng chưa tạo ra thay đổi rõ ràng cho cuộc sống.\nVD: Craft — kỹ năng tăng dần nhưng ảnh hưởng cuộc sống còn thấp.\n→ Xem xét lại: có thể pivot để tăng impact.',
+    },
 ];
 
 const hoveredBubble = ref(null);
@@ -144,17 +160,18 @@ const hoveredBubble = ref(null);
                                 <rect :x="padL + innerW/2" :y="padT + innerH/2" :width="innerW/2" :height="innerH/2"
                                     fill="#f59e0b" fill-opacity="0.04" />
 
-                                <!-- Quadrant labels -->
-                                <text v-for="q in quadrants" :key="q.label"
-                                    :x="q.x" :y="q.y"
-                                    :fill="q.color" font-size="13" font-weight="700" opacity="0.85">
-                                    {{ q.label }}
-                                </text>
-                                <text v-for="q in quadrants" :key="q.sub"
-                                    :x="q.x" :y="q.y + 18"
-                                    :fill="q.color" font-size="11" opacity="0.6">
-                                    {{ q.sub }}
-                                </text>
+                                <!-- Quadrant labels + tooltips -->
+                                <g v-for="q in quadrants" :key="q.label" cursor="help">
+                                    <title>{{ q.desc }}</title>
+                                    <text :x="q.x" :y="q.y"
+                                        :fill="q.color" font-size="13" font-weight="700" opacity="0.85">
+                                        {{ q.label }}
+                                    </text>
+                                    <text :x="q.x" :y="q.y + 18"
+                                        :fill="q.color" font-size="11" opacity="0.6">
+                                        {{ q.sub }}
+                                    </text>
+                                </g>
 
                                 <!-- Axis labels -->
                                 <text :x="padL + innerW/2" :y="svgHeight - 6" text-anchor="middle" font-size="13" fill="#9ca3af">Compound (tích lũy)</text>
