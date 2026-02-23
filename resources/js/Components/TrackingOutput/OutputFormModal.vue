@@ -18,7 +18,7 @@ const emit = defineEmits(['close']);
 
 const form = ref({
     title: '',
-    category: 'coding',
+    category: 'writing',
     goal_id: null,
     duration: 60,
     note: '',
@@ -72,7 +72,7 @@ watch(() => props.show, (val) => {
             const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             form.value = {
                 title: props.defaultTitle || '',
-                category: 'coding',
+                category: 'writing',
                 goal_id: null,
                 duration: 60,
                 note: '',
@@ -202,6 +202,7 @@ const close = () => emit('close');
                                 v-for="(cat, key) in categories"
                                 :key="key"
                                 type="button"
+                                :title="cat.tooltip"
                                 @click="form.category = key"
                                 class="px-3 py-1.5 rounded-full text-sm transition-colors"
                                 :class="form.category === key

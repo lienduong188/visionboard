@@ -14,15 +14,14 @@ class DailyOutput extends Model
     // compound: Khả năng tích lũy theo thời gian (1-10)
     // flywheel = impact × compound (max 100)
     const CATEGORIES = [
-        'coding'   => ['icon' => '💻', 'label' => 'Coding',   'impact' => 9, 'compound' => 9],
-        'writing'  => ['icon' => '✍️', 'label' => 'Writing',  'impact' => 8, 'compound' => 9],
-        'career'   => ['icon' => '💼', 'label' => 'Career',   'impact' => 9, 'compound' => 7],
-        'study'    => ['icon' => '📚', 'label' => 'Study',    'impact' => 7, 'compound' => 8],
-        'video'    => ['icon' => '🎥', 'label' => 'Video',    'impact' => 7, 'compound' => 7],
-        'training' => ['icon' => '🏃', 'label' => 'Training', 'impact' => 8, 'compound' => 5],
-        'creative' => ['icon' => '🎨', 'label' => 'Creative', 'impact' => 6, 'compound' => 6],
-        'wellness' => ['icon' => '🧘', 'label' => 'Wellness', 'impact' => 7, 'compound' => 5],
-        'other'    => ['icon' => '🔧', 'label' => 'Other',    'impact' => 4, 'compound' => 3],
+        'writing'  => ['icon' => '✍️', 'label' => 'Writing',  'impact' => 8, 'compound' => 9, 'tooltip' => 'Viết blog, caption, scripting'],
+        'capture'  => ['icon' => '📸', 'label' => 'Capture',  'impact' => 7, 'compound' => 7, 'tooltip' => 'Quay vlog, chụp ảnh (raw, chưa edit)'],
+        'edit'     => ['icon' => '🎬', 'label' => 'Edit',     'impact' => 8, 'compound' => 8, 'tooltip' => 'Edit video, audio mixing, post-production'],
+        'art'      => ['icon' => '🖌️', 'label' => 'Art',      'impact' => 7, 'compound' => 7, 'tooltip' => 'Vẽ tranh, design Adobe (Illustrator, Photoshop...)'],
+        'craft'    => ['icon' => '🧶', 'label' => 'Craft',    'impact' => 5, 'compound' => 4, 'tooltip' => 'Thêu thùa, móc len, handmade'],
+        'movement' => ['icon' => '🏃', 'label' => 'Movement', 'impact' => 8, 'compound' => 6, 'tooltip' => 'Chạy, gym, leo núi'],
+        'learning' => ['icon' => '📚', 'label' => 'Learning', 'impact' => 8, 'compound' => 9, 'tooltip' => 'Đọc sách, học, coding'],
+        'connect'  => ['icon' => '🤝', 'label' => 'Connect',  'impact' => 7, 'compound' => 6, 'tooltip' => 'Gọi cho gia đình, kết nối bạn bè'],
     ];
 
     const DURATION_PRESETS = [30, 60, 90, 120];
