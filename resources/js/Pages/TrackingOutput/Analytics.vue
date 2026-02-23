@@ -26,9 +26,9 @@ const fmtTime = (min) => {
 // Flywheel quadrant SVG
 // X axis = compound (1-10), Y axis = impact (1-10)
 // Each category = bubble, size = time ratio
-const svgWidth = 400;
-const svgHeight = 340;
-const padL = 40, padR = 20, padT = 20, padB = 40;
+const svgWidth = 660;
+const svgHeight = 540;
+const padL = 58, padR = 28, padT = 32, padB = 58;
 const innerW = svgWidth - padL - padR;
 const innerH = svgHeight - padT - padB;
 
@@ -39,8 +39,8 @@ const bubbles = computed(() => {
     const maxTime = Math.max(...props.categoryStats.map(c => c.total_time), 1);
     return props.categoryStats.map(c => {
         const r = c.total_time > 0
-            ? 8 + (c.total_time / maxTime) * 22
-            : 6;
+            ? 14 + (c.total_time / maxTime) * 34
+            : 10;
         return {
             ...c,
             cx: toX(c.compound),
@@ -64,8 +64,8 @@ const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighte
 const quadrants = [
     { x: padL + innerW * 0.02, y: padT + innerH * 0.05, label: 'HIGH IMPACT', sub: 'Low Compound', color: '#6366f1' },
     { x: padL + innerW * 0.52, y: padT + innerH * 0.05, label: '🔥 FLYWHEEL ZONE', sub: 'High × High', color: '#10b981' },
-    { x: padL + innerW * 0.02, y: padT + innerH * 0.55, label: 'LOW PRIORITY', sub: 'Low × Low', color: '#9ca3af' },
-    { x: padL + innerW * 0.52, y: padT + innerH * 0.55, label: 'HIGH COMPOUND', sub: 'Low Impact', color: '#f59e0b' },
+    { x: padL + innerW * 0.02, y: padT + innerH * 0.56, label: 'LOW PRIORITY', sub: 'Low × Low', color: '#9ca3af' },
+    { x: padL + innerW * 0.52, y: padT + innerH * 0.56, label: 'HIGH COMPOUND', sub: 'Low Impact', color: '#f59e0b' },
 ];
 
 const hoveredBubble = ref(null);
@@ -89,7 +89,7 @@ const hoveredBubble = ref(null);
         </template>
 
         <div class="py-6">
-            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 space-y-6">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6">
 
                 <!-- Top KPI Cards -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -126,13 +126,13 @@ const hoveredBubble = ref(null);
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
                     <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Ma trận Flywheel</h3>
                     <p class="text-sm text-gray-400 dark:text-gray-500 mb-3">Trục Y = Impact dài hạn · Trục X = Khả năng tích lũy · Kích thước = Thời gian đầu tư</p>
-                        <div class="relative overflow-x-auto">
-                            <svg :width="svgWidth" :height="svgHeight" class="w-full max-w-full">
+                        <div class="w-full">
+                            <svg :viewBox="`0 0 ${svgWidth} ${svgHeight}`" class="w-full h-auto">
                                 <!-- Grid lines -->
                                 <line :x1="padL + innerW/2" :y1="padT" :x2="padL + innerW/2" :y2="padT + innerH"
-                                    stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4" class="dark:opacity-20" />
+                                    stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="6,4" class="dark:opacity-20" />
                                 <line :x1="padL" :y1="padT + innerH/2" :x2="padL + innerW" :y2="padT + innerH/2"
-                                    stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4,4" class="dark:opacity-20" />
+                                    stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="6,4" class="dark:opacity-20" />
 
                                 <!-- Quadrant backgrounds -->
                                 <rect :x="padL" :y="padT" :width="innerW/2" :height="innerH/2"
@@ -147,25 +147,25 @@ const hoveredBubble = ref(null);
                                 <!-- Quadrant labels -->
                                 <text v-for="q in quadrants" :key="q.label"
                                     :x="q.x" :y="q.y"
-                                    :fill="q.color" font-size="9" font-weight="600" opacity="0.8">
+                                    :fill="q.color" font-size="13" font-weight="700" opacity="0.85">
                                     {{ q.label }}
                                 </text>
                                 <text v-for="q in quadrants" :key="q.sub"
-                                    :x="q.x" :y="q.y + 12"
-                                    :fill="q.color" font-size="8" opacity="0.6">
+                                    :x="q.x" :y="q.y + 18"
+                                    :fill="q.color" font-size="11" opacity="0.6">
                                     {{ q.sub }}
                                 </text>
 
                                 <!-- Axis labels -->
-                                <text :x="padL + innerW/2" :y="svgHeight - 4" text-anchor="middle" font-size="10" fill="#9ca3af">Compound (tích lũy)</text>
-                                <text :x="14" :y="padT + innerH/2" text-anchor="middle" font-size="10" fill="#9ca3af"
-                                    transform="rotate(-90, 14, 230)">Impact</text>
+                                <text :x="padL + innerW/2" :y="svgHeight - 6" text-anchor="middle" font-size="13" fill="#9ca3af">Compound (tích lũy)</text>
+                                <text :x="18" :y="padT + innerH/2" text-anchor="middle" font-size="13" fill="#9ca3af"
+                                    :transform="`rotate(-90, 18, ${padT + innerH/2})`">Impact</text>
 
                                 <!-- Axis ticks -->
-                                <text :x="padL" :y="svgHeight - 8" text-anchor="middle" font-size="8" fill="#d1d5db">1</text>
-                                <text :x="padL + innerW" :y="svgHeight - 8" text-anchor="middle" font-size="8" fill="#d1d5db">10</text>
-                                <text :x="padL - 8" :y="padT + innerH" text-anchor="end" font-size="8" fill="#d1d5db">1</text>
-                                <text :x="padL - 8" :y="padT + 4" text-anchor="end" font-size="8" fill="#d1d5db">10</text>
+                                <text :x="padL" :y="svgHeight - 12" text-anchor="middle" font-size="11" fill="#d1d5db">1</text>
+                                <text :x="padL + innerW" :y="svgHeight - 12" text-anchor="middle" font-size="11" fill="#d1d5db">10</text>
+                                <text :x="padL - 10" :y="padT + innerH" text-anchor="end" font-size="11" fill="#d1d5db">1</text>
+                                <text :x="padL - 10" :y="padT + 6" text-anchor="end" font-size="11" fill="#d1d5db">10</text>
 
                                 <!-- Bubbles -->
                                 <g v-for="b in bubbles" :key="b.key"
@@ -177,39 +177,39 @@ const hoveredBubble = ref(null);
                                         :fill="b.flywheel >= 63 ? '#10b981' : b.flywheel >= 40 ? '#6366f1' : '#9ca3af'"
                                         :fill-opacity="b.total_time > 0 ? 0.8 : 0.2"
                                         :stroke="hoveredBubble === b.key ? '#1f2937' : 'white'"
-                                        stroke-width="2"
+                                        stroke-width="2.5"
                                         class="transition-all duration-200"
                                     />
-                                    <text :x="b.cx" :y="b.cy - b.r - 4" text-anchor="middle" font-size="11">{{ b.icon }}</text>
+                                    <text :x="b.cx" :y="b.cy - b.r - 5" text-anchor="middle" font-size="18">{{ b.icon }}</text>
                                     <text v-if="hoveredBubble === b.key || b.total_time > 0"
-                                        :x="b.cx" :y="b.cy + b.r + 12" text-anchor="middle" font-size="8" fill="#6b7280">
+                                        :x="b.cx" :y="b.cy + b.r + 16" text-anchor="middle" font-size="11" fill="#6b7280">
                                         {{ b.label }}
                                     </text>
                                 </g>
 
                                 <!-- Tooltip for hovered -->
-                                <g v-if="hoveredBubble" >
+                                <g v-if="hoveredBubble">
                                     <template v-for="b in bubbles" :key="b.key">
                                         <template v-if="b.key === hoveredBubble">
                                             <rect
-                                                :x="Math.min(b.cx + 10, svgWidth - 110)"
-                                                :y="Math.max(b.cy - 40, 4)"
-                                                width="105" height="52" rx="6"
-                                                fill="#1f2937" fill-opacity="0.92" />
-                                            <text :x="Math.min(b.cx + 62, svgWidth - 57)" :y="Math.max(b.cy - 27, 17)"
-                                                text-anchor="middle" font-size="10" fill="white" font-weight="600">
+                                                :x="Math.min(b.cx + 14, svgWidth - 150)"
+                                                :y="Math.max(b.cy - 50, 4)"
+                                                width="140" height="66" rx="8"
+                                                fill="#1f2937" fill-opacity="0.93" />
+                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy - 34, 20)"
+                                                text-anchor="middle" font-size="13" fill="white" font-weight="600">
                                                 {{ b.icon }} {{ b.label }}
                                             </text>
-                                            <text :x="Math.min(b.cx + 62, svgWidth - 57)" :y="Math.max(b.cy - 14, 30)"
-                                                text-anchor="middle" font-size="9" fill="#d1fae5">
+                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy - 18, 36)"
+                                                text-anchor="middle" font-size="11" fill="#d1fae5">
                                                 Flywheel: {{ b.flywheel }}/100
                                             </text>
-                                            <text :x="Math.min(b.cx + 62, svgWidth - 57)" :y="Math.max(b.cy - 1, 43)"
-                                                text-anchor="middle" font-size="9" fill="#bfdbfe">
+                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy - 3, 51)"
+                                                text-anchor="middle" font-size="11" fill="#bfdbfe">
                                                 {{ fmtTime(b.total_time) }} · {{ b.time_ratio }}%
                                             </text>
-                                            <text :x="Math.min(b.cx + 62, svgWidth - 57)" :y="Math.max(b.cy + 12, 56)"
-                                                text-anchor="middle" font-size="9" fill="#fde68a">
+                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy + 13, 66)"
+                                                text-anchor="middle" font-size="11" fill="#fde68a">
                                                 I={{ b.impact }} × C={{ b.compound }}
                                             </text>
                                         </template>
