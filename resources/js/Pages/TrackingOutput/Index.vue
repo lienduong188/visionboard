@@ -274,6 +274,7 @@ const switchView = (view) => {
                         v-for="(cat, key) in categories"
                         :key="key"
                         @click="categoryFilter = key"
+                        :title="cat.tooltip"
                         class="px-3 py-1 rounded-full text-xs font-medium transition-colors"
                         :class="categoryFilter === key
                             ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
