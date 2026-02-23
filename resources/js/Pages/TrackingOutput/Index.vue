@@ -4,6 +4,7 @@ import OutputStatsBar from '@/Components/TrackingOutput/OutputStatsBar.vue';
 import DayOutputGroup from '@/Components/TrackingOutput/DayOutputGroup.vue';
 import OutputFormModal from '@/Components/TrackingOutput/OutputFormModal.vue';
 import CalendarHeatmap from '@/Components/TrackingOutput/CalendarHeatmap.vue';
+import MonthlyCalendar from '@/Components/TrackingOutput/MonthlyCalendar.vue';
 import SpinWheel from '@/Components/TrackingOutput/SpinWheel.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
@@ -24,6 +25,7 @@ const props = defineProps({
 });
 
 const viewMode = ref(props.currentView || 'list');
+const calendarSubMode = ref('heatmap'); // 'heatmap' | 'monthly'
 const showFormModal = ref(false);
 const editingOutput = ref(null);
 const defaultDate = ref(null);
@@ -281,9 +283,38 @@ const switchView = (view) => {
                     </button>
                 </div>
 
-                <!-- Calendar Heatmap View -->
-                <div v-if="viewMode === 'calendar'" class="mb-6">
+                <!-- Calendar View -->
+                <div v-if="viewMode === 'calendar'" class="mb-6 space-y-4">
+                    <!-- Sub-toggle: Heatmap / Monthly -->
+                    <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 w-fit">
+                        <button
+                            @click="calendarSubMode = 'heatmap'"
+                            class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+                            :class="calendarSubMode === 'heatmap'
+                                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                        >
+                            🌿 Heatmap
+                        </button>
+                        <button
+                            @click="calendarSubMode = 'monthly'"
+                            class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+                            :class="calendarSubMode === 'monthly'
+                                ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
+                        >
+                            📅 Monthly
+                        </button>
+                    </div>
+
                     <CalendarHeatmap
+                        v-if="calendarSubMode === 'heatmap'"
+                        :heatmap="heatmap"
+                        :rest-days="restDays"
+                        @select-date="selectDateFromCalendar"
+                    />
+                    <MonthlyCalendar
+                        v-else
                         :heatmap="heatmap"
                         :rest-days="restDays"
                         @select-date="selectDateFromCalendar"
