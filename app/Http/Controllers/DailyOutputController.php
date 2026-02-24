@@ -116,7 +116,7 @@ class DailyOutputController extends Controller
             'note' => 'nullable|string|max:1000',
             'output_link' => 'nullable|string|max:500',
             'images' => 'nullable|array|max:10',
-            'images.*' => 'image|max:5120',
+            'images.*' => 'image',
             'rating' => 'nullable|integer|min:1|max:5',
             'status' => 'required|in:planned,done,skipped',
         ]);
@@ -162,7 +162,7 @@ class DailyOutputController extends Controller
             'note' => 'nullable|string|max:1000',
             'output_link' => 'nullable|string|max:500',
             'images' => 'nullable|array|max:10',
-            'images.*' => 'image|max:5120',
+            'images.*' => 'image',
             'removed_images' => 'nullable|array',
             'removed_images.*' => 'string|max:500',
             'remove_image_path' => 'nullable|boolean',

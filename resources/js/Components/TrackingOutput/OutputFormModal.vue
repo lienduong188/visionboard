@@ -113,15 +113,50 @@ const setRating = (r) => {
     form.value.rating = form.value.rating === r ? null : r;
 };
 
-const onImagesChange = (e) => {
+const MAX_DIMENSION = 2400;
+const JPEG_QUALITY = 0.88;
+
+const resizeIfNeeded = (file) => {
+    return new Promise((resolve) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const { width, height } = img;
+            if (width <= MAX_DIMENSION && height <= MAX_DIMENSION) {
+                resolve(file);
+                return;
+            }
+            let newW, newH;
+            if (width >= height) {
+                newW = MAX_DIMENSION;
+                newH = Math.round(height * MAX_DIMENSION / width);
+            } else {
+                newH = MAX_DIMENSION;
+                newW = Math.round(width * MAX_DIMENSION / height);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = newW;
+            canvas.height = newH;
+            canvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
+            canvas.toBlob((blob) => {
+                resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+            }, 'image/jpeg', JPEG_QUALITY);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+    });
+};
+
+const onImagesChange = async (e) => {
     const files = Array.from(e.target.files);
     for (const file of files) {
-        newImageFiles.value.push(file);
+        const processed = await resizeIfNeeded(file);
+        newImageFiles.value.push(processed);
         const reader = new FileReader();
         reader.onload = (ev) => { newImagePreviews.value.push(ev.target.result); };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(processed);
     }
-    // Reset input so same files can be re-selected if needed
     e.target.value = '';
 };
 
@@ -464,7 +499,7 @@ const close = () => emit('close');
                             @change="onImagesChange"
                             class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/30 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/50 cursor-pointer"
                         />
-                        <p class="text-xs text-gray-400 mt-1">Max 5MB/ảnh. Có thể chọn nhiều ảnh.</p>
+                        <p class="text-xs text-gray-400 mt-1">Có thể chọn nhiều ảnh. Ảnh lớn sẽ tự động scale.</p>
                     </div>
 
                     <!-- Validation errors -->
