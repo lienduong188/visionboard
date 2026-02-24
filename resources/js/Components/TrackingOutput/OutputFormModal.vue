@@ -199,12 +199,28 @@ const close = () => emit('close');
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                         {{ isEditing ? 'Edit Output' : 'Add Output' }}
                     </h3>
-                    <button @click="close" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                        ✕
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            @click="close"
+                            class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            form="output-form"
+                            class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+                        >
+                            {{ isEditing ? 'Update' : 'Add' }}
+                        </button>
+                        <button @click="close" class="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            ✕
+                        </button>
+                    </div>
                 </div>
 
-                <form @submit.prevent="submit" novalidate class="p-6 space-y-4">
+                <form id="output-form" @submit.prevent="submit" novalidate class="p-6 space-y-4">
                     <!-- Title -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -458,22 +474,6 @@ const close = () => emit('close');
                         </p>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button
-                            type="button"
-                            @click="close"
-                            class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
-                        >
-                            {{ isEditing ? 'Update' : 'Add Output' }}
-                        </button>
-                    </div>
                 </form>
             </div>
         </div>
