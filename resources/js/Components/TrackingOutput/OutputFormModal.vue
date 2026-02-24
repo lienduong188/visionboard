@@ -243,8 +243,8 @@ const close = () => emit('close');
                             Cancel
                         </button>
                         <button
-                            type="submit"
-                            form="output-form"
+                            type="button"
+                            @click="submit"
                             class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
                         >
                             {{ isEditing ? 'Update' : 'Add' }}
