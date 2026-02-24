@@ -24,7 +24,7 @@ class DailyOutput extends Model
         'connect'  => ['icon' => '🤝', 'label' => 'Connect',  'impact' => 7, 'compound' => 6, 'tooltip' => 'Gọi cho gia đình, kết nối bạn bè'],
     ];
 
-    const DURATION_PRESETS = [30, 60, 90, 120];
+    const DURATION_PRESETS = [10, 30, 60, 90, 120];
 
     const TRACKING_START = '2026-02-17';
     const TRACKING_END = '2027-02-05';
@@ -39,6 +39,7 @@ class DailyOutput extends Model
         'note',
         'output_link',
         'image_path',
+        'images',
         'rating',
         'status',
         'sort_order',
@@ -49,6 +50,7 @@ class DailyOutput extends Model
         'duration' => 'integer',
         'rating' => 'integer',
         'sort_order' => 'integer',
+        'images' => 'array',
     ];
 
     public function user(): BelongsTo

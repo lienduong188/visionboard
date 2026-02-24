@@ -28,18 +28,34 @@ const form = ref({
     output_date: '',
 });
 
-const imageFile = ref(null);
-const imagePreview = ref(null);
-const removeImage = ref(false);
+// Multi-image state
+const newImageFiles = ref([]); // File objects to upload
+const newImagePreviews = ref([]); // data URLs for preview
+const removedImagePaths = ref([]); // existing paths to delete
+const removeImagePath = ref(false); // whether to remove legacy image_path
 
 const isEditing = computed(() => !!props.output);
+
+// Existing images from server (edit mode)
+const existingImages = computed(() => {
+    if (!props.output) return [];
+    const list = [];
+    if (props.output.image_path && !removeImagePath.value) {
+        list.push({ path: props.output.image_path, isLegacy: true });
+    }
+    const jsonImages = props.output.images ?? [];
+    for (const path of jsonImages) {
+        if (!removedImagePaths.value.includes(path)) {
+            list.push({ path, isLegacy: false });
+        }
+    }
+    return list;
+});
 
 // Parse date string thành YYYY-MM-DD theo local timezone (tránh UTC shift)
 const toLocalDateStr = (dateStr) => {
     if (!dateStr) return '';
-    // Nếu đã là YYYY-MM-DD thì dùng luôn
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    // Có timezone info → parse và lấy theo local time
     const d = new Date(dateStr);
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -51,9 +67,10 @@ const toLocalDateStr = (dateStr) => {
 watch(() => props.show, (val) => {
     if (val) {
         formErrors.value = {};
-        imageFile.value = null;
-        imagePreview.value = null;
-        removeImage.value = false;
+        newImageFiles.value = [];
+        newImagePreviews.value = [];
+        removedImagePaths.value = [];
+        removeImagePath.value = false;
 
         if (props.output) {
             form.value = {
@@ -96,29 +113,30 @@ const setRating = (r) => {
     form.value.rating = form.value.rating === r ? null : r;
 };
 
-const onImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    imageFile.value = file;
-    removeImage.value = false;
-    const reader = new FileReader();
-    reader.onload = (ev) => { imagePreview.value = ev.target.result; };
-    reader.readAsDataURL(file);
-};
-
-const handleRemoveImage = () => {
-    imageFile.value = null;
-    imagePreview.value = null;
-    removeImage.value = true;
-};
-
-const currentImageUrl = computed(() => {
-    if (imagePreview.value) return imagePreview.value;
-    if (!removeImage.value && props.output?.image_path) {
-        return '/storage/' + props.output.image_path;
+const onImagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+        newImageFiles.value.push(file);
+        const reader = new FileReader();
+        reader.onload = (ev) => { newImagePreviews.value.push(ev.target.result); };
+        reader.readAsDataURL(file);
     }
-    return null;
-});
+    // Reset input so same files can be re-selected if needed
+    e.target.value = '';
+};
+
+const removeNewImage = (index) => {
+    newImageFiles.value.splice(index, 1);
+    newImagePreviews.value.splice(index, 1);
+};
+
+const removeExistingImage = (path, isLegacy) => {
+    if (isLegacy) {
+        removeImagePath.value = true;
+    } else {
+        removedImagePaths.value.push(path);
+    }
+};
 
 const submit = () => {
     if (!form.value.title.trim()) return;
@@ -133,11 +151,21 @@ const submit = () => {
     if (form.value.note) data.append('note', form.value.note);
     if (form.value.output_link) data.append('output_link', form.value.output_link);
     if (form.value.rating) data.append('rating', form.value.rating);
-    if (imageFile.value) data.append('image', imageFile.value);
-    if (removeImage.value) data.append('remove_image', '1');
+
+    // New images
+    for (const file of newImageFiles.value) {
+        data.append('images[]', file);
+    }
 
     if (isEditing.value) {
-        // Inertia PUT không hỗ trợ FormData → dùng POST + _method spoofing
+        // Removed existing images
+        for (const path of removedImagePaths.value) {
+            data.append('removed_images[]', path);
+        }
+        if (removeImagePath.value) {
+            data.append('remove_image_path', '1');
+        }
+
         data.append('_method', 'PUT');
         router.post(route('tracking-output.update', props.output.id), data, {
             forceFormData: true,
@@ -176,7 +204,7 @@ const close = () => emit('close');
                     </button>
                 </div>
 
-                <form @submit.prevent="submit" class="p-6 space-y-4">
+                <form @submit.prevent="submit" novalidate class="p-6 space-y-4">
                     <!-- Title -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -187,7 +215,6 @@ const close = () => emit('close');
                             type="text"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                             placeholder="What did you accomplish?"
-                            required
                             autofocus
                         />
                     </div>
@@ -235,13 +262,13 @@ const close = () => emit('close');
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Duration
                         </label>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 flex-wrap">
                             <button
                                 v-for="preset in durationPresets"
                                 :key="preset"
                                 type="button"
                                 @click="form.duration = preset"
-                                class="px-4 py-2 rounded-lg text-sm font-mono transition-colors"
+                                class="px-3 py-2 rounded-lg text-sm font-mono transition-colors"
                                 :class="form.duration === preset
                                     ? 'bg-indigo-500 text-white'
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'"
@@ -342,42 +369,74 @@ const close = () => emit('close');
                         </label>
                         <input
                             v-model="form.output_link"
-                            type="url"
+                            type="text"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                             placeholder="https://..."
                         />
                     </div>
 
-                    <!-- Image Upload -->
+                    <!-- Image Upload (multiple) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Image
+                            Images
                         </label>
 
-                        <!-- Current / Preview image -->
-                        <div v-if="currentImageUrl" class="mb-2 relative inline-block">
-                            <img
-                                :src="currentImageUrl"
-                                class="h-32 w-auto rounded-lg object-cover border border-gray-200 dark:border-gray-600"
-                                alt="Output image"
-                            />
-                            <button
-                                type="button"
-                                @click="handleRemoveImage"
-                                class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                title="Remove image"
+                        <!-- Existing images (edit mode) -->
+                        <div v-if="existingImages.length > 0" class="flex flex-wrap gap-2 mb-2">
+                            <div
+                                v-for="img in existingImages"
+                                :key="img.path"
+                                class="relative"
                             >
-                                ✕
-                            </button>
+                                <a :href="'/storage/' + img.path" target="_blank">
+                                    <img
+                                        :src="'/storage/' + img.path"
+                                        class="h-20 w-20 rounded-lg object-cover border border-gray-200 dark:border-gray-600 hover:opacity-80 transition-opacity"
+                                        alt="Output image"
+                                    />
+                                </a>
+                                <button
+                                    type="button"
+                                    @click="removeExistingImage(img.path, img.isLegacy)"
+                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                    title="Remove image"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- New image previews -->
+                        <div v-if="newImagePreviews.length > 0" class="flex flex-wrap gap-2 mb-2">
+                            <div
+                                v-for="(preview, index) in newImagePreviews"
+                                :key="index"
+                                class="relative"
+                            >
+                                <img
+                                    :src="preview"
+                                    class="h-20 w-20 rounded-lg object-cover border-2 border-indigo-300 dark:border-indigo-600"
+                                    alt="New image"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeNewImage(index)"
+                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                    title="Remove"
+                                >
+                                    ✕
+                                </button>
+                            </div>
                         </div>
 
                         <input
                             type="file"
                             accept="image/*"
-                            @change="onImageChange"
+                            multiple
+                            @change="onImagesChange"
                             class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 dark:file:bg-indigo-900/30 dark:file:text-indigo-300 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900/50 cursor-pointer"
                         />
-                        <p class="text-xs text-gray-400 mt-1">Max 5MB. JPG, PNG, WebP, GIF...</p>
+                        <p class="text-xs text-gray-400 mt-1">Max 5MB/ảnh. Có thể chọn nhiều ảnh.</p>
                     </div>
 
                     <!-- Validation errors -->

@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -23,6 +24,14 @@ const toggleStatus = () => {
         status: nextStatus,
     }, { preserveScroll: true });
 };
+
+// Gộp image_path (legacy) và images (JSON) thành một mảng
+const allImages = computed(() => {
+    const list = [];
+    if (props.output.image_path) list.push(props.output.image_path);
+    for (const p of props.output.images ?? []) list.push(p);
+    return list;
+});
 
 const formatDuration = (minutes) => {
     if (!minutes) return '0m';
@@ -91,19 +100,22 @@ const formatDuration = (minutes) => {
                     🔗
                 </a>
 
-                <!-- Image thumbnail -->
-                <a
-                    v-if="output.image_path"
-                    :href="'/storage/' + output.image_path"
-                    target="_blank"
-                    title="View image"
-                >
-                    <img
-                        :src="'/storage/' + output.image_path"
-                        class="h-6 w-6 rounded object-cover border border-gray-200 dark:border-gray-600 hover:opacity-80 transition-opacity"
-                        alt=""
-                    />
-                </a>
+                <!-- Image thumbnails (multiple) -->
+                <template v-if="allImages.length > 0">
+                    <a
+                        v-for="(img, i) in allImages"
+                        :key="i"
+                        :href="'/storage/' + img"
+                        target="_blank"
+                        title="View image"
+                    >
+                        <img
+                            :src="'/storage/' + img"
+                            class="h-6 w-6 rounded object-cover border border-gray-200 dark:border-gray-600 hover:opacity-80 transition-opacity"
+                            alt=""
+                        />
+                    </a>
+                </template>
 
                 <!-- Actions: ẩn khi public view -->
                 <div v-if="!isPublic" class="flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">

@@ -114,8 +114,9 @@ class DailyOutputController extends Controller
             'goal_id' => 'nullable|exists:goals,id',
             'duration' => 'required|integer|min:1|max:1440',
             'note' => 'nullable|string|max:1000',
-            'output_link' => 'nullable|url|max:500',
-            'image' => 'nullable|image|max:5120',
+            'output_link' => 'nullable|string|max:500',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|max:5120',
             'rating' => 'nullable|integer|min:1|max:5',
             'status' => 'required|in:planned,done,skipped',
         ]);
@@ -123,10 +124,13 @@ class DailyOutputController extends Controller
         if (empty($validated['output_link'])) $validated['output_link'] = null;
         if (empty($validated['note'])) $validated['note'] = null;
 
-        if ($request->hasFile('image')) {
-            $validated['image_path'] = $request->file('image')->store('daily-outputs', 'public');
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $imagePaths[] = $file->store('daily-outputs', 'public');
+            }
         }
-        unset($validated['image']);
+        $validated['images'] = $imagePaths ?: null;
 
         $validated['user_id'] = $request->user()->id;
         $validated['sort_order'] = DailyOutput::where('user_id', $request->user()->id)
@@ -156,8 +160,12 @@ class DailyOutputController extends Controller
             'goal_id' => 'nullable|exists:goals,id',
             'duration' => 'required|integer|min:1|max:1440',
             'note' => 'nullable|string|max:1000',
-            'output_link' => 'nullable|url|max:500',
-            'image' => 'nullable|image|max:5120',
+            'output_link' => 'nullable|string|max:500',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|max:5120',
+            'removed_images' => 'nullable|array',
+            'removed_images.*' => 'string|max:500',
+            'remove_image_path' => 'nullable|boolean',
             'rating' => 'nullable|integer|min:1|max:5',
             'status' => 'required|in:planned,done,skipped',
         ]);
@@ -165,16 +173,28 @@ class DailyOutputController extends Controller
         if (empty($validated['output_link'])) $validated['output_link'] = null;
         if (empty($validated['note'])) $validated['note'] = null;
 
-        if ($request->hasFile('image')) {
-            if ($dailyOutput->image_path) {
-                Storage::disk('public')->delete($dailyOutput->image_path);
-            }
-            $validated['image_path'] = $request->file('image')->store('daily-outputs', 'public');
-        } elseif ($request->boolean('remove_image') && $dailyOutput->image_path) {
+        // Handle image_path (legacy single image)
+        if ($request->boolean('remove_image_path') && $dailyOutput->image_path) {
             Storage::disk('public')->delete($dailyOutput->image_path);
             $validated['image_path'] = null;
         }
-        unset($validated['image']);
+
+        // Handle removing specific images from JSON column
+        $currentImages = $dailyOutput->images ?? [];
+        $removedImages = $validated['removed_images'] ?? [];
+        foreach ($removedImages as $path) {
+            Storage::disk('public')->delete($path);
+            $currentImages = array_values(array_filter($currentImages, fn($p) => $p !== $path));
+        }
+
+        // Add new uploaded images
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $currentImages[] = $file->store('daily-outputs', 'public');
+            }
+        }
+        $validated['images'] = $currentImages ?: null;
+        unset($validated['removed_images'], $validated['remove_image_path']);
 
         $dailyOutput->update($validated);
 
@@ -189,6 +209,9 @@ class DailyOutputController extends Controller
 
         if ($dailyOutput->image_path) {
             Storage::disk('public')->delete($dailyOutput->image_path);
+        }
+        foreach ($dailyOutput->images ?? [] as $path) {
+            Storage::disk('public')->delete($path);
         }
 
         $dailyOutput->delete();
