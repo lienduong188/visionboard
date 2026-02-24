@@ -262,7 +262,7 @@ const close = () => emit('close');
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Duration
                         </label>
-                        <div class="flex gap-2 flex-wrap">
+                        <div class="flex gap-2 flex-wrap items-center">
                             <button
                                 v-for="preset in durationPresets"
                                 :key="preset"
@@ -275,6 +275,18 @@ const close = () => emit('close');
                             >
                                 {{ preset }}'
                             </button>
+                            <!-- Custom input -->
+                            <div class="flex items-center gap-1">
+                                <input
+                                    type="number"
+                                    v-model.number="form.duration"
+                                    min="1"
+                                    max="1440"
+                                    class="w-20 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm font-mono text-center focus:border-indigo-500 focus:ring-indigo-500 py-2"
+                                    placeholder="?"
+                                />
+                                <span class="text-sm text-gray-500 dark:text-gray-400">'</span>
+                            </div>
                         </div>
                     </div>
 
