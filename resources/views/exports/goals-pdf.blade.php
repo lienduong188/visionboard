@@ -213,7 +213,7 @@
 
     @if($coreGoals->count() > 0)
     <div class="section">
-        <div class="section-title">Core Goals - Truc Trung Tam</div>
+        <div class="section-title">Core Goals</div>
         @foreach($coreGoals as $goal)
         <div class="goal">
             <div class="goal-header">

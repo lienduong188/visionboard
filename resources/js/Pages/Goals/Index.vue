@@ -529,7 +529,7 @@ const saveOrder = () => {
                                 <span class="star star-4">★</span>
                                 <span class="star star-5">✦</span>
                                 <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-4 sm:mt-6 max-w-xs mx-auto italic">
-                                    "Mỗi ngày đi một đoạn nhỏ, <br>đủ bền để đi xa, <br>đủ chậm để không bỏ quên mình."
+                                    "Each day, take one small step, <br>steady enough to go far, <br>slow enough not to lose yourself."
                                 </p>
                             </div>
                         </div>

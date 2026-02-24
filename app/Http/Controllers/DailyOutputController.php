@@ -338,8 +338,8 @@ class DailyOutputController extends Controller
                     'label' => $stat['label'],
                     'type' => 'untapped',
                     'priority' => 'high',
-                    'message' => "Chưa khám phá! Flywheel {$flywheel}/100 - tiềm năng tích lũy rất cao.",
-                    'action' => 'Bắt đầu ngay, dù chỉ 30 phút/tuần.',
+                    'message' => "Not explored yet! Flywheel {$flywheel}/100 — high accumulation potential.",
+                    'action' => 'Start now, even 30 mins/week makes a difference.',
                 ];
             } elseif ($flywheel >= 63 && $timeRatio < 15 && $catTime > 0) {
                 $recommendations[] = [
@@ -348,8 +348,8 @@ class DailyOutputController extends Controller
                     'label' => $stat['label'],
                     'type' => 'underinvested',
                     'priority' => 'high',
-                    'message' => "Flywheel {$flywheel}/100 nhưng chỉ {$timeRatio}% thời gian. Đang bỏ lỡ compound effect.",
-                    'action' => 'Tăng lên ít nhất 20% tổng thời gian.',
+                    'message' => "Flywheel {$flywheel}/100 but only {$timeRatio}% of your time. Missing out on compound effect.",
+                    'action' => 'Increase to at least 20% of total time.',
                 ];
             } elseif ($flywheel >= 49 && $timeRatio >= 15 && $timeRatio <= 35) {
                 $recommendations[] = [
@@ -358,8 +358,8 @@ class DailyOutputController extends Controller
                     'label' => $stat['label'],
                     'type' => 'balanced',
                     'priority' => 'good',
-                    'message' => "Flywheel {$flywheel}/100 với {$timeRatio}% thời gian. Cân bằng tốt!",
-                    'action' => 'Duy trì và tăng chất lượng (rating).',
+                    'message' => "Flywheel {$flywheel}/100 with {$timeRatio}% time. Good balance!",
+                    'action' => 'Maintain and improve quality (rating).',
                 ];
             } elseif ($flywheel >= 49 && $timeRatio > 35) {
                 $recommendations[] = [
@@ -368,8 +368,8 @@ class DailyOutputController extends Controller
                     'label' => $stat['label'],
                     'type' => 'champion',
                     'priority' => 'great',
-                    'message' => "🏆 Flywheel {$flywheel}/100 với {$timeRatio}% thời gian. Activity chủ lực!",
-                    'action' => 'Tiếp tục! Đây là vòng quay mạnh nhất.',
+                    'message' => "🏆 Flywheel {$flywheel}/100 with {$timeRatio}% time. Your strongest activity!",
+                    'action' => 'Keep going! This is your strongest flywheel.',
                 ];
             } elseif ($flywheel < 36 && $timeRatio > 20) {
                 $recommendations[] = [
@@ -378,8 +378,8 @@ class DailyOutputController extends Controller
                     'label' => $stat['label'],
                     'type' => 'overinvested',
                     'priority' => 'warning',
-                    'message' => "Flywheel chỉ {$flywheel}/100 nhưng chiếm {$timeRatio}% thời gian.",
-                    'action' => 'Cân nhắc giảm xuống dưới 15% để tái đầu tư vào activities có flywheel cao hơn.',
+                    'message' => "Flywheel only {$flywheel}/100 but takes {$timeRatio}% of your time.",
+                    'action' => 'Consider reducing below 15% to reinvest in higher-flywheel activities.',
                 ];
             }
         }

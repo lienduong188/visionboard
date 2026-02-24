@@ -8,16 +8,16 @@ const props = defineProps({
 const emit = defineEmits(['close', 'result']);
 
 const DEFAULT_ITEMS = [
-    { label: 'Viết blog', color: '#6366F1' },
-    { label: 'Quay vlog', color: '#3B82F6' },
-    { label: 'Edit video', color: '#EC4899' },
-    { label: 'Học', color: '#F59E0B' },
-    { label: 'Đọc', color: '#8B5CF6' },
-    { label: 'Vẽ', color: '#F43F5E' },
-    { label: 'Dọn dẹp', color: '#14B8A6' },
+    { label: 'Write Blog', color: '#6366F1' },
+    { label: 'Record Vlog', color: '#3B82F6' },
+    { label: 'Edit Video', color: '#EC4899' },
+    { label: 'Study', color: '#F59E0B' },
+    { label: 'Read', color: '#8B5CF6' },
+    { label: 'Draw', color: '#F43F5E' },
+    { label: 'Clean Up', color: '#14B8A6' },
     { label: 'Design', color: '#E879F9' },
-    { label: 'Thêu', color: '#10B981' },
-    { label: 'Móc len', color: '#EF4444' },
+    { label: 'Embroider', color: '#10B981' },
+    { label: 'Crochet', color: '#EF4444' },
 ];
 
 const COLORS_POOL = [
@@ -267,7 +267,7 @@ onMounted(() => {
                                 type="text"
                                 :disabled="customItems.length >= MAX_CUSTOM_ITEMS"
                                 class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:opacity-50"
-                                placeholder="Nhập hoạt động..."
+                                placeholder="Enter activity..."
                                 @keyup.enter="addCustomItem"
                             />
                             <button
@@ -294,10 +294,10 @@ onMounted(() => {
 
                         <div class="flex justify-between items-center">
                             <p v-if="customItems.length < 2" class="text-xs text-amber-500">
-                                Thêm ít nhất 2 mục để quay
+                                Add at least 2 items to spin
                             </p>
                             <p v-else-if="customItems.length >= MAX_CUSTOM_ITEMS" class="text-xs text-rose-500">
-                                Đã đạt tối đa {{ MAX_CUSTOM_ITEMS }} mục
+                                Max {{ MAX_CUSTOM_ITEMS }} items reached
                             </p>
                             <span v-else class="text-xs text-gray-400">{{ customItems.length }}/{{ MAX_CUSTOM_ITEMS }}</span>
                             <button
@@ -336,7 +336,7 @@ onMounted(() => {
                             class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                             :class="{ 'animate-pulse': isSpinning }"
                         >
-                            {{ isSpinning ? 'Đang về bờ...' : (result ? 'Về bờ nữa!!' : 'Về bờ!!') }}
+                            {{ isSpinning ? 'Spinning...' : (result ? 'Spin Again!!' : 'Spin!!') }}
                         </button>
                         <button
                             v-if="result && !isSpinning"

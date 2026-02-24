@@ -51,10 +51,10 @@ const bubbles = computed(() => {
 });
 
 const priorityConfig = {
-    warning: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-300 dark:border-amber-700', badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', icon: '⚠️', label: 'Cân nhắc' },
-    high:    { bg: 'bg-blue-50 dark:bg-blue-900/20',   border: 'border-blue-300 dark:border-blue-700',   badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',   icon: '🚀', label: 'Cần đầu tư' },
-    good:    { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-300 dark:border-green-700', badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: '✅', label: 'Cân bằng tốt' },
-    great:   { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-300 dark:border-purple-700', badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', icon: '🏆', label: 'Xuất sắc' },
+    warning: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-300 dark:border-amber-700', badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', icon: '⚠️', label: 'Consider' },
+    high:    { bg: 'bg-blue-50 dark:bg-blue-900/20',   border: 'border-blue-300 dark:border-blue-700',   badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',   icon: '🚀', label: 'Invest More' },
+    good:    { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-300 dark:border-green-700', badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: '✅', label: 'Well Balanced' },
+    great:   { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-300 dark:border-purple-700', badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', icon: '🏆', label: 'Excellent' },
 };
 
 // Weekly trend bar chart (simple SVG)
@@ -96,10 +96,10 @@ const hoveredBubble = ref(null);
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
                         📊 Output Analytics
                     </h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Phân tích giá trị vòng quay (Flywheel)</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Flywheel value analysis</p>
                 </div>
                 <Link :href="route('tracking-output.index')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                    ← Về Output Tracker
+                    ← Back to Output Tracker
                 </Link>
             </div>
         </template>
@@ -111,18 +111,18 @@ const hoveredBubble = ref(null);
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
                         <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ totalWeightedScore.toLocaleString() }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Tổng Flywheel Score</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Flywheel Score</div>
                         <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">∑ (time × flywheel/100)</div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
                         <div class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ fmtTime(totalTime) }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Tổng thời gian</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Tất cả categories</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Time</div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">All categories</div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
                         <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
                             {{ ranked.find(r => r.total_time > 0)?.icon || '—' }}
-                            {{ ranked.find(r => r.total_time > 0)?.label || 'Chưa có' }}
+                            {{ ranked.find(r => r.total_time > 0)?.label || 'None yet' }}
                         </div>
                         <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Top Flywheel Activity</div>
                         <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
@@ -133,15 +133,15 @@ const hoveredBubble = ref(null);
                         <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">
                             {{ categoryStats.filter(c => c.total_time > 0).length }}/{{ categoryStats.length }}
                         </div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Categories đã làm</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Độ đa dạng output</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">Active Categories</div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Output diversity</div>
                     </div>
                 </div>
 
                 <!-- Flywheel Matrix -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Ma trận Flywheel</h3>
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-3">Trục Y = Impact dài hạn · Trục X = Khả năng tích lũy · Kích thước = Thời gian đầu tư</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Flywheel Matrix</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-3">Y-axis = Long-term impact · X-axis = Compounding · Size = Time invested</p>
                         <div class="w-full">
                             <svg :viewBox="`0 0 ${svgWidth} ${svgHeight}`" class="w-full h-auto">
                                 <!-- Grid lines -->
@@ -174,7 +174,7 @@ const hoveredBubble = ref(null);
                                 </g>
 
                                 <!-- Axis labels -->
-                                <text :x="padL + innerW/2" :y="svgHeight - 6" text-anchor="middle" font-size="13" fill="#9ca3af">Compound (tích lũy)</text>
+                                <text :x="padL + innerW/2" :y="svgHeight - 6" text-anchor="middle" font-size="13" fill="#9ca3af">Compound</text>
                                 <text :x="18" :y="padT + innerH/2" text-anchor="middle" font-size="13" fill="#9ca3af"
                                     :transform="`rotate(-90, 18, ${padT + innerH/2})`">Impact</text>
 
@@ -239,27 +239,27 @@ const hoveredBubble = ref(null);
                     <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                         <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
                             <p class="font-semibold text-emerald-700 dark:text-emerald-400 mb-1">🟢 Flywheel Zone</p>
-                            <p class="text-emerald-600 dark:text-emerald-500 text-xs">Impact cao + Compound cao. Hoạt động vàng — tích lũy mãi mãi. Ưu tiên số 1.</p>
+                            <p class="text-emerald-600 dark:text-emerald-500 text-xs">High impact + High compound. Golden activity — accumulates forever. Priority #1.</p>
                         </div>
                         <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3">
                             <p class="font-semibold text-indigo-700 dark:text-indigo-400 mb-1">🟣 High Impact</p>
-                            <p class="text-indigo-600 dark:text-indigo-500 text-xs">Impact cao, Compound thấp. Quan trọng nhưng không tích lũy. Làm vừa đủ.</p>
+                            <p class="text-indigo-600 dark:text-indigo-500 text-xs">High impact, low compound. Important but doesn't accumulate. Do moderately.</p>
                         </div>
                         <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
                             <p class="font-semibold text-amber-700 dark:text-amber-400 mb-1">🟡 High Compound</p>
-                            <p class="text-amber-600 dark:text-amber-500 text-xs">Compound cao, Impact chưa rõ. Đang xây kỹ năng — cần pivot để tăng impact.</p>
+                            <p class="text-amber-600 dark:text-amber-500 text-xs">High compound, unclear impact. Building skills — pivot to increase impact.</p>
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
                             <p class="font-semibold text-gray-600 dark:text-gray-400 mb-1">⬜ Low Priority</p>
-                            <p class="text-gray-500 dark:text-gray-500 text-xs">Cả hai thấp. Tránh đầu tư nhiều thời gian. Chỉ làm khi cần.</p>
+                            <p class="text-gray-500 dark:text-gray-500 text-xs">Both low. Avoid investing much time. Only do when necessary.</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Category Rankings -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Giá trị vòng quay theo Category</h3>
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Flywheel = Impact × Compound · Màu thanh = Weighted Score (time × flywheel)</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Flywheel Value by Category</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Flywheel = Impact × Compound · Bar color = Weighted Score (time × flywheel)</p>
                     <div class="space-y-4">
                         <div v-for="(cat, idx) in ranked" :key="cat.key" class="flex items-center gap-3">
                             <span class="text-sm text-gray-400 dark:text-gray-500 w-5 shrink-0">{{ idx + 1 }}</span>
@@ -298,17 +298,17 @@ const hoveredBubble = ref(null);
                             <div class="w-4 h-2 bg-emerald-400 rounded"></div> Flywheel score
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <div class="w-4 h-1.5 bg-amber-400 rounded"></div> Thời gian × Flywheel
+                            <div class="w-4 h-1.5 bg-amber-400 rounded"></div> Time × Flywheel
                         </div>
                     </div>
                 </div>
 
                 <!-- Recommendations -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">💡 Gợi ý tối ưu vòng quay</h3>
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Dựa trên ma trận Flywheel, đây là những điều chỉnh nên làm:</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">💡 Flywheel Optimization Tips</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Based on the Flywheel matrix, here are recommended adjustments:</p>
                     <div v-if="recommendations.length === 0" class="text-sm text-gray-400 text-center py-4">
-                        Chưa có đủ data để phân tích. Hãy thêm nhiều outputs hơn!
+                        Not enough data to analyze. Add more outputs!
                     </div>
                     <div class="flex flex-col gap-3">
                         <div v-for="rec in recommendations" :key="rec.category"
@@ -332,8 +332,8 @@ const hoveredBubble = ref(null);
 
                 <!-- Weekly Flywheel Trend -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">📈 Xu hướng Flywheel Score theo tuần</h3>
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Flywheel score tích lũy mỗi tuần (thời gian × giá trị tích lũy)</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">📈 Weekly Flywheel Score Trend</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Weekly accumulated Flywheel score (time × compound value)</p>
                     <div class="flex items-end gap-1 h-32 overflow-x-auto pb-6 relative">
                         <div v-for="(week, idx) in weeklyTrend" :key="idx"
                             class="flex flex-col items-center gap-1 flex-shrink-0"
@@ -348,14 +348,14 @@ const hoveredBubble = ref(null);
                             </div>
                         </div>
                         <div v-if="weeklyTrend.length === 0" class="w-full text-center text-sm text-gray-400 py-8">
-                            Chưa có data
+                            No data yet
                         </div>
                     </div>
                 </div>
 
                 <!-- Category Detail Table -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-4">Chi tiết Giá trị Vòng quay</h3>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-4">Flywheel Value Details</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
@@ -364,8 +364,8 @@ const hoveredBubble = ref(null);
                                     <th class="text-center pb-3">Impact</th>
                                     <th class="text-center pb-3">Compound</th>
                                     <th class="text-center pb-3">Flywheel</th>
-                                    <th class="text-right pb-3">Thời gian</th>
-                                    <th class="text-right pb-3">% Tổng</th>
+                                    <th class="text-right pb-3">Time</th>
+                                    <th class="text-right pb-3">% Total</th>
                                     <th class="text-right pb-3">Outputs</th>
                                     <th class="text-right pb-3">Avg ⭐</th>
                                     <th class="text-right pb-3">Weighted</th>
@@ -415,7 +415,7 @@ const hoveredBubble = ref(null);
                             </tbody>
                             <tfoot>
                                 <tr class="border-t-2 border-gray-200 dark:border-gray-600">
-                                    <td colspan="4" class="pt-3 text-sm text-gray-400">Tổng cộng</td>
+                                    <td colspan="4" class="pt-3 text-sm text-gray-400">Total</td>
                                     <td class="text-right pt-3 font-semibold text-gray-700 dark:text-gray-200">{{ fmtTime(totalTime) }}</td>
                                     <td class="text-right pt-3 text-gray-400">100%</td>
                                     <td class="text-right pt-3 font-semibold text-gray-700 dark:text-gray-200">

@@ -122,7 +122,7 @@ class GoalController extends Controller
 
             if ($coreGoalsCount >= 3) {
                 return back()->withErrors([
-                    'is_core_goal' => 'Bạn chỉ có thể có tối đa 3 Core Goals (trục trung tâm).',
+                    'is_core_goal' => 'You can only have a maximum of 3 Core Goals.',
                 ])->withInput();
             }
         }
@@ -212,7 +212,7 @@ class GoalController extends Controller
 
             if ($coreGoalsCount >= 3) {
                 return back()->withErrors([
-                    'is_core_goal' => 'Bạn chỉ có thể có tối đa 3 Core Goals (trục trung tâm).',
+                    'is_core_goal' => 'You can only have a maximum of 3 Core Goals.',
                 ])->withInput();
             }
         }

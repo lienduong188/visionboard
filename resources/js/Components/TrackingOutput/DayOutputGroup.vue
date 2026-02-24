@@ -105,7 +105,7 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
         <!-- Empty state -->
         <div v-else class="px-4 py-6 text-center">
             <p class="text-sm" :class="isMissed ? 'text-red-400 dark:text-red-500' : 'text-gray-400 dark:text-gray-500'">
-                {{ isRestDay ? '😴 Rest day - recharging!' : isMissed ? '✗ Bỏ lỡ ngày này' : 'No outputs for this day' }}
+                {{ isRestDay ? '😴 Rest day - recharging!' : isMissed ? '✗ Missed this day' : 'No outputs for this day' }}
             </p>
             <button
                 v-if="!isRestDay && !isPublic"

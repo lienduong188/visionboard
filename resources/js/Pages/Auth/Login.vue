@@ -39,7 +39,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="login" value="Username hoặc Email" />
+                <InputLabel for="login" value="Username or Email" />
 
                 <TextInput
                     id="login"
