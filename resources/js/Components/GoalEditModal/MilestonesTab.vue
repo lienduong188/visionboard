@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import draggable from 'vuedraggable';
 import { marked } from 'marked';
-import { formatForInput, parseFromInput } from '@/utils/formatNumber';
+import { formatForInput, parseFromInput, formatLocalDate } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -185,14 +185,7 @@ const deleteMilestoneTodo = (milestone, todo) => {
     });
 };
 
-const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-};
+const formatDate = (date) => formatLocalDate(date, 'ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 </script>
 
 <template>

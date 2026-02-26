@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { formatNumber } from '@/utils/formatNumber';
+import { formatNumber, formatLocalDate } from '@/utils/formatNumber';
 import { marked } from 'marked';
 import GoalProgressChart from '@/Components/Charts/GoalProgressChart.vue';
 
@@ -69,14 +69,7 @@ const priorityBadge = computed(() => {
     return badges[props.goal?.priority] || badges['medium'];
 });
 
-const formatDate = (date) => {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-};
+const formatDate = (date) => date ? formatLocalDate(date) : '—';
 
 const formatDateTime = (date) => {
     if (!date) return '—';

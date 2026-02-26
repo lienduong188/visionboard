@@ -25,7 +25,7 @@ class ProgressLog extends Model
     protected $casts = [
         'previous_value' => 'decimal:2',
         'new_value' => 'decimal:2',
-        'logged_at' => 'datetime',
+        'logged_at' => 'date:Y-m-d',
     ];
 
     /**

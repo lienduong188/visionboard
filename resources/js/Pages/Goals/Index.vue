@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { formatLocalDate } from '@/utils/formatNumber';
 import GoalCard from '@/Components/GoalCard.vue';
 import UnifiedFloating from '@/Components/UnifiedFloating.vue';
 import GoalEditModal from '@/Components/GoalEditModal.vue';
@@ -731,7 +732,7 @@ const saveOrder = () => {
                                                         v-if="milestone.due_date"
                                                         class="text-xs text-gray-500 dark:text-gray-400"
                                                     >
-                                                        {{ new Date(milestone.due_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) }}
+                                                        {{ formatLocalDate(milestone.due_date, 'ja-JP', { month: 'short', day: 'numeric' }) }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -766,7 +767,7 @@ const saveOrder = () => {
                                                         v-if="todo.end_date"
                                                         class="text-xs text-gray-400"
                                                     >
-                                                        → {{ new Date(todo.end_date).toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' }) }}
+                                                        → {{ formatLocalDate(todo.end_date, 'ja-JP', { month: 'short', day: 'numeric' }) }}
                                                     </span>
                                                 </div>
                                             </div>

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import ProgressLineChart from './ProgressLineChart.vue';
+import { formatLocalDate } from '@/utils/formatNumber';
 
 const props = defineProps({
     goals: {
@@ -17,12 +18,7 @@ const periods = [
     { value: '90', label: '90 days' },
 ];
 
-const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('ja-JP', {
-        month: 'short',
-        day: 'numeric'
-    });
-};
+const formatDate = (date) => formatLocalDate(date, 'ja-JP', { month: 'short', day: 'numeric' });
 
 const chartData = computed(() => {
     const days = parseInt(selectedPeriod.value);

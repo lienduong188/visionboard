@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { formatNumber } from '@/utils/formatNumber';
+import { formatNumber, formatLocalDate } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: {
@@ -43,14 +43,7 @@ const priorityIcon = computed(() => {
     return icons[props.goal.priority] || '';
 });
 
-const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-};
+const formatDate = (date) => formatLocalDate(date);
 
 const daysRemaining = computed(() => {
     if (!props.goal.target_date) return null;

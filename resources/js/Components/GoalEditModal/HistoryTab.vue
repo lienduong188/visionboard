@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import GoalProgressChart from '@/Components/Charts/GoalProgressChart.vue';
-import { formatNumber, formatForInput, parseFromInput } from '@/utils/formatNumber';
+import { formatNumber, formatForInput, parseFromInput, todayLocalStr, formatLocalDate } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -68,7 +68,7 @@ const onNewValueBlur = () => {
 const openAddProgressLog = () => {
     editingProgressLog.value = null;
     progressLogForm.reset();
-    progressLogForm.logged_at = new Date().toISOString().split('T')[0];
+    progressLogForm.logged_at = todayLocalStr();
     progressLogForm.new_value = '';
     displayNewValue.value = '';
     showProgressLogModal.value = true;
@@ -112,14 +112,7 @@ const deleteProgressLog = (log) => {
     }
 };
 
-const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-};
+const formatDate = (date) => formatLocalDate(date);
 </script>
 
 <template>

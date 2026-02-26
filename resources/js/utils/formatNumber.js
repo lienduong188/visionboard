@@ -63,6 +63,36 @@ export function formatForInput(value) {
 }
 
 /**
+ * Get today's date as YYYY-MM-DD string in LOCAL timezone (tránh UTC shift)
+ * @returns {string} e.g. "2026-02-27"
+ */
+export function todayLocalStr() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+/**
+ * Format a date string for display, dùng LOCAL timezone để tránh UTC shift.
+ * Hỗ trợ cả date-only "2026-02-27" và datetime "2026-02-27T15:00:00Z".
+ * @param {string} date
+ * @param {string} locale
+ * @param {object} options - override toLocaleDateString options
+ * @returns {string}
+ */
+export function formatLocalDate(date, locale = 'ja-JP', options = {}) {
+    if (!date) return '';
+    // Lấy phần date-only để tránh timezone shift khi parse
+    const datePart = date.split('T')[0].split(' ')[0];
+    const [year, month, day] = datePart.split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString(locale, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        ...options,
+    });
+}
+
+/**
  * Parse a formatted number string back to a number
  * Removes thousand separators and returns raw number
  * @param {string} value

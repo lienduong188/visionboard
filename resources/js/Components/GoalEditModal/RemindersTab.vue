@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { formatLocalDate } from '@/utils/formatNumber';
 import { router, useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -66,10 +67,7 @@ const removeSpecificDate = (date) => {
     }
 };
 
-const formatSpecificDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-};
+const formatSpecificDate = (dateStr) => formatLocalDate(dateStr, 'en-US', { day: 'numeric', month: 'short' });
 
 const openAddReminder = () => {
     editingReminder.value = null;
@@ -177,24 +175,14 @@ const formatFrequency = (reminder) => {
     if (reminder.frequency === 'specific' && reminder.specific_dates) {
         const dates = reminder.specific_dates.split(',');
         if (dates.length <= 3) {
-            return dates.map(d => {
-                const date = new Date(d);
-                return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-            }).join(', ');
+            return dates.map(d => formatLocalDate(d.trim(), 'en-US', { day: 'numeric', month: 'short' })).join(', ');
         }
         return `${dates.length} specific dates`;
     }
     return frequencyLabels[reminder.frequency] || reminder.frequency;
 };
 
-const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-};
+const formatDate = (date) => formatLocalDate(date, 'ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 </script>
 
 <template>

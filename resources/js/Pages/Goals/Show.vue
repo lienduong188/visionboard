@@ -5,7 +5,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref, computed, watch } from 'vue';
 import draggable from 'vuedraggable';
 import { marked } from 'marked';
-import { formatNumber, formatForInput, parseFromInput } from '@/utils/formatNumber';
+import { formatNumber, formatForInput, parseFromInput, todayLocalStr, formatLocalDate } from '@/utils/formatNumber';
 
 const props = defineProps({
     goal: Object,
@@ -230,14 +230,7 @@ const statusBadge = computed(() => {
     return badges[props.goal.status] || badges['not_started'];
 });
 
-const formatDate = (date) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-};
+const formatDate = (date) => formatLocalDate(date, 'ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
 // Expanded milestones state (toggle details)
 const expandedMilestones = ref({});
@@ -378,7 +371,7 @@ const openAddProgressLog = () => {
     editingProgressLog.value = null;
     progressLogForm.reset();
     // Default to today
-    progressLogForm.logged_at = new Date().toISOString().split('T')[0];
+    progressLogForm.logged_at = todayLocalStr();
     progressLogForm.new_value = props.goal.current_value || 0;
     displayProgressLogNewValue.value = formatForInput(props.goal.current_value || 0);
     showProgressLogModal.value = true;
