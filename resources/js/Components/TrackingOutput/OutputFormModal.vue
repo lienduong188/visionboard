@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const formErrors = ref({});
+const isSubmitting = ref(false);
 
 const props = defineProps({
     show: Boolean,
@@ -67,6 +68,7 @@ const toLocalDateStr = (dateStr) => {
 watch(() => props.show, (val) => {
     if (val) {
         formErrors.value = {};
+        isSubmitting.value = false;
         newImageFiles.value = [];
         newImagePreviews.value = [];
         removedImagePaths.value = [];
@@ -174,8 +176,14 @@ const removeExistingImage = (path, isLegacy) => {
 };
 
 const submit = () => {
-    if (!form.value.title.trim()) return;
+    if (!form.value.title.trim()) {
+        formErrors.value = { title: 'Title is required.' };
+        return;
+    }
+    if (isSubmitting.value) return;
 
+    isSubmitting.value = true;
+    formErrors.value = {};
     const data = new FormData();
     data.append('title', form.value.title);
     data.append('category', form.value.category);
@@ -206,14 +214,16 @@ const submit = () => {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => emit('close'),
-            onError: (errors) => { formErrors.value = errors; },
+            onError: (errors) => { formErrors.value = errors; isSubmitting.value = false; },
+            onFinish: () => { isSubmitting.value = false; },
         });
     } else {
         router.post(route('tracking-output.store'), data, {
             forceFormData: true,
             preserveScroll: true,
             onSuccess: () => emit('close'),
-            onError: (errors) => { formErrors.value = errors; },
+            onError: (errors) => { formErrors.value = errors; isSubmitting.value = false; },
+            onFinish: () => { isSubmitting.value = false; },
         });
     }
 };
@@ -245,9 +255,10 @@ const close = () => emit('close');
                         <button
                             type="button"
                             @click="submit"
-                            class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+                            :disabled="isSubmitting"
+                            class="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            {{ isEditing ? 'Update' : 'Add' }}
+                            {{ isSubmitting ? '...' : (isEditing ? 'Update' : 'Add') }}
                         </button>
                         <button @click="close" class="ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                             ✕
@@ -266,7 +277,6 @@ const close = () => emit('close');
                             type="text"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                             placeholder="What did you accomplish?"
-                            autofocus
                         />
                     </div>
 
