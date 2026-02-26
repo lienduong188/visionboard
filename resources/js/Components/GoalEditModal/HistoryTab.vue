@@ -84,6 +84,9 @@ const openEditProgressLog = (log) => {
 };
 
 const submitProgressLog = () => {
+    // Ensure displayNewValue is synced to form before submitting (in case user didn't blur)
+    onNewValueBlur();
+
     if (editingProgressLog.value) {
         progressLogForm.put(route('progress-logs.update', [props.goal.id, editingProgressLog.value.id]), {
             onSuccess: () => {
