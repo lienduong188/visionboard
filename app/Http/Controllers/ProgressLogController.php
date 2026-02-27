@@ -35,11 +35,13 @@ class ProgressLogController extends Controller
         \Log::info("After save: current_value={$goal->current_value}, progress={$goal->progress}");
 
         // Update all logs with correct cumulative values
-        $logs = $goal->progressLogs()->orderBy('logged_at', 'asc')->get();
+        // Use reorder() to override relationship's default DESC, then orderBy ASC
+        // Use DB::table() to bypass Eloquent casting so logged_at is never touched
+        $logs = $goal->progressLogs()->reorder()->orderBy('logged_at', 'asc')->get();
         $cumulative = 0;
         foreach ($logs as $log) {
             $cumulative++;
-            $log->update([
+            \DB::table('progress_logs')->where('id', $log->id)->update([
                 'previous_value' => $cumulative - 1,
                 'new_value' => $cumulative,
                 'previous_progress' => $goal->calculateProgressForValue($cumulative - 1),

@@ -169,7 +169,7 @@ const formatDate = (date) => formatLocalDate(date);
 
             <div v-if="goal.progress_logs?.length" class="space-y-2">
                 <div
-                    v-for="log in (showAllProgressLogs ? goal.progress_logs : goal.progress_logs.slice(0, 5))"
+                    v-for="log in (showAllProgressLogs ? [...goal.progress_logs].reverse() : [...goal.progress_logs].slice(0, 5).reverse())"
                     :key="log.id"
                     class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg group"
                 >
