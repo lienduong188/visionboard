@@ -199,6 +199,7 @@ class GoalController extends Controller
             'is_pinned' => 'boolean',
             'is_core_goal' => 'boolean',
             'progress_mode' => 'nullable|in:value,milestone',
+            'cover_image_position' => 'nullable|string|max:20',
         ]);
 
         // Note: current_value is managed by progress logs, not editable in form

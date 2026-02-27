@@ -406,8 +406,8 @@ const floatingWords = computed(() => floatingObjects.value.filter(obj => obj.typ
                     <!-- Full Cover Image or Icon -->
                     <div
                         v-if="goal.cover_image_url"
-                        class="w-full h-full bg-cover bg-center"
-                        :style="{ backgroundImage: `url(${goal.cover_image_url})` }"
+                        class="w-full h-full bg-cover"
+                        :style="{ backgroundImage: `url(${goal.cover_image_url})`, backgroundPosition: goal.cover_image_position || '50% 50%' }"
                     >
                         <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
                     </div>

@@ -190,9 +190,9 @@ const deleteGoal = () => {
                 <div class="relative w-full max-w-3xl max-h-[90vh] overflow-hidden bg-white dark:bg-gray-800 rounded-2xl shadow-2xl flex flex-col">
                     <!-- Cover Image / Header -->
                     <div
-                        class="relative h-40 bg-cover bg-center flex-shrink-0"
+                        class="relative h-40 bg-cover flex-shrink-0"
                         :style="goal.cover_image_url
-                            ? { backgroundImage: `url(${goal.cover_image_url})` }
+                            ? { backgroundImage: `url(${goal.cover_image_url})`, backgroundPosition: goal.cover_image_position || '50% 50%' }
                             : { backgroundColor: `${goal.category?.color}30` }"
                     >
                         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>

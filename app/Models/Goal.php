@@ -33,6 +33,7 @@ class Goal extends Model
         'is_core_goal',
         'sort_order',
         'orbit_scale',
+        'cover_image_position',
     ];
 
     protected $casts = [

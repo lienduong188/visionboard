@@ -22,6 +22,7 @@ const form = useForm({
     slogan: '',
     cover_image: null,
     remove_cover_image: false,
+    cover_image_position: null,
     target_value: '',
     start_value: '',
     unit: '',
@@ -43,6 +44,7 @@ const syncFormWithGoal = () => {
         form.slogan = props.goal.slogan || '';
         form.cover_image = null;
         form.remove_cover_image = false;
+        form.cover_image_position = props.goal.cover_image_position || null;
         form.target_value = props.goal.target_value || '';
         form.start_value = props.goal.start_value || '';
         form.unit = props.goal.unit || '';
@@ -76,7 +78,66 @@ const canSetCoreGoal = computed(() => {
 const currentImage = ref(null);
 const imagePreview = ref(null);
 const fileInput = ref(null);
+const imageContainer = ref(null);
 const showDeleteConfirm = ref(false);
+
+// Drag to reposition image
+const isDragging = ref(false);
+const dragStart = ref({ x: 0, y: 0, posX: 50, posY: 50 });
+
+const parsedPosition = computed(() => {
+    const pos = form.cover_image_position || '50% 50%';
+    const parts = pos.split(' ');
+    return {
+        x: parseFloat(parts[0]) || 50,
+        y: parseFloat(parts[1]) || 50,
+    };
+});
+
+const imagePositionStyle = computed(() => ({
+    backgroundPosition: form.cover_image_position || '50% 50%',
+}));
+
+const startDrag = (e) => {
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    isDragging.value = true;
+    dragStart.value = {
+        x: clientX,
+        y: clientY,
+        posX: parsedPosition.value.x,
+        posY: parsedPosition.value.y,
+    };
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDrag);
+    document.addEventListener('touchmove', onDrag, { passive: false });
+    document.addEventListener('touchend', stopDrag);
+};
+
+const onDrag = (e) => {
+    if (!isDragging.value) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const container = imageContainer.value;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const dx = clientX - dragStart.value.x;
+    const dy = clientY - dragStart.value.y;
+    // Dragging right → move image right → show left content → decrease x%
+    const newX = Math.max(0, Math.min(100, dragStart.value.posX - (dx / rect.width) * 100));
+    const newY = Math.max(0, Math.min(100, dragStart.value.posY - (dy / rect.height) * 100));
+    form.cover_image_position = `${Math.round(newX)}% ${Math.round(newY)}%`;
+};
+
+const stopDrag = () => {
+    isDragging.value = false;
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', stopDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', stopDrag);
+};
 const processing = ref(false);
 const newChecklistItem = ref('');
 const editingChecklistId = ref(null);
@@ -146,6 +207,7 @@ const handleImageChange = async (e) => {
         const resized = await resizeImage(file);
         form.cover_image = resized;
         form.remove_cover_image = false;
+        form.cover_image_position = null; // reset position for new image
         imagePreview.value = URL.createObjectURL(resized);
     }
 };
@@ -177,6 +239,9 @@ const submit = () => {
     }
     if (form.remove_cover_image) {
         data.append('remove_cover_image', '1');
+    }
+    if (form.cover_image_position) {
+        data.append('cover_image_position', form.cover_image_position);
     }
     if (form.target_value !== '' && form.target_value !== null && form.target_value !== undefined) {
         data.append('target_value', String(form.target_value));
@@ -298,6 +363,7 @@ const isDirty = computed(() => {
         form.slogan !== (props.goal.slogan || '') ||
         form.cover_image !== null ||
         form.remove_cover_image ||
+        (form.cover_image_position || null) !== (props.goal.cover_image_position || null) ||
         String(form.target_value) !== String(props.goal.target_value || '') ||
         String(form.start_value) !== String(props.goal.start_value || '') ||
         form.unit !== (props.goal.unit || '') ||
@@ -410,11 +476,24 @@ defineExpose({
                 </div>
                 <InputError :message="form.errors.cover_image" class="mt-2" />
                 <div v-if="imagePreview || currentImage" class="mt-3 relative">
-                    <img
-                        :src="imagePreview || currentImage"
-                        alt="Cover"
-                        class="h-32 w-full object-cover rounded-lg"
-                    />
+                    <div
+                        ref="imageContainer"
+                        class="h-32 w-full rounded-lg bg-cover overflow-hidden"
+                        :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+                        :style="{
+                            backgroundImage: `url(${imagePreview || currentImage})`,
+                            backgroundSize: 'cover',
+                            ...imagePositionStyle,
+                        }"
+                        @mousedown="startDrag"
+                        @touchstart="startDrag"
+                    >
+                        <div class="h-full w-full bg-gradient-to-t from-black/20 to-transparent flex items-end justify-center pb-1">
+                            <span class="text-white text-xs bg-black/40 px-2 py-0.5 rounded select-none">
+                                {{ isDragging ? 'Đang kéo...' : 'Kéo để đổi vị trí' }}
+                            </span>
+                        </div>
+                    </div>
                     <button
                         type="button"
                         @click="removeImage"
