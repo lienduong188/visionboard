@@ -28,7 +28,7 @@ class Milestone extends Model
 
     protected $casts = [
         'target_value' => 'decimal:2',
-        'due_date' => 'date',
+        'due_date' => 'date:Y-m-d',
         'completed_at' => 'datetime',
         'is_completed' => 'boolean',
         'is_soft' => 'boolean',

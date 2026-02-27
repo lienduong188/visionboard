@@ -31,8 +31,8 @@ class Reminder extends Model
     protected $casts = [
         'remind_time' => 'datetime:H:i',
         'is_active' => 'boolean',
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date' => 'date:Y-m-d',
+        'end_date' => 'date:Y-m-d',
         'last_sent_at' => 'datetime',
         'next_send_at' => 'datetime',
     ];

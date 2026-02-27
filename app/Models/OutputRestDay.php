@@ -17,7 +17,7 @@ class OutputRestDay extends Model
     ];
 
     protected $casts = [
-        'rest_date' => 'date',
+        'rest_date' => 'date:Y-m-d',
         'is_earned' => 'boolean',
     ];
 
