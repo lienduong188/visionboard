@@ -8,7 +8,7 @@ import MonthlyCalendar from '@/Components/TrackingOutput/MonthlyCalendar.vue';
 import SpinWheel from '@/Components/TrackingOutput/SpinWheel.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 
 const props = defineProps({
     outputs: Object,
@@ -130,11 +130,17 @@ const openEditModal = (output) => {
     showFormModal.value = true;
 };
 
-const closeModal = () => {
+const closeModal = (savedDate) => {
     showFormModal.value = false;
     editingOutput.value = null;
     defaultTitle.value = null;
     defaultDate.value = null;
+    if (savedDate) {
+        nextTick(() => {
+            const el = document.getElementById(`day-${savedDate}`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    }
 };
 
 const deleteOutput = (id) => {

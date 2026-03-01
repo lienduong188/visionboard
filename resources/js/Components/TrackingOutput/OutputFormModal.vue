@@ -210,18 +210,20 @@ const submit = () => {
         }
 
         data.append('_method', 'PUT');
+        const savedDate = form.value.output_date;
         router.post(route('tracking-output.update', props.output.id), data, {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => emit('close'),
+            onSuccess: () => emit('close', savedDate),
             onError: (errors) => { formErrors.value = errors; isSubmitting.value = false; },
             onFinish: () => { isSubmitting.value = false; },
         });
     } else {
+        const savedDate = form.value.output_date;
         router.post(route('tracking-output.store'), data, {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => emit('close'),
+            onSuccess: () => emit('close', savedDate),
             onError: (errors) => { formErrors.value = errors; isSubmitting.value = false; },
             onFinish: () => { isSubmitting.value = false; },
         });
