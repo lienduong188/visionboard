@@ -39,24 +39,44 @@ const seededRandom = (seed) => {
     return x - Math.floor(x);
 };
 
-// Get random position avoiding center
+// Get random position in bottom half of container (for goals - below center text)
+const getGoalPosition = (size, index, total) => {
+    const padding = size / 2 + 30;
+    const centerY = props.containerHeight / 2;
+
+    // Place goals in the bottom 55% of the container
+    const bottomStart = centerY + 20;
+    const bottomEnd = props.containerHeight - padding;
+    const availableHeight = Math.max(bottomEnd - bottomStart, size + 10);
+
+    const cols = Math.max(1, Math.ceil(Math.sqrt(total)));
+    const col = index % cols;
+
+    const zoneWidth = (props.containerWidth - padding * 2) / cols;
+    let x = padding + col * zoneWidth + seededRandom(index * 7 + 1) * zoneWidth;
+    let y = bottomStart + seededRandom(index * 7 + 3) * availableHeight;
+
+    // Clamp to bounds
+    x = Math.max(padding, Math.min(props.containerWidth - padding, x));
+    y = Math.max(bottomStart, Math.min(props.containerHeight - padding, y));
+
+    return { x, y };
+};
+
+// Get random position for words (anywhere in container, avoiding center)
 const getRandomPosition = (size, index, total) => {
     const padding = size / 2 + 30;
     const centerX = props.containerWidth / 2;
     const centerY = props.containerHeight / 2;
 
-    // Divide container into zones (excluding center)
-    // Use grid-based distribution for better spread
     const cols = Math.ceil(Math.sqrt(total));
     const rows = Math.ceil(total / cols);
     const col = index % cols;
     const row = Math.floor(index / cols);
 
-    // Calculate zone boundaries
     const zoneWidth = (props.containerWidth - padding * 2) / cols;
     const zoneHeight = (props.containerHeight - padding * 2) / rows;
 
-    // Deterministic position within zone (seeded by index)
     let x = padding + col * zoneWidth + seededRandom(index * 7 + 1) * zoneWidth;
     let y = padding + row * zoneHeight + seededRandom(index * 7 + 3) * zoneHeight;
 
@@ -87,7 +107,7 @@ const initializeObjects = () => {
     const goalSize = props.isMobile ? 125 : 240;
     props.goals.forEach((goal, index) => {
         const cardSize = goalSize;
-        const pos = getRandomPosition(cardSize, index, totalCount);
+        const pos = getGoalPosition(cardSize, index, props.goals.length);
 
         allObjects.push({
             ...goal,
@@ -171,8 +191,8 @@ const animate = () => {
             vy = -Math.abs(vy) * 0.9;
         }
 
-        // Check center zone and push away if needed
-        if (isInCenterZone(x, y, size)) {
+        // Check center zone and push away if needed (only for words, goals can pass through freely)
+        if (obj.type === 'word' && isInCenterZone(x, y, size)) {
             const centerX = props.containerWidth / 2;
             const centerY = props.containerHeight / 2;
             const dx = x - centerX;
