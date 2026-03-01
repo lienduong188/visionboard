@@ -48,6 +48,17 @@ class StreakCalculator
             ->flip()
             ->all();
 
+        // Get dates that have only "skipped" outputs (no "done") — these don't break streak
+        $skippedOnlyDates = DailyOutput::where('user_id', $this->userId)
+            ->where('status', 'skipped')
+            ->whereBetween('output_date', [$this->startDate->format('Y-m-d'), $today->format('Y-m-d')])
+            ->selectRaw('DISTINCT output_date')
+            ->pluck('output_date')
+            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->filter(fn($d) => !isset($activeDates[$d]))
+            ->flip()
+            ->all();
+
         // Get all rest days
         $restDays = OutputRestDay::where('user_id', $this->userId)
             ->whereBetween('rest_date', [$this->startDate->format('Y-m-d'), $today->format('Y-m-d')])
@@ -71,6 +82,8 @@ class StreakCalculator
             $hasOutput = isset($activeDates[$dateStr]);
             $isRestDay = $restDays->has($dateStr);
 
+            $isSkippedOnly = isset($skippedOnlyDates[$dateStr]);
+
             if ($hasOutput) {
                 $tempStreak++;
                 $consecutiveForEarn++;
@@ -82,6 +95,9 @@ class StreakCalculator
             } elseif ($isRestDay && $restDays->get($dateStr)->is_earned) {
                 // Earned rest day: streak continues but doesn't count towards earning
                 $tempStreak++;
+            } elseif ($isSkippedOnly) {
+                // Day with only skipped outputs: don't break streak, don't increment
+                // (user acknowledged the day but couldn't complete)
             } else {
                 // No output, no earned rest day → streak resets
                 $longestStreak = max($longestStreak, $tempStreak);
