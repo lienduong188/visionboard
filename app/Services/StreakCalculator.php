@@ -81,8 +81,7 @@ class StreakCalculator
                     $earnedRestDays++;
                 }
             } elseif ($isRestDay && $restDays->get($dateStr)->is_earned) {
-                // Earned rest day: streak continues but doesn't count towards earning
-                $tempStreak++;
+                // Earned rest day: streak holds (doesn't increment, doesn't reset, doesn't count towards earning)
             } else {
                 // No output (or skipped) and no earned rest day → streak resets
                 $longestStreak = max($longestStreak, $tempStreak);
