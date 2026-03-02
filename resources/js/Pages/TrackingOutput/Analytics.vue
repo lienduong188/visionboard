@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 const props = defineProps({
     categoryStats: Array,
@@ -23,31 +23,13 @@ const fmtTime = (min) => {
     return `${h}h ${m}m`;
 };
 
-// Flywheel quadrant SVG
-// X axis = compound (1-10), Y axis = impact (1-10)
-// Each category = bubble, size = time ratio
-const svgWidth = 660;
-const svgHeight = 540;
-const padL = 58, padR = 28, padT = 32, padB = 58;
-const innerW = svgWidth - padL - padR;
-const innerH = svgHeight - padT - padB;
-
-const toX = (compound) => padL + ((compound - 1) / 9) * innerW;
-const toY = (impact) => padT + innerH - ((impact - 1) / 9) * innerH;
-
+// Bubbles: size = time ratio
 const bubbles = computed(() => {
     const maxTime = Math.max(...props.categoryStats.map(c => c.total_time), 1);
-    return props.categoryStats.map(c => {
-        const r = c.total_time > 0
-            ? 14 + (c.total_time / maxTime) * 34
-            : 10;
-        return {
-            ...c,
-            cx: toX(c.compound),
-            cy: toY(c.impact),
-            r,
-        };
-    });
+    return props.categoryStats.map(c => ({
+        ...c,
+        r: c.total_time > 0 ? 20 + (c.total_time / maxTime) * 44 : 16,
+    }));
 });
 
 const priorityConfig = {
@@ -60,31 +42,6 @@ const priorityConfig = {
 // Weekly trend bar chart (simple SVG)
 const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighted_score), 1));
 
-// Quadrant labels
-const quadrants = [
-    {
-        x: padL + innerW * 0.02, y: padT + innerH * 0.05,
-        label: 'HIGH IMPACT', sub: 'Low Compound', color: '#6366f1',
-        desc: 'Impact cao, Compound thấp\nTạo ra thay đổi lớn nhưng không tích lũy theo thời gian.\nVD: Movement — sức khỏe tốt nhưng bỏ 1 tuần là xuống ngay.\n→ Quan trọng, nhưng đừng over-invest thêm giờ vào đây.',
-    },
-    {
-        x: padL + innerW * 0.52, y: padT + innerH * 0.05,
-        label: '🔥 FLYWHEEL ZONE', sub: 'High × High', color: '#10b981',
-        desc: 'Impact cao + Compound cao = Vòng quay vàng!\nMỗi giờ đầu tư hôm nay tạo ra giá trị tích lũy mãi mãi.\nVD: Writing, Learning — bài viết & kiến thức compound theo thời gian.\n→ Ưu tiên số 1. Đầu tư nhiều nhất vào đây.',
-    },
-    {
-        x: padL + innerW * 0.02, y: padT + innerH * 0.56,
-        label: 'LOW PRIORITY', sub: 'Low × Low', color: '#9ca3af',
-        desc: 'Impact thấp + Compound thấp\nKhông tạo giá trị lớn, không tích lũy.\n→ Hạn chế tối đa thời gian bỏ vào đây.',
-    },
-    {
-        x: padL + innerW * 0.52, y: padT + innerH * 0.56,
-        label: 'HIGH COMPOUND', sub: 'Low Impact', color: '#f59e0b',
-        desc: 'Compound cao nhưng Impact chưa rõ\nTích lũy được nhưng chưa tạo ra thay đổi rõ ràng cho cuộc sống.\nVD: Craft — kỹ năng tăng dần nhưng ảnh hưởng cuộc sống còn thấp.\n→ Xem xét lại: có thể pivot để tăng impact.',
-    },
-];
-
-const hoveredBubble = ref(null);
 </script>
 
 <template>
@@ -138,120 +95,26 @@ const hoveredBubble = ref(null);
                     </div>
                 </div>
 
-                <!-- Flywheel Matrix -->
+                <!-- Category Bubbles -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Flywheel Matrix</h3>
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-3">Y-axis = Long-term impact · X-axis = Compounding · Size = Time invested</p>
-                        <div class="w-full">
-                            <svg :viewBox="`0 0 ${svgWidth} ${svgHeight}`" class="w-full h-auto">
-                                <!-- Grid lines -->
-                                <line :x1="padL + innerW/2" :y1="padT" :x2="padL + innerW/2" :y2="padT + innerH"
-                                    stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="6,4" class="dark:opacity-20" />
-                                <line :x1="padL" :y1="padT + innerH/2" :x2="padL + innerW" :y2="padT + innerH/2"
-                                    stroke="#e5e7eb" stroke-width="1.5" stroke-dasharray="6,4" class="dark:opacity-20" />
-
-                                <!-- Quadrant backgrounds -->
-                                <rect :x="padL" :y="padT" :width="innerW/2" :height="innerH/2"
-                                    fill="#6366f1" fill-opacity="0.04" />
-                                <rect :x="padL + innerW/2" :y="padT" :width="innerW/2" :height="innerH/2"
-                                    fill="#10b981" fill-opacity="0.07" />
-                                <rect :x="padL" :y="padT + innerH/2" :width="innerW/2" :height="innerH/2"
-                                    fill="#9ca3af" fill-opacity="0.04" />
-                                <rect :x="padL + innerW/2" :y="padT + innerH/2" :width="innerW/2" :height="innerH/2"
-                                    fill="#f59e0b" fill-opacity="0.04" />
-
-                                <!-- Quadrant labels + tooltips -->
-                                <g v-for="q in quadrants" :key="q.label" cursor="help">
-                                    <title>{{ q.desc }}</title>
-                                    <text :x="q.x" :y="q.y"
-                                        :fill="q.color" font-size="13" font-weight="700" opacity="0.85">
-                                        {{ q.label }}
-                                    </text>
-                                    <text :x="q.x" :y="q.y + 18"
-                                        :fill="q.color" font-size="11" opacity="0.6">
-                                        {{ q.sub }}
-                                    </text>
-                                </g>
-
-                                <!-- Axis labels -->
-                                <text :x="padL + innerW/2" :y="svgHeight - 6" text-anchor="middle" font-size="13" fill="#9ca3af">Compound</text>
-                                <text :x="18" :y="padT + innerH/2" text-anchor="middle" font-size="13" fill="#9ca3af"
-                                    :transform="`rotate(-90, 18, ${padT + innerH/2})`">Impact</text>
-
-                                <!-- Axis ticks -->
-                                <text :x="padL" :y="svgHeight - 12" text-anchor="middle" font-size="11" fill="#d1d5db">1</text>
-                                <text :x="padL + innerW" :y="svgHeight - 12" text-anchor="middle" font-size="11" fill="#d1d5db">10</text>
-                                <text :x="padL - 10" :y="padT + innerH" text-anchor="end" font-size="11" fill="#d1d5db">1</text>
-                                <text :x="padL - 10" :y="padT + 6" text-anchor="end" font-size="11" fill="#d1d5db">10</text>
-
-                                <!-- Bubbles -->
-                                <g v-for="b in bubbles" :key="b.key"
-                                    @mouseenter="hoveredBubble = b.key"
-                                    @mouseleave="hoveredBubble = null"
-                                    class="cursor-pointer">
-                                    <circle
-                                        :cx="b.cx" :cy="b.cy" :r="b.r"
-                                        :fill="b.flywheel >= 63 ? '#10b981' : b.flywheel >= 40 ? '#6366f1' : '#9ca3af'"
-                                        :fill-opacity="b.total_time > 0 ? 0.8 : 0.2"
-                                        :stroke="hoveredBubble === b.key ? '#1f2937' : 'white'"
-                                        stroke-width="2.5"
-                                        class="transition-all duration-200"
-                                    />
-                                    <text :x="b.cx" :y="b.cy - b.r - 5" text-anchor="middle" font-size="18">{{ b.icon }}</text>
-                                    <text v-if="hoveredBubble === b.key || b.total_time > 0"
-                                        :x="b.cx" :y="b.cy + b.r + 16" text-anchor="middle" font-size="11" fill="#6b7280">
-                                        {{ b.label }}
-                                    </text>
-                                </g>
-
-                                <!-- Tooltip for hovered -->
-                                <g v-if="hoveredBubble">
-                                    <template v-for="b in bubbles" :key="b.key">
-                                        <template v-if="b.key === hoveredBubble">
-                                            <rect
-                                                :x="Math.min(b.cx + 14, svgWidth - 150)"
-                                                :y="Math.max(b.cy - 50, 4)"
-                                                width="140" height="66" rx="8"
-                                                fill="#1f2937" fill-opacity="0.93" />
-                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy - 34, 20)"
-                                                text-anchor="middle" font-size="13" fill="white" font-weight="600">
-                                                {{ b.icon }} {{ b.label }}
-                                            </text>
-                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy - 18, 36)"
-                                                text-anchor="middle" font-size="11" fill="#d1fae5">
-                                                Flywheel: {{ b.flywheel }}/100
-                                            </text>
-                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy - 3, 51)"
-                                                text-anchor="middle" font-size="11" fill="#bfdbfe">
-                                                {{ fmtTime(b.total_time) }} · {{ b.time_ratio }}%
-                                            </text>
-                                            <text :x="Math.min(b.cx + 84, svgWidth - 80)" :y="Math.max(b.cy + 13, 66)"
-                                                text-anchor="middle" font-size="11" fill="#fde68a">
-                                                I={{ b.impact }} × C={{ b.compound }}
-                                            </text>
-                                        </template>
-                                    </template>
-                                </g>
-                            </svg>
-                        </div>
-
-                    <!-- Flywheel Explanation -->
-                    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                        <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3">
-                            <p class="font-semibold text-emerald-700 dark:text-emerald-400 mb-1">🟢 Flywheel Zone</p>
-                            <p class="text-emerald-600 dark:text-emerald-500 text-xs">High impact + High compound. Golden activity — accumulates forever. Priority #1.</p>
-                        </div>
-                        <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-3">
-                            <p class="font-semibold text-indigo-700 dark:text-indigo-400 mb-1">🟣 High Impact</p>
-                            <p class="text-indigo-600 dark:text-indigo-500 text-xs">High impact, low compound. Important but doesn't accumulate. Do moderately.</p>
-                        </div>
-                        <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
-                            <p class="font-semibold text-amber-700 dark:text-amber-400 mb-1">🟡 High Compound</p>
-                            <p class="text-amber-600 dark:text-amber-500 text-xs">High compound, unclear impact. Building skills — pivot to increase impact.</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-700/40 rounded-lg p-3">
-                            <p class="font-semibold text-gray-600 dark:text-gray-400 mb-1">⬜ Low Priority</p>
-                            <p class="text-gray-500 dark:text-gray-500 text-xs">Both low. Avoid investing much time. Only do when necessary.</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Bubbles</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-5">Size = Time invested · Color = Flywheel score</p>
+                    <div class="flex flex-wrap items-end justify-center gap-5 py-2">
+                        <div v-for="b in bubbles" :key="b.key" class="flex flex-col items-center gap-1.5">
+                            <div
+                                class="rounded-full flex items-center justify-center border-2 transition-all"
+                                :style="{ width: (b.r * 2) + 'px', height: (b.r * 2) + 'px' }"
+                                :class="b.total_time > 0
+                                    ? (b.flywheel >= 63 ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-300 dark:border-emerald-600' : b.flywheel >= 40 ? 'bg-indigo-100 dark:bg-indigo-900/40 border-indigo-300 dark:border-indigo-600' : 'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600')
+                                    : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-40'"
+                                :title="`${b.label}: ${fmtTime(b.total_time)} · Flywheel ${b.flywheel}/100`"
+                            >
+                                <span :style="{ fontSize: Math.max(b.r * 0.75, 14) + 'px' }">{{ b.icon }}</span>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-xs font-medium text-gray-600 dark:text-gray-300 leading-tight" style="max-width: 72px">{{ b.label }}</div>
+                                <div v-if="b.total_time > 0" class="text-xs text-gray-400 dark:text-gray-500">{{ fmtTime(b.total_time) }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
