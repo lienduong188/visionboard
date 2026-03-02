@@ -99,20 +99,21 @@ const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighte
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
                     <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Bubbles</h3>
                     <p class="text-sm text-gray-400 dark:text-gray-500 mb-5">Size = Time invested · Color = Flywheel score</p>
-                    <div class="flex flex-wrap items-end justify-center gap-5 py-2">
-                        <div v-for="b in bubbles" :key="b.key" class="flex flex-col items-center gap-1.5">
-                            <div
-                                class="rounded-full flex items-center justify-center border-2 transition-all"
-                                :style="{ width: (b.r * 2) + 'px', height: (b.r * 2) + 'px' }"
+                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-4 py-2">
+                        <div v-for="b in bubbles" :key="b.key"
+                            class="flex flex-col items-center gap-1.5 p-1"
+                            :title="`${b.label}: ${fmtTime(b.total_time)} · Flywheel ${b.flywheel}/100`"
+                        >
+                            <div class="w-full aspect-square rounded-full flex items-center justify-center border-2 transition-all"
                                 :class="b.total_time > 0
                                     ? (b.flywheel >= 63 ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-300 dark:border-emerald-600' : b.flywheel >= 40 ? 'bg-indigo-100 dark:bg-indigo-900/40 border-indigo-300 dark:border-indigo-600' : 'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600')
                                     : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-40'"
-                                :title="`${b.label}: ${fmtTime(b.total_time)} · Flywheel ${b.flywheel}/100`"
+                                :style="{ fontSize: b.total_time > 0 ? `clamp(16px, ${8 + (b.r - 20) / 44 * 10}px, 28px)` : '14px' }"
                             >
-                                <span :style="{ fontSize: Math.max(b.r * 0.75, 14) + 'px' }">{{ b.icon }}</span>
+                                {{ b.icon }}
                             </div>
-                            <div class="text-center">
-                                <div class="text-xs font-medium text-gray-600 dark:text-gray-300 leading-tight" style="max-width: 72px">{{ b.label }}</div>
+                            <div class="text-center w-full">
+                                <div class="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{{ b.label }}</div>
                                 <div v-if="b.total_time > 0" class="text-xs text-gray-400 dark:text-gray-500">{{ fmtTime(b.total_time) }}</div>
                             </div>
                         </div>
