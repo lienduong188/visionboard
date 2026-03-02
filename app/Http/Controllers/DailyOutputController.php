@@ -335,6 +335,7 @@ class DailyOutputController extends Controller
             });
             $weekWeighted = 0;
             foreach ($weekOutputs as $o) {
+                if (!isset($categories[$o->category])) continue;
                 $flywheel = $categories[$o->category]['impact'] * $categories[$o->category]['compound'];
                 $weekWeighted += round($o->duration * $flywheel / 100);
             }
