@@ -345,6 +345,7 @@ const switchView = (view) => {
                             :is-missed="isMissed(date)"
                             :day-number="getDayNumber(date)"
                             :is-public="isPublic"
+                            :rest-days-available="streakData.rest_days_available"
                             @add="openAddModal"
                             @edit="openEditModal"
                             @delete="deleteOutput"

@@ -12,6 +12,7 @@ const props = defineProps({
     isMissed: Boolean,
     dayNumber: Number,
     isPublic: Boolean,
+    restDaysAvailable: Number,
 });
 
 const emit = defineEmits(['add', 'edit', 'delete', 'toggle-rest']);
@@ -79,6 +80,17 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
                 <span v-if="doneCount" class="text-xs text-green-500">
                     {{ doneCount }} done
                 </span>
+                <button
+                    v-if="!isPublic && !isToday && !isTomorrow"
+                    @click="emit('toggle-rest', date)"
+                    class="text-xs px-1.5 py-0.5 rounded transition-colors"
+                    :class="isRestDay
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-500'"
+                    :title="isRestDay ? 'Remove rest day' : (restDaysAvailable > 0 ? `Mark as rest day (${restDaysAvailable} available)` : 'Mark as rest day (0 available - streak will reset!)')"
+                >
+                    😴 Rest
+                </button>
                 <button
                     v-if="!isPublic"
                     @click="emit('add', date)"

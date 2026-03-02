@@ -393,16 +393,6 @@ const close = () => emit('close');
                             >
                                 📋 Planned
                             </button>
-                            <button
-                                type="button"
-                                @click="form.status = 'skipped'"
-                                class="px-4 py-2 rounded-lg text-sm transition-colors"
-                                :class="form.status === 'skipped'
-                                    ? 'bg-gray-500 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
-                            >
-                                ⏭️ Skipped
-                            </button>
                         </div>
                     </div>
 
