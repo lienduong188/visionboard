@@ -23,13 +23,25 @@ const fmtTime = (min) => {
     return `${h}h ${m}m`;
 };
 
-// Bubbles: size = time ratio
-const bubbles = computed(() => {
+// Circle packing: scatter bubbles randomly, no overlap
+const W = 700, H = 260;
+const packedBubbles = computed(() => {
     const maxTime = Math.max(...props.categoryStats.map(c => c.total_time), 1);
-    return props.categoryStats.map(c => ({
-        ...c,
-        r: c.total_time > 0 ? 20 + (c.total_time / maxTime) * 44 : 16,
-    }));
+    const sorted = [...props.categoryStats].sort((a, b) => b.total_time - a.total_time);
+    const placed = [];
+    for (const c of sorted) {
+        const r = c.total_time > 0 ? 18 + (c.total_time / maxTime) * 38 : 14;
+        let x = W / 2, y = H / 2;
+        for (let i = 0; i < 600; i++) {
+            const tx = r + 6 + Math.random() * (W - 2 * r - 12);
+            const ty = r + 6 + Math.random() * (H - 2 * r - 12);
+            if (!placed.some(p => Math.hypot(p.x - tx, p.y - ty) < p.r + r + 8)) {
+                x = tx; y = ty; break;
+            }
+        }
+        placed.push({ ...c, x, y, r });
+    }
+    return placed;
 });
 
 const priorityConfig = {
@@ -99,25 +111,30 @@ const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighte
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
                     <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">Category Bubbles</h3>
                     <p class="text-sm text-gray-400 dark:text-gray-500 mb-5">Size = Time invested · Color = Flywheel score</p>
-                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-4 py-2">
-                        <div v-for="b in bubbles" :key="b.key"
-                            class="flex flex-col items-center gap-1.5 p-1"
-                            :title="`${b.label}: ${fmtTime(b.total_time)} · Flywheel ${b.flywheel}/100`"
-                        >
-                            <div class="w-full aspect-square rounded-full flex items-center justify-center border-2 transition-all"
-                                :class="b.total_time > 0
-                                    ? (b.flywheel >= 63 ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-300 dark:border-emerald-600' : b.flywheel >= 40 ? 'bg-indigo-100 dark:bg-indigo-900/40 border-indigo-300 dark:border-indigo-600' : 'bg-gray-100 dark:bg-gray-700 border-gray-200 dark:border-gray-600')
-                                    : 'bg-gray-50 dark:bg-gray-800 border-gray-100 dark:border-gray-700 opacity-40'"
-                                :style="{ fontSize: b.total_time > 0 ? `clamp(16px, ${8 + (b.r - 20) / 44 * 10}px, 28px)` : '14px' }"
-                            >
-                                {{ b.icon }}
-                            </div>
-                            <div class="text-center w-full">
-                                <div class="text-xs font-medium text-gray-600 dark:text-gray-300 truncate">{{ b.label }}</div>
-                                <div v-if="b.total_time > 0" class="text-xs text-gray-400 dark:text-gray-500">{{ fmtTime(b.total_time) }}</div>
-                            </div>
-                        </div>
-                    </div>
+                    <svg :viewBox="`0 0 ${W} ${H}`" class="w-full h-auto">
+                        <g v-for="b in packedBubbles" :key="b.key">
+                            <title>{{ b.label }}: {{ fmtTime(b.total_time) }} · Flywheel {{ b.flywheel }}/100</title>
+                            <circle
+                                :cx="b.x" :cy="b.y" :r="b.r"
+                                :fill="b.total_time > 0
+                                    ? (b.flywheel >= 63 ? '#d1fae5' : b.flywheel >= 40 ? '#e0e7ff' : '#f3f4f6')
+                                    : '#f9fafb'"
+                                :stroke="b.total_time > 0
+                                    ? (b.flywheel >= 63 ? '#6ee7b7' : b.flywheel >= 40 ? '#a5b4fc' : '#d1d5db')
+                                    : '#e5e7eb'"
+                                :stroke-width="b.total_time > 0 ? 2 : 1"
+                                :opacity="b.total_time > 0 ? 1 : 0.4"
+                            />
+                            <text :x="b.x" :y="b.y + b.r * 0.32"
+                                text-anchor="middle" dominant-baseline="middle"
+                                :font-size="b.r * 0.85">{{ b.icon }}</text>
+                            <text :x="b.x" :y="b.y + b.r + 13"
+                                text-anchor="middle" font-size="10" fill="#6b7280">{{ b.label }}</text>
+                            <text v-if="b.total_time > 0"
+                                :x="b.x" :y="b.y + b.r + 24"
+                                text-anchor="middle" font-size="9" fill="#9ca3af">{{ fmtTime(b.total_time) }}</text>
+                        </g>
+                    </svg>
                 </div>
 
                 <!-- Category Rankings -->
