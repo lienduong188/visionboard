@@ -24,7 +24,7 @@ const fmtTime = (min) => {
 };
 
 // Circle packing: scatter bubbles randomly, no overlap
-const W = 700, H = 260;
+const W = 700, H = 300;
 const packedBubbles = computed(() => {
     const maxTime = Math.max(...props.categoryStats.map(c => c.total_time), 1);
     const sorted = [...props.categoryStats].sort((a, b) => b.total_time - a.total_time);
@@ -32,7 +32,7 @@ const packedBubbles = computed(() => {
     for (const c of sorted) {
         const r = c.total_time > 0 ? 18 + (c.total_time / maxTime) * 38 : 14;
         let x = W / 2, y = H / 2;
-        for (let i = 0; i < 600; i++) {
+        for (let i = 0; i < 800; i++) {
             const tx = r + 6 + Math.random() * (W - 2 * r - 12);
             const ty = r + 6 + Math.random() * (H - 2 * r - 12);
             if (!placed.some(p => Math.hypot(p.x - tx, p.y - ty) < p.r + r + 8)) {
@@ -125,9 +125,9 @@ const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighte
                                 :stroke-width="b.total_time > 0 ? 2 : 1"
                                 :opacity="b.total_time > 0 ? 1 : 0.4"
                             />
-                            <text :x="b.x" :y="b.y + b.r * 0.32"
+                            <text :x="b.x" :y="b.y"
                                 text-anchor="middle" dominant-baseline="middle"
-                                :font-size="b.r * 0.85">{{ b.icon }}</text>
+                                :font-size="b.r * 0.9">{{ b.icon }}</text>
                             <text :x="b.x" :y="b.y + b.r + 13"
                                 text-anchor="middle" font-size="10" fill="#6b7280">{{ b.label }}</text>
                             <text v-if="b.total_time > 0"
