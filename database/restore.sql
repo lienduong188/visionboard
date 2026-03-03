@@ -372,6 +372,30 @@ INSERT INTO `progress_logs` (`id`, `goal_id`, `previous_value`, `new_value`, `pr
 INSERT INTO `progress_logs` (`id`, `goal_id`, `previous_value`, `new_value`, `previous_progress`, `new_progress`, `note`, `logged_at`) VALUES (17,7,0.00,1.00,0,2,'待ち時間に残ったもの','2026-02-05 03:38:48');
 INSERT INTO `progress_logs` (`id`, `goal_id`, `previous_value`, `new_value`, `previous_progress`, `new_progress`, `note`, `logged_at`) VALUES (18,2,22.46,23.66,53,56,NULL,'2026-02-02 15:00:00');
 INSERT INTO `progress_logs` (`id`, `goal_id`, `previous_value`, `new_value`, `previous_progress`, `new_progress`, `note`, `logged_at`) VALUES (19,10,1.00,2.00,8,17,'高見山','2026-02-06 15:00:00');
+
+-- Recreate reminders with correct type/frequency constraints (SQLite ALTER TABLE MODIFY không hoạt động)
+DROP TABLE IF EXISTS "reminders";
+CREATE TABLE "reminders" (
+    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "goal_id" integer NOT NULL,
+    "type" varchar NOT NULL DEFAULT 'progress' CHECK("type" IN ('progress', 'deadline', 'custom')),
+    "frequency" varchar NOT NULL DEFAULT 'weekly' CHECK("frequency" IN ('daily', 'weekly', 'monthly', 'specific')),
+    "weekly_days" varchar(20),
+    "monthly_day" tinyint,
+    "start_date" date,
+    "end_date" date,
+    "custom_days" text,
+    "specific_dates" text,
+    "remind_time" time NOT NULL,
+    "message" text,
+    "is_active" tinyint(1) NOT NULL DEFAULT '1',
+    "last_sent_at" datetime,
+    "next_send_at" datetime,
+    "created_at" datetime,
+    "updated_at" datetime,
+    FOREIGN KEY ("goal_id") REFERENCES "goals" ("id") ON DELETE CASCADE
+);
+
 INSERT INTO `reminders` (`id`, `goal_id`, `type`, `frequency`, `weekly_days`, `monthly_day`, `start_date`, `end_date`, `custom_days`, `specific_dates`, `remind_time`, `message`, `is_active`, `last_sent_at`, `next_send_at`, `created_at`, `updated_at`) VALUES (2,9,'progress','monthly','1',1,NULL,NULL,NULL,NULL,'09:00:00','chọn sách cho tháng',1,NULL,'2026-03-01 00:00:00','2026-02-03 21:24:16','2026-02-03 21:24:16');
 INSERT INTO `reminders` (`id`, `goal_id`, `type`, `frequency`, `weekly_days`, `monthly_day`, `start_date`, `end_date`, `custom_days`, `specific_dates`, `remind_time`, `message`, `is_active`, `last_sent_at`, `next_send_at`, `created_at`, `updated_at`) VALUES (3,9,'progress','monthly','1',25,NULL,NULL,NULL,NULL,'09:00:00','check tiến độ + viết review',1,NULL,'2026-02-25 00:00:00','2026-02-03 21:24:56','2026-02-03 21:24:56');
 INSERT INTO `reminders` (`id`, `goal_id`, `type`, `frequency`, `weekly_days`, `monthly_day`, `start_date`, `end_date`, `custom_days`, `specific_dates`, `remind_time`, `message`, `is_active`, `last_sent_at`, `next_send_at`, `created_at`, `updated_at`) VALUES (5,8,'progress','monthly','1',1,'2026-03-01','2026-06-01',NULL,NULL,'09:00:00','- Check quỹ du lịch\n- Xem giá vé máy bay',1,NULL,'2026-03-01 00:00:00','2026-02-03 22:33:08','2026-02-03 22:33:08');
