@@ -37,6 +37,23 @@ INSERT INTO `goals` (`id`, `user_id`, `category_id`, `title`, `description`, `sl
 INSERT INTO `goals` (`id`, `user_id`, `category_id`, `title`, `description`, `slogan`, `cover_image`, `target_value`, `current_value`, `unit`, `start_value`, `progress`, `progress_mode`, `start_date`, `target_date`, `completed_at`, `priority`, `status`, `is_pinned`, `is_core_goal`, `sort_order`, `orbit_scale`, `created_at`, `updated_at`) VALUES (18,1,8,'gia nhập lại 日本ユニセフ協会',NULL,NULL,NULL,NULL,0.00,NULL,NULL,0,'milestone','2026-01-01','2026-12-31',NULL,'low','not_started',0,0,7,3,'2026-02-04 04:06:19','2026-02-07 04:13:15');
 INSERT INTO `goals` (`id`, `user_id`, `category_id`, `title`, `description`, `slogan`, `cover_image`, `target_value`, `current_value`, `unit`, `start_value`, `progress`, `progress_mode`, `start_date`, `target_date`, `completed_at`, `priority`, `status`, `is_pinned`, `is_core_goal`, `sort_order`, `orbit_scale`, `created_at`, `updated_at`) VALUES (19,1,7,'Sống cùng thiên nhiên một cách có ý thức','Mình ở trong trạng thái nhẹ và mở. Mình cảm nhận gió, ánh sáng, mặt đất và nhịp thở của thiên nhiên quanh mình. Mình chủ động bước ra ngoài – đi bộ, leo núi, ra biển hoặc chỉ đứng yên nhìn trời – như một cách kết nối và nạp lại năng lượng tinh thần.','Thiên nhiên là nơi mình trở về',NULL,72.00,0.00,'回',NULL,0,'value','2026-01-01','2026-12-31',NULL,'medium','not_started',0,0,8,3,'2026-02-04 04:12:31','2026-02-07 04:13:15');
 INSERT INTO `goals` (`id`, `user_id`, `category_id`, `title`, `description`, `slogan`, `cover_image`, `target_value`, `current_value`, `unit`, `start_value`, `progress`, `progress_mode`, `start_date`, `target_date`, `completed_at`, `priority`, `status`, `is_pinned`, `is_core_goal`, `sort_order`, `orbit_scale`, `created_at`, `updated_at`) VALUES (20,1,5,'Công tác Fukuoka – Làm việc tập trung, sống gọn gàng','Mình ở trong trạng thái làm việc tập trung nhưng cơ thể vẫn nhẹ và tinh thần thoải mái. \r\n\r\nMình hình dung những buổi sáng chạy bộ ở Fukuoka, hít thở không khí trong lành trước giờ làm. \r\nSau giờ làm, mình đi ăn những món đặc sản địa phương, cảm nhận thành phố bằng nhịp sống chậm. \r\nCuối tuần, mình leo núi nhẹ hoặc đi solo trip, vừa khám phá vừa nạp lại năng lượng. \r\n\r\nMình làm việc trọn vẹn trong tuần và cho bản thân không gian sống đúng nghĩa.','Làm việc trọn vẹn, sống không vội.',NULL,NULL,0.00,NULL,NULL,0,'milestone','2026-02-09','2026-02-28',NULL,'medium','not_started',1,0,2,3,'2026-02-04 19:27:01','2026-02-07 04:13:15');
+
+-- Recreate categories with correct schema (production có thể thiếu name_ja)
+DROP TABLE IF EXISTS "categories";
+CREATE TABLE "categories" (
+    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" varchar(100) NOT NULL,
+    "name_ja" varchar(100),
+    "slug" varchar(100) NOT NULL UNIQUE,
+    "description" text,
+    "icon" varchar(50) NOT NULL,
+    "color" varchar(7) NOT NULL,
+    "sort_order" integer NOT NULL DEFAULT 0,
+    "is_default" tinyint(1) NOT NULL DEFAULT 0,
+    "created_at" datetime,
+    "updated_at" datetime
+);
+
 INSERT INTO `categories` (`id`, `name`, `name_ja`, `slug`, `description`, `icon`, `color`, `sort_order`, `is_default`, `created_at`, `updated_at`) VALUES (1,'Career & Finance','キャリア・財務','career-finance','Career growth, income, investments, debt management','💰','#10B981',1,1,'2026-02-01 05:29:06','2026-02-01 05:29:06');
 INSERT INTO `categories` (`id`, `name`, `name_ja`, `slug`, `description`, `icon`, `color`, `sort_order`, `is_default`, `created_at`, `updated_at`) VALUES (2,'Health & Fitness','健康・フィットネス','health-fitness','Physical health, exercise, nutrition, wellness','🏃','#EF4444',2,1,'2026-02-01 05:29:06','2026-02-01 05:29:06');
 INSERT INTO `categories` (`id`, `name`, `name_ja`, `slug`, `description`, `icon`, `color`, `sort_order`, `is_default`, `created_at`, `updated_at`) VALUES (3,'Relationships','人間関係','relationships','Family, friends, romantic relationships, networking','❤️','#EC4899',3,1,'2026-02-01 05:29:06','2026-02-01 05:29:06');
