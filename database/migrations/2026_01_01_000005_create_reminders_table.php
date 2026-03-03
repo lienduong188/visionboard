@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('reminders')) {
+            return;
+        }
+
         Schema::create('reminders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('goal_id')->constrained()->onDelete('cascade');

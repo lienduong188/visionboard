@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('goal_checklists')) {
+            return;
+        }
+
         Schema::create('goal_checklists', function (Blueprint $table) {
             $table->id();
             $table->foreignId('goal_id')->constrained()->onDelete('cascade');
