@@ -9,7 +9,7 @@ on:
 # Chỉ cho 1 deploy chạy tại 1 thời điểm, cancel deploy cũ nếu có push mới
 concurrency:
   group: production-deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
