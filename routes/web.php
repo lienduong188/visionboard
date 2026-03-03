@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressLogController;
 use App\Http\Controllers\ReminderController;
 use App\Http\Controllers\ReviewSettingController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\GoalReferenceController;
 use App\Http\Controllers\DailyOutputController;
 use App\Http\Controllers\ThemeWordController;
@@ -95,6 +96,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Review Settings
     Route::get('/settings/reviews', [ReviewSettingController::class, 'show'])->name('settings.reviews');
     Route::put('/settings/reviews', [ReviewSettingController::class, 'update'])->name('settings.reviews.update');
+
+    Route::get('/settings/backup', [BackupController::class, 'index'])->name('settings.backup');
+    Route::post('/backup/run', [BackupController::class, 'run'])->name('backup.run');
 
     // Daily Output Tracking
     Route::get('/tracking-output/analytics', [DailyOutputController::class, 'analytics'])->name('tracking-output.analytics');

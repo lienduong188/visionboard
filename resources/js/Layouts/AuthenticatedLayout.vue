@@ -23,6 +23,18 @@ const isVisionBoardActive = computed(() => {
 const isPlanActive = computed(() => {
     return route().current('goals.index') && currentView.value === 'plan';
 });
+
+const backupStatus = computed(() => page.props.backupStatus);
+
+const backupLabel = computed(() => {
+    if (!backupStatus.value?.last_backup_at) return null;
+    const diff = Math.floor((Date.now() - new Date(backupStatus.value.last_backup_at).getTime()) / 60000);
+    if (diff < 60) return `${diff}m`;
+    if (diff < 1440) return `${Math.floor(diff / 60)}h`;
+    return `${Math.floor(diff / 1440)}d`;
+});
+
+const backupIsOverdue = computed(() => backupStatus.value?.is_overdue ?? false);
 </script>
 
 <template>
@@ -88,6 +100,19 @@ const isPlanActive = computed(() => {
                             <!-- Theme Switcher -->
                             <ThemeSwitcher />
 
+                            <!-- Backup Status Badge -->
+                            <Link
+                                :href="route('settings.backup')"
+                                class="ms-3 inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors"
+                                :class="backupIsOverdue
+                                    ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-400 dark:hover:bg-yellow-900/60'
+                                    : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/40 dark:text-green-400 dark:hover:bg-green-900/60'"
+                                :title="backupIsOverdue ? 'Chưa backup — Click để backup ngay' : `Backup: ${backupLabel} trước`"
+                            >
+                                <span>{{ backupIsOverdue ? '⚠️' : '💾' }}</span>
+                                <span>{{ backupIsOverdue ? 'Backup!' : backupLabel }}</span>
+                            </Link>
+
                             <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
@@ -125,6 +150,11 @@ const isPlanActive = computed(() => {
                                             :href="route('settings.reviews')"
                                         >
                                             Review Settings
+                                        </DropdownLink>
+                                        <DropdownLink
+                                            :href="route('settings.backup')"
+                                        >
+                                            💾 Backup
                                         </DropdownLink>
                                         <DropdownLink
                                             :href="route('logout')"
@@ -249,6 +279,9 @@ const isPlanActive = computed(() => {
                             <ResponsiveNavLink :href="route('settings.reviews')">
                                 Review Settings
                             </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('settings.backup')">
+                                💾 Backup
+                            </ResponsiveNavLink>
                             <ResponsiveNavLink
                                 :href="route('logout')"
                                 method="post"
@@ -260,6 +293,21 @@ const isPlanActive = computed(() => {
                     </div>
                 </div>
             </nav>
+
+            <!-- Backup Overdue Warning Banner -->
+            <div v-if="backupIsOverdue"
+                class="bg-yellow-50 dark:bg-yellow-900/30 border-b border-yellow-200 dark:border-yellow-700">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+                    <p class="text-sm text-yellow-800 dark:text-yellow-300">
+                        ⚠️ <strong>Chưa backup</strong>
+                        {{ backupStatus?.last_backup_at ? '— Quá 24h chưa backup database.' : '— Chưa có backup nào.' }}
+                    </p>
+                    <Link :href="route('settings.backup')"
+                        class="text-xs font-medium text-yellow-700 dark:text-yellow-400 underline hover:no-underline ml-4 whitespace-nowrap">
+                        Backup ngay →
+                    </Link>
+                </div>
+            </div>
 
             <!-- Page Heading -->
             <header
