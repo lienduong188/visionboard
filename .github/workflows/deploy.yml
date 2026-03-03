@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch: # Cho phép trigger thủ công
 
+# Chỉ cho 1 deploy chạy tại 1 thời điểm, cancel deploy cũ nếu có push mới
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build Assets
