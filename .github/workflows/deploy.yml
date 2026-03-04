@@ -98,41 +98,44 @@ jobs:
           fi
 
           # Preserve .env and storage from current deployment (vendor comes fresh from CI)
+          # NOTE: Do NOT fall back to www/ - it may be the portfolio or another project!
           CURRENT_DIR=""
           if [ -d "www/visionboard2026" ] && [ -f "www/visionboard2026/artisan" ]; then
             CURRENT_DIR="www/visionboard2026"
-          elif [ -f "www/artisan" ]; then
-            CURRENT_DIR="www"
+          elif [ -d "www/visionboard2026_backup" ] && [ -f "www/visionboard2026_backup/artisan" ]; then
+            echo "⚠️ Main deployment missing, falling back to backup for .env and storage"
+            CURRENT_DIR="www/visionboard2026_backup"
           fi
 
           if [ -n "$CURRENT_DIR" ]; then
             echo "Found current deployment at ~/$CURRENT_DIR"
 
             if [ -f "$CURRENT_DIR/.env" ]; then
-              echo "Preserving .env file..."
-              cp "$CURRENT_DIR/.env" www/visionboard2026_new/.env
-              # Ensure APP_TIMEZONE is set to Asia/Tokyo (FreeBSD sed requires -i '')
-              grep -q "APP_TIMEZONE" www/visionboard2026_new/.env \
-                && sed -i '' 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Asia\/Tokyo/' www/visionboard2026_new/.env \
-                || echo "APP_TIMEZONE=Asia/Tokyo" >> www/visionboard2026_new/.env
-              echo "Ensured APP_TIMEZONE=Asia/Tokyo in .env"
-              # Ensure APP_URL is correct (prevent wrong domain for image URLs)
-              grep -q "APP_URL" www/visionboard2026_new/.env \
-                && sed -i '' 's|^APP_URL=.*|APP_URL=https://visionboard.duonglien.com|' www/visionboard2026_new/.env \
-                || echo "APP_URL=https://visionboard.duonglien.com" >> www/visionboard2026_new/.env
-              # Remove ASSET_URL if set (should inherit from APP_URL)
-              sed -i '' '/^ASSET_URL=/d' www/visionboard2026_new/.env 2>/dev/null || true
-              echo "Ensured APP_URL=https://visionboard.duonglien.com in .env"
+              # Verify it's actually visionboard's .env (not portfolio or other project)
+              if grep -q "visionboard\|DB_CONNECTION=sqlite" "$CURRENT_DIR/.env" 2>/dev/null; then
+                echo "Preserving .env file..."
+                cp "$CURRENT_DIR/.env" www/visionboard2026_new/.env
+                # Ensure APP_TIMEZONE is set to Asia/Tokyo (FreeBSD sed requires -i '')
+                grep -q "APP_TIMEZONE" www/visionboard2026_new/.env \
+                  && sed -i '' 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Asia\/Tokyo/' www/visionboard2026_new/.env \
+                  || echo "APP_TIMEZONE=Asia/Tokyo" >> www/visionboard2026_new/.env
+                echo "Ensured APP_TIMEZONE=Asia/Tokyo in .env"
+                # Ensure APP_URL is correct (prevent wrong domain for image URLs)
+                grep -q "APP_URL" www/visionboard2026_new/.env \
+                  && sed -i '' 's|^APP_URL=.*|APP_URL=https://visionboard.duonglien.com|' www/visionboard2026_new/.env \
+                  || echo "APP_URL=https://visionboard.duonglien.com" >> www/visionboard2026_new/.env
+                # Remove ASSET_URL if set (should inherit from APP_URL)
+                sed -i '' '/^ASSET_URL=/d' www/visionboard2026_new/.env 2>/dev/null || true
+                echo "Ensured APP_URL=https://visionboard.duonglien.com in .env"
+              else
+                echo "⚠️ .env at $CURRENT_DIR doesn't look like visionboard's (skipping to avoid wrong APP_KEY)"
+              fi
             fi
 
             if [ -d "$CURRENT_DIR/storage/app" ]; then
               echo "Preserving storage uploads..."
               rm -rf www/visionboard2026_new/storage/app
               cp -r "$CURRENT_DIR/storage/app" www/visionboard2026_new/storage/app
-            elif [ -d "www/visionboard2026_backup/storage/app" ]; then
-              echo "⚠️ Current storage missing, recovering from backup..."
-              rm -rf www/visionboard2026_new/storage/app
-              cp -r "www/visionboard2026_backup/storage/app" www/visionboard2026_new/storage/app
             fi
 
             # Preserve SQLite database (critical - do not wipe user data!)
@@ -159,6 +162,29 @@ jobs:
 
           # Remove .env.production to prevent it from overriding .env
           rm -f .env.production
+
+          # Disaster recovery: generate minimal .env if none was preserved
+          if [ ! -f ".env" ]; then
+            echo "⚠️ No .env found! Generating minimal .env for disaster recovery..."
+            echo 'APP_NAME="VisionBoard 2026"' > .env
+            echo 'APP_ENV=production' >> .env
+            echo 'APP_KEY=' >> .env
+            echo 'APP_DEBUG=false' >> .env
+            echo 'APP_URL=https://visionboard.duonglien.com' >> .env
+            echo 'APP_TIMEZONE=Asia/Tokyo' >> .env
+            echo 'LOG_CHANNEL=stack' >> .env
+            echo 'LOG_LEVEL=error' >> .env
+            echo 'DB_CONNECTION=sqlite' >> .env
+            echo 'DB_DATABASE=database/database.sqlite' >> .env
+            echo 'CACHE_DRIVER=file' >> .env
+            echo 'FILESYSTEM_DISK=local' >> .env
+            echo 'QUEUE_CONNECTION=sync' >> .env
+            echo 'SESSION_DRIVER=file' >> .env
+            echo 'SESSION_LIFETIME=120' >> .env
+            echo 'SESSION_PATH=/' >> .env
+            php artisan key:generate --force
+            echo "✅ Generated fresh APP_KEY. Users will need to re-login."
+          fi
 
           # Create storage dirs if missing
           mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
