@@ -12,14 +12,42 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 📤 Upload restore.sql to server
+      - name: 📤 Upload restore.sql + restore script to server
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > deploy_key
           chmod 600 deploy_key
+
+          # Tạo restore script (sh-compatible, không dùng bash syntax)
+          cat > restore.sh << 'SCRIPT'
+          #!/bin/sh
+          set -e
+          DB_PATH=$HOME/www/visionboard2026/database/database.sqlite
+
+          # Backup trước khi restore
+          if [ -f "$DB_PATH" ]; then
+            BACKUP_PATH="$HOME/database_before_restore_$(date +%Y%m%d_%H%M%S).sqlite"
+            cp "$DB_PATH" "$BACKUP_PATH"
+            echo "Backed up current DB to $BACKUP_PATH"
+          fi
+
+          # Chạy restore
+          echo "Running restore..."
+          sqlite3 "$DB_PATH" < "$HOME/restore.sql"
+          rm "$HOME/restore.sql"
+          echo "Restore complete!"
+
+          # Verify
+          USER_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM users;")
+          GOAL_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM goals;")
+          OUTPUT_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM daily_outputs;")
+          echo "After restore: users=$USER_COUNT, goals=$GOAL_COUNT, daily_outputs=$OUTPUT_COUNT"
+          SCRIPT
+
           scp -i deploy_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
-            database/restore.sql ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/restore.sql
-          rm deploy_key
-          echo "Uploaded restore.sql to server"
+            database/restore.sql restore.sh \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/
+          rm deploy_key restore.sh
+          echo "Uploaded restore.sql and restore.sh to server"
 
       - name: 🔄 Run restore on server
         uses: appleboy/ssh-action@v1.0.3
@@ -28,26 +56,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: |
-            DB_PATH=~/www/visionboard2026/database/database.sqlite
-
-            # Backup hiện tại trước khi restore
-            if [ -f "$DB_PATH" ]; then
-              cp "$DB_PATH" ~/database_before_restore_$(date +%Y%m%d_%H%M%S).sqlite
-              echo "Backed up current DB"
-            fi
-
-            # Chạy restore
-            echo "Running restore..."
-            sqlite3 "$DB_PATH" < ~/restore.sql
-            rm ~/restore.sql
-            echo "Restore complete!"
-
-            # Verify
-            USER_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM users;")
-            GOAL_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM goals;")
-            OUTPUT_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM daily_outputs;")
-            echo "After restore: users=$USER_COUNT, goals=$GOAL_COUNT, daily_outputs=$OUTPUT_COUNT"
+          script: sh ~/restore.sh
 
       - name: ✅ Done
         run: echo "Database restored successfully!"
