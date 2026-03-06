@@ -198,13 +198,9 @@ jobs:
           echo "Running migrations..."
           php artisan migrate --force
 
-          # Run data restore AFTER migrations (schema must be up-to-date first)
-          if [ -f "database/restore.sql" ]; then
-            echo "Running data restore..."
-            sqlite3 database/database.sqlite < database/restore.sql
-            rm database/restore.sql
-            echo "Data restore complete!"
-          fi
+          # NOTE: restore.sql is NOT auto-run in deploy to prevent accidental data wipe.
+          # If manual restore is needed, SSH to server and run manually:
+          #   sqlite3 ~/www/visionboard2026/database/database.sqlite < ~/restore.sql
 
           echo "Setting up storage link..."
           mkdir -p storage/app/public
