@@ -6,6 +6,7 @@ const props = defineProps({
     output: Object,
     categories: Object,
     isPublic: Boolean,
+    movementTypes: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['edit', 'delete']);
@@ -41,6 +42,25 @@ const formatDuration = (minutes) => {
     if (m === 0) return `${h}h`;
     return `${h}h${m}'`;
 };
+
+const movementPace = computed(() => {
+    const dist = parseFloat(props.output.distance_km);
+    const hms = props.output.duration_hms;
+    if (!dist || dist <= 0 || !hms) return null;
+    const parts = hms.split(':');
+    if (parts.length !== 3) return null;
+    const totalSec = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+    if (!totalSec) return null;
+    const paceSecPerKm = totalSec / dist;
+    const paceMin = Math.floor(paceSecPerKm / 60);
+    const paceSec = Math.round(paceSecPerKm % 60);
+    return `${paceMin}:${String(paceSec).padStart(2, '0')}`;
+});
+
+const movementTypeInfo = computed(() => {
+    if (!props.output.movement_type) return null;
+    return props.movementTypes[props.output.movement_type] || null;
+});
 </script>
 
 <template>
@@ -75,6 +95,15 @@ const formatDuration = (minutes) => {
             <!-- Goal link -->
             <div v-if="output.goal" class="text-xs text-gray-500 dark:text-gray-400 truncate">
                 → {{ output.goal.title }}
+            </div>
+
+            <!-- Movement stats (chỉ hiện khi có data) -->
+            <div v-if="output.category === 'movement' && (output.distance_km || output.duration_hms)" class="flex items-center gap-2 mt-1 flex-wrap text-xs text-orange-600 dark:text-orange-400 font-mono">
+                <span v-if="movementTypeInfo" class="not-mono text-orange-500">{{ movementTypeInfo.icon }} {{ movementTypeInfo.ja }}</span>
+                <span v-if="output.distance_km">📍 {{ parseFloat(output.distance_km) % 1 === 0 ? parseFloat(output.distance_km) : parseFloat(output.distance_km).toFixed(2).replace(/\.?0+$/, '') }} km</span>
+                <span v-if="output.duration_hms">⏱ {{ output.duration_hms }}</span>
+                <span v-if="movementPace">⚡ {{ movementPace }}/km</span>
+                <span v-if="output.heart_rate">❤️ {{ output.heart_rate }}</span>
             </div>
 
             <!-- Meta row: duration, rating, link, image, actions -->

@@ -13,6 +13,7 @@ const props = defineProps({
     dayNumber: Number,
     isPublic: Boolean,
     restDaysAvailable: Number,
+    movementTypes: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['add', 'edit', 'delete', 'toggle-rest']);
@@ -109,6 +110,7 @@ const doneCount = computed(() => props.outputs.filter(o => o.status === 'done').
                 :output="output"
                 :categories="categories"
                 :is-public="isPublic"
+                :movement-types="movementTypes"
                 @edit="emit('edit', { ...$event, output_date: date })"
                 @delete="emit('delete', $event)"
             />
