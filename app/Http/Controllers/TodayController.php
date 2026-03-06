@@ -25,6 +25,7 @@ class TodayController extends Controller
         // 1. Milestones with due_date (pending, within 7 days or overdue)
         $milestones = Milestone::with(['goal.category', 'todos'])
             ->whereIn('goal_id', $goalIds)
+            ->whereHas('goal', fn($q) => $q->where('status', '!=', 'completed'))
             ->where('is_completed', false)
             ->whereNotNull('due_date')
             ->where('due_date', '<=', $endOfWeek)
