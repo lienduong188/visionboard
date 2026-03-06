@@ -166,19 +166,19 @@ const daysRemaining = computed(() => {
                     >
                         <span v-if="daysRemaining !== null">
                             <span
-                                v-if="daysRemaining < 0"
+                                v-if="daysRemaining < 0 && goal.status !== 'completed'"
                                 class="text-red-500 font-medium"
                             >
                                 {{ Math.abs(daysRemaining) }} days overdue
                             </span>
                             <span
-                                v-else-if="daysRemaining === 0"
+                                v-else-if="daysRemaining === 0 && goal.status !== 'completed'"
                                 class="text-yellow-500 font-medium"
                             >
                                 Due today!
                             </span>
                             <span
-                                v-else-if="daysRemaining <= 7"
+                                v-else-if="daysRemaining <= 7 && goal.status !== 'completed'"
                                 class="text-orange-500 font-medium"
                             >
                                 {{ daysRemaining }} days left
