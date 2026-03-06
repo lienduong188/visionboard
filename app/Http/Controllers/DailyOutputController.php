@@ -60,6 +60,7 @@ class DailyOutputController extends Controller
             'currentView' => $view,
             'categories' => DailyOutput::CATEGORIES,
             'durationPresets' => DailyOutput::DURATION_PRESETS,
+            'movementTypes' => DailyOutput::MOVEMENT_TYPES,
         ]);
     }
 
@@ -101,6 +102,7 @@ class DailyOutputController extends Controller
             'currentView' => $view,
             'categories' => DailyOutput::CATEGORIES,
             'durationPresets' => DailyOutput::DURATION_PRESETS,
+            'movementTypes' => DailyOutput::MOVEMENT_TYPES,
             'isPublic' => true,
         ]);
     }
@@ -119,10 +121,19 @@ class DailyOutputController extends Controller
             'images.*' => 'image',
             'rating' => 'nullable|integer|min:1|max:5',
             'status' => 'required|in:planned,done,skipped',
+            // Movement-specific fields
+            'movement_type' => 'nullable|string|in:' . implode(',', array_keys(DailyOutput::MOVEMENT_TYPES)),
+            'distance_km' => 'nullable|numeric|min:0|max:9999',
+            'duration_hms' => 'nullable|string|max:10|regex:/^\d{1,2}:\d{2}:\d{2}$/',
+            'heart_rate' => 'nullable|integer|min:0|max:300',
+            'cadence' => 'nullable|integer|min:0|max:300',
+            'kcal' => 'nullable|integer|min:0|max:99999',
         ]);
 
         if (empty($validated['output_link'])) $validated['output_link'] = null;
         if (empty($validated['note'])) $validated['note'] = null;
+        if (empty($validated['movement_type'])) $validated['movement_type'] = null;
+        if (empty($validated['duration_hms'])) $validated['duration_hms'] = null;
 
         $imagePaths = [];
         if ($request->hasFile('images')) {
@@ -168,10 +179,19 @@ class DailyOutputController extends Controller
             'remove_image_path' => 'nullable|boolean',
             'rating' => 'nullable|integer|min:1|max:5',
             'status' => 'required|in:planned,done,skipped',
+            // Movement-specific fields
+            'movement_type' => 'nullable|string|in:' . implode(',', array_keys(DailyOutput::MOVEMENT_TYPES)),
+            'distance_km' => 'nullable|numeric|min:0|max:9999',
+            'duration_hms' => 'nullable|string|max:10|regex:/^\d{1,2}:\d{2}:\d{2}$/',
+            'heart_rate' => 'nullable|integer|min:0|max:300',
+            'cadence' => 'nullable|integer|min:0|max:300',
+            'kcal' => 'nullable|integer|min:0|max:99999',
         ]);
 
         if (empty($validated['output_link'])) $validated['output_link'] = null;
         if (empty($validated['note'])) $validated['note'] = null;
+        if (empty($validated['movement_type'])) $validated['movement_type'] = null;
+        if (empty($validated['duration_hms'])) $validated['duration_hms'] = null;
 
         // Handle image_path (legacy single image)
         if ($request->boolean('remove_image_path') && $dailyOutput->image_path) {

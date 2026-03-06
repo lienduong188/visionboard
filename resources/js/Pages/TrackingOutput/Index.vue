@@ -6,6 +6,7 @@ import OutputFormModal from '@/Components/TrackingOutput/OutputFormModal.vue';
 import CalendarHeatmap from '@/Components/TrackingOutput/CalendarHeatmap.vue';
 import MonthlyCalendar from '@/Components/TrackingOutput/MonthlyCalendar.vue';
 import SpinWheel from '@/Components/TrackingOutput/SpinWheel.vue';
+import MovementLogTable from '@/Components/TrackingOutput/MovementLogTable.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
 import { ref, computed, nextTick } from 'vue';
@@ -22,6 +23,7 @@ const props = defineProps({
     categories: Object,
     durationPresets: Array,
     isPublic: { type: Boolean, default: false },
+    movementTypes: { type: Object, default: () => ({}) },
 });
 
 const viewMode = ref(props.currentView || 'list');
@@ -337,6 +339,14 @@ const switchView = (view) => {
                     />
                 </div>
 
+                <!-- Movement Log Table (chỉ hiện khi filter movement) -->
+                <div v-if="viewMode === 'list' && categoryFilter === 'movement'" class="mb-6">
+                    <MovementLogTable
+                        :outputs="outputs"
+                        :movement-types="movementTypes"
+                    />
+                </div>
+
                 <!-- List View -->
                 <div v-if="viewMode === 'list'" class="space-y-4">
                     <div
@@ -403,6 +413,7 @@ const switchView = (view) => {
             :default-title="defaultTitle"
             :default-category="defaultCategory"
             :default-status="defaultStatus"
+            :movement-types="movementTypes"
             @close="closeModal"
         />
 

@@ -26,6 +26,14 @@ class DailyOutput extends Model
 
     const DURATION_PRESETS = [10, 30, 60, 90, 120];
 
+    const MOVEMENT_TYPES = [
+        'running'       => ['label' => 'Running',      'ja' => 'ランニング',    'icon' => '🏃'],
+        'trail_running' => ['label' => 'Trail Running', 'ja' => 'トレイルラン', 'icon' => '🏔️'],
+        'gym'           => ['label' => 'Gym',           'ja' => 'ジム',          'icon' => '🏋️'],
+        'hiking'        => ['label' => 'Hiking',        'ja' => 'ハイキング',    'icon' => '⛰️'],
+        'other'         => ['label' => 'Other',         'ja' => 'その他',        'icon' => '⚡'],
+    ];
+
     const TRACKING_START = '2026-02-17';
     const TRACKING_END = '2027-02-05';
 
@@ -43,6 +51,12 @@ class DailyOutput extends Model
         'rating',
         'status',
         'sort_order',
+        'movement_type',
+        'distance_km',
+        'duration_hms',
+        'heart_rate',
+        'cadence',
+        'kcal',
     ];
 
     protected $casts = [
@@ -51,6 +65,10 @@ class DailyOutput extends Model
         'rating' => 'integer',
         'sort_order' => 'integer',
         'images' => 'array',
+        'distance_km' => 'decimal:2',
+        'heart_rate' => 'integer',
+        'cadence' => 'integer',
+        'kcal' => 'integer',
     ];
 
     public function user(): BelongsTo

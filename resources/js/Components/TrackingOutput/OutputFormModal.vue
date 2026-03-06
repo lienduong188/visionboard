@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, nextTick } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const formErrors = ref({});
@@ -15,6 +15,7 @@ const props = defineProps({
     defaultTitle: { type: String, default: null },
     defaultCategory: { type: String, default: null },
     defaultStatus: { type: String, default: null },
+    movementTypes: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['close']);
@@ -29,6 +30,28 @@ const form = ref({
     rating: null,
     status: 'done',
     output_date: '',
+    // Movement-specific
+    movement_type: null,
+    distance_km: '',
+    duration_hms: '',
+    heart_rate: '',
+    cadence: '',
+    kcal: '',
+});
+
+// Pace computed from distance_km and duration_hms
+const computedPace = computed(() => {
+    const dist = parseFloat(form.value.distance_km);
+    const hms = form.value.duration_hms;
+    if (!dist || dist <= 0 || !hms) return null;
+    const parts = hms.split(':');
+    if (parts.length !== 3) return null;
+    const totalSec = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+    if (!totalSec) return null;
+    const paceSecPerKm = totalSec / dist;
+    const paceMin = Math.floor(paceSecPerKm / 60);
+    const paceSec = Math.round(paceSecPerKm % 60);
+    return `${paceMin}:${String(paceSec).padStart(2, '0')}`;
 });
 
 // Multi-image state
@@ -87,6 +110,12 @@ watch(() => props.show, (val) => {
                 rating: props.output.rating,
                 status: props.output.status,
                 output_date: toLocalDateStr(props.output.output_date),
+                movement_type: props.output.movement_type || null,
+                distance_km: props.output.distance_km || '',
+                duration_hms: props.output.duration_hms || '',
+                heart_rate: props.output.heart_rate || '',
+                cadence: props.output.cadence || '',
+                kcal: props.output.kcal || '',
             };
         } else {
             const now = new Date();
@@ -101,6 +130,12 @@ watch(() => props.show, (val) => {
                 rating: null,
                 status: props.defaultStatus || (isFutureDate(props.defaultDate || today) ? 'planned' : 'done'),
                 output_date: props.defaultDate || today,
+                movement_type: null,
+                distance_km: '',
+                duration_hms: '',
+                heart_rate: '',
+                cadence: '',
+                kcal: '',
             };
         }
     }
@@ -196,6 +231,15 @@ const submit = () => {
     if (form.value.note) data.append('note', form.value.note);
     if (form.value.output_link) data.append('output_link', form.value.output_link);
     if (form.value.rating) data.append('rating', form.value.rating);
+    // Movement fields
+    if (form.value.category === 'movement') {
+        if (form.value.movement_type) data.append('movement_type', form.value.movement_type);
+        if (form.value.distance_km !== '') data.append('distance_km', form.value.distance_km);
+        if (form.value.duration_hms) data.append('duration_hms', form.value.duration_hms);
+        if (form.value.heart_rate !== '') data.append('heart_rate', form.value.heart_rate);
+        if (form.value.cadence !== '') data.append('cadence', form.value.cadence);
+        if (form.value.kcal !== '') data.append('kcal', form.value.kcal);
+    }
 
     // New images
     for (const file of newImageFiles.value) {
@@ -351,6 +395,96 @@ const close = () => emit('close');
                                     placeholder="?"
                                 />
                                 <span class="text-sm text-gray-500 dark:text-gray-400">'</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Movement-specific fields -->
+                    <div v-if="form.category === 'movement'" class="rounded-xl border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 p-4 space-y-3">
+                        <p class="text-xs font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wide">🏃 Movement Details</p>
+
+                        <!-- Activity Type -->
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Activity Type</label>
+                            <div class="flex flex-wrap gap-2">
+                                <button
+                                    v-for="(mt, key) in movementTypes"
+                                    :key="key"
+                                    type="button"
+                                    @click="form.movement_type = form.movement_type === key ? null : key"
+                                    class="px-3 py-1.5 rounded-full text-sm transition-colors"
+                                    :class="form.movement_type === key
+                                        ? 'bg-orange-500 text-white'
+                                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 hover:border-orange-400'"
+                                >
+                                    {{ mt.icon }} {{ mt.ja }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Distance + Precise Time -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Distance (km)</label>
+                                <input
+                                    v-model="form.distance_km"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-orange-500 focus:ring-orange-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Time (HH:MM:SS)</label>
+                                <input
+                                    v-model="form.duration_hms"
+                                    type="text"
+                                    placeholder="0:00:00"
+                                    pattern="\d{1,2}:\d{2}:\d{2}"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-orange-500 focus:ring-orange-500 font-mono"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Pace (auto-calculated) -->
+                        <div v-if="computedPace" class="text-sm text-orange-700 dark:text-orange-300">
+                            Pace: <span class="font-semibold font-mono">{{ computedPace }} /km</span>
+                        </div>
+
+                        <!-- HR + Cadence + Kcal -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Heart Rate</label>
+                                <input
+                                    v-model="form.heart_rate"
+                                    type="number"
+                                    min="0"
+                                    max="300"
+                                    placeholder="bpm"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-orange-500 focus:ring-orange-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Cadence</label>
+                                <input
+                                    v-model="form.cadence"
+                                    type="number"
+                                    min="0"
+                                    max="300"
+                                    placeholder="spm"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-orange-500 focus:ring-orange-500"
+                                />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Kcal</label>
+                                <input
+                                    v-model="form.kcal"
+                                    type="number"
+                                    min="0"
+                                    placeholder="kcal"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:border-orange-500 focus:ring-orange-500"
+                                />
                             </div>
                         </div>
                     </div>
