@@ -13,6 +13,8 @@ const props = defineProps({
     durationPresets: Array,
     defaultDate: { type: String, default: null },
     defaultTitle: { type: String, default: null },
+    defaultCategory: { type: String, default: null },
+    defaultStatus: { type: String, default: null },
 });
 
 const emit = defineEmits(['close']);
@@ -91,13 +93,13 @@ watch(() => props.show, (val) => {
             const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             form.value = {
                 title: props.defaultTitle || '',
-                category: 'writing',
+                category: props.defaultCategory || 'writing',
                 goal_id: null,
                 duration: 60,
                 note: '',
                 output_link: '',
                 rating: null,
-                status: isFutureDate(props.defaultDate || today) ? 'planned' : 'done',
+                status: props.defaultStatus || (isFutureDate(props.defaultDate || today) ? 'planned' : 'done'),
                 output_date: props.defaultDate || today,
             };
         }

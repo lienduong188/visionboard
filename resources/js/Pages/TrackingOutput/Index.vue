@@ -30,6 +30,8 @@ const showFormModal = ref(false);
 const editingOutput = ref(null);
 const defaultDate = ref(null);
 const defaultTitle = ref(null);
+const defaultCategory = ref(null);
+const defaultStatus = ref(null);
 const categoryFilter = ref('all');
 const showSpinWheel = ref(false);
 
@@ -111,17 +113,19 @@ const isMissed = (date) => {
 };
 
 // Modal handlers
-const openAddModal = (date, title = null) => {
+const openAddModal = (date, title = null, category = null, status = null) => {
     editingOutput.value = null;
     defaultDate.value = date || today;
     defaultTitle.value = title;
+    defaultCategory.value = category;
+    defaultStatus.value = status;
     showFormModal.value = true;
 };
 
 // Spin wheel handler
-const onWheelResult = (label) => {
+const onWheelResult = ({ label, category }) => {
     showSpinWheel.value = false;
-    openAddModal(today, label);
+    openAddModal(today, label, category, 'planned');
 };
 
 const openEditModal = (output) => {
@@ -135,6 +139,8 @@ const closeModal = (savedDate) => {
     editingOutput.value = null;
     defaultTitle.value = null;
     defaultDate.value = null;
+    defaultCategory.value = null;
+    defaultStatus.value = null;
     if (savedDate) {
         nextTick(() => {
             const el = document.getElementById(`day-${savedDate}`);
@@ -173,7 +179,7 @@ const switchView = (view) => {
 </script>
 
 <template>
-    <Head title="Daily Output Tracker" />
+    <Head title="Daily Hobbies Tracker" />
 
     <component
         :is="isPublic ? 'div' : AuthenticatedLayout"
@@ -182,7 +188,7 @@ const switchView = (view) => {
         <!-- Public header (only when not logged in) -->
         <div v-if="isPublic" class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-                <span class="font-semibold text-gray-900 dark:text-white">🚀 v!t's Daily Output Tracker</span>
+                <span class="font-semibold text-gray-900 dark:text-white">🚀 v!t's Daily Hobbies Tracker</span>
                 <div class="flex items-center gap-3">
                     <ThemeSwitcher />
                     <a :href="route('login')" class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
@@ -199,7 +205,7 @@ const switchView = (view) => {
                     <div class="flex items-center justify-between flex-wrap gap-3">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                                Daily Output Tracker
+                                Daily Hobbies Tracker
                             </h1>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                 17/2/2026 → 5/2/2027
@@ -392,6 +398,8 @@ const switchView = (view) => {
             :duration-presets="durationPresets"
             :default-date="defaultDate"
             :default-title="defaultTitle"
+            :default-category="defaultCategory"
+            :default-status="defaultStatus"
             @close="closeModal"
         />
 

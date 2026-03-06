@@ -85,7 +85,7 @@ const backupIsOverdue = computed(() => backupStatus.value?.is_overdue ?? false);
                                     :href="route('tracking-output.index')"
                                     :active="route().current('tracking-output.index')"
                                 >
-                                    Output
+                                    Hobbies
                                 </NavLink>
                                 <NavLink
                                     :href="route('analytics.index')"
@@ -247,7 +247,7 @@ const backupIsOverdue = computed(() => backupStatus.value?.is_overdue ?? false);
                             :href="route('tracking-output.index')"
                             :active="route().current('tracking-output.index')"
                         >
-                            Output
+                            Hobbies
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('analytics.index')"

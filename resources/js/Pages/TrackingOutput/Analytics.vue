@@ -45,10 +45,10 @@ const packedBubbles = computed(() => {
 });
 
 const priorityConfig = {
-    warning: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-300 dark:border-amber-700', badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', icon: '⚠️', label: 'Consider' },
-    high:    { bg: 'bg-blue-50 dark:bg-blue-900/20',   border: 'border-blue-300 dark:border-blue-700',   badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',   icon: '🚀', label: 'Invest More' },
-    good:    { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-300 dark:border-green-700', badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: '✅', label: 'Well Balanced' },
-    great:   { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-300 dark:border-purple-700', badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', icon: '🏆', label: 'Excellent' },
+    warning: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-300 dark:border-amber-700', badge: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200', icon: '⚠️', label: 'Cân nhắc' },
+    high:    { bg: 'bg-blue-50 dark:bg-blue-900/20',   border: 'border-blue-300 dark:border-blue-700',   badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',   icon: '🚀', label: 'Đầu tư thêm' },
+    good:    { bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-300 dark:border-green-700', badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', icon: '✅', label: 'Cân bằng tốt' },
+    great:   { bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-300 dark:border-purple-700', badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200', icon: '🏆', label: 'Xuất sắc' },
 };
 
 // Weekly trend bar chart (simple SVG)
@@ -186,10 +186,10 @@ const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighte
 
                 <!-- Recommendations -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">💡 Flywheel Optimization Tips</h3>
-                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Based on the Flywheel matrix, here are recommended adjustments:</p>
+                    <h3 class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">💡 Gợi ý tối ưu Flywheel</h3>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mb-4">Dựa trên ma trận Flywheel, đây là các điều chỉnh được đề xuất:</p>
                     <div v-if="recommendations.length === 0" class="text-sm text-gray-400 text-center py-4">
-                        Not enough data to analyze. Add more outputs!
+                        Chưa đủ dữ liệu để phân tích. Hãy thêm nhiều hoạt động hơn!
                     </div>
                     <div class="flex flex-col gap-3">
                         <div v-for="rec in recommendations" :key="rec.category"

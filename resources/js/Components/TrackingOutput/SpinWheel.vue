@@ -8,16 +8,14 @@ const props = defineProps({
 const emit = defineEmits(['close', 'result']);
 
 const DEFAULT_ITEMS = [
-    { label: 'Write Blog', color: '#6366F1' },
-    { label: 'Record Vlog', color: '#3B82F6' },
-    { label: 'Edit Video', color: '#EC4899' },
-    { label: 'Study', color: '#F59E0B' },
-    { label: 'Read', color: '#8B5CF6' },
-    { label: 'Draw', color: '#F43F5E' },
-    { label: 'Clean Up', color: '#14B8A6' },
-    { label: 'Design', color: '#E879F9' },
-    { label: 'Embroider', color: '#10B981' },
-    { label: 'Crochet', color: '#EF4444' },
+    { key: 'writing',  label: '✍️ Writing',  color: '#6366F1' },
+    { key: 'capture',  label: '📸 Capture',  color: '#3B82F6' },
+    { key: 'edit',     label: '🎬 Edit',     color: '#EC4899' },
+    { key: 'art',      label: '🖌️ Art',      color: '#F59E0B' },
+    { key: 'craft',    label: '🧶 Craft',    color: '#8B5CF6' },
+    { key: 'movement', label: '🏃 Movement', color: '#F43F5E' },
+    { key: 'learning', label: '📚 Learning', color: '#14B8A6' },
+    { key: 'connect',  label: '🤝 Connect',  color: '#10B981' },
 ];
 
 const COLORS_POOL = [
@@ -340,7 +338,7 @@ onMounted(() => {
                         </button>
                         <button
                             v-if="result && !isSpinning"
-                            @click="emit('result', result.label)"
+                            @click="emit('result', { label: result.label, category: result.key || null })"
                             class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold text-lg shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all"
                         >
                             ✅ Use This
