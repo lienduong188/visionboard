@@ -57,18 +57,18 @@ const trendMax = computed(() => Math.max(...props.weeklyTrend.map(w => w.weighte
 </script>
 
 <template>
-    <Head title="Output Analytics" />
+    <Head title="Hobbies Analytics" />
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between">
                 <div>
                     <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                        📊 Output Analytics
+                        📊 Hobbies Analytics
                     </h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Flywheel value analysis</p>
                 </div>
                 <Link :href="route('tracking-output.index')" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                    ← Back to Output Tracker
+                    ← Back to Hobbies Tracker
                 </Link>
             </div>
         </template>
