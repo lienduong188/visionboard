@@ -61,6 +61,19 @@ const displayDates = computed(() => {
     const trackingStart = '2026-02-17';
     const trackingEnd = '2027-02-05';
 
+    // Khi đang filter theo category cụ thể: chỉ hiện ngày có output trong category đó
+    if (categoryFilter.value !== 'all') {
+        const dates = new Set();
+        for (const [date, dayOutputs] of Object.entries(props.outputs || {})) {
+            if (dayOutputs.some(o => o.category === categoryFilter.value)) {
+                dates.add(date);
+            }
+        }
+        return [...dates]
+            .filter(d => d >= trackingStart && d <= trackingEnd)
+            .sort((a, b) => b.localeCompare(a));
+    }
+
     const dateSet = new Set();
 
     // Add tomorrow and all dates with outputs (kể cả planned tương lai)
