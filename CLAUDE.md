@@ -32,6 +32,27 @@ npm run build
 npm run dev
 ```
 
+## ⚠️ Quy tắc Deploy & Database (QUAN TRỌNG - đọc trước khi deploy)
+
+### Database production là SQLite trên Sakura server
+- File: `~/www/visionboard2026/database/database.sqlite`
+- **KHÔNG BAO GIỜ** commit `database/restore.sql` vào git — dù chỉ "tạm thời"
+  - File này được gitignore, nếu cần force-add thì phải xóa ngay sau khi dùng xong
+  - Một khi đã commit vào git → mỗi lần deploy sẽ tự động wipe sạch data production
+- **KHÔNG** thêm bước auto-run restore.sql vào `deploy.yml` — đã từng làm và gây mất data nhiều lần
+- Deploy an toàn: script tự copy sqlite từ deployment cũ sang mới, data được preserve
+
+### Khi cần restore data production
+- Dùng workflow **"Restore Database (Manual)"** trên GitHub Actions (trigger thủ công)
+- Workflow dùng backup mới nhất từ `storage/app/backups/` trên server (backup tự động hàng ngày 2AM)
+- Server Sakura dùng **FreeBSD/tcsh** — script phải chạy qua `sh` (không dùng bash syntax)
+- Không dùng `appleboy/ssh-action` cho script phức tạp — dùng raw SSH: `ssh ... "sh ~/script.sh"`
+
+### Backup system
+- Tự động backup hàng ngày lúc 2:00 AM (Asia/Tokyo), giữ 7 bản gần nhất
+- Backup lưu tại `storage/app/backups/` trên server
+- Có thể backup thủ công tại `/settings/backup`
+
 ## Production Deployment
 
 ### 🚀 GitHub Actions Auto-Deploy (Khuyên dùng)
