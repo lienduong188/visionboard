@@ -12,51 +12,15 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 📤 Upload restore.sql + restore script to server
+      - name: 📤 Upload restore.sql + restore script, then run via SSH
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > deploy_key
           chmod 600 deploy_key
-
-          # Tạo restore script (sh-compatible, không dùng bash syntax)
-          cat > restore.sh << 'SCRIPT'
-          #!/bin/sh
-          set -e
-          DB_PATH=$HOME/www/visionboard2026/database/database.sqlite
-
-          # Backup trước khi restore
-          if [ -f "$DB_PATH" ]; then
-            BACKUP_PATH="$HOME/database_before_restore_$(date +%Y%m%d_%H%M%S).sqlite"
-            cp "$DB_PATH" "$BACKUP_PATH"
-            echo "Backed up current DB to $BACKUP_PATH"
-          fi
-
-          # Chạy restore
-          echo "Running restore..."
-          sqlite3 "$DB_PATH" < "$HOME/restore.sql"
-          rm "$HOME/restore.sql"
-          echo "Restore complete!"
-
-          # Verify
-          USER_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM users;")
-          GOAL_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM goals;")
-          OUTPUT_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM daily_outputs;")
-          echo "After restore: users=$USER_COUNT, goals=$GOAL_COUNT, daily_outputs=$OUTPUT_COUNT"
-          SCRIPT
-
-          scp -i deploy_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
-            database/restore.sql restore.sh \
-            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/
-          rm deploy_key restore.sh
-          echo "Uploaded restore.sql and restore.sh to server"
-
-      - name: 🔄 Run restore on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: sh ~/restore.sh
+          scp -i deploy_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no database/restore.sql database/restore.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/
+          echo "Uploaded files"
+          ssh -i deploy_key -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "sh ~/restore.sh && rm ~/restore.sh"
+          rm deploy_key
+          echo "Done!"
 
       - name: ✅ Done
         run: echo "Database restored successfully!"
