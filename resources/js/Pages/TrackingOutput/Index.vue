@@ -117,7 +117,8 @@ const openAddModal = (date, title = null, category = null, status = null) => {
     editingOutput.value = null;
     defaultDate.value = date || today;
     defaultTitle.value = title;
-    defaultCategory.value = category;
+    // Nếu không có category được truyền vào, dùng categoryFilter hiện tại (nếu đang filter cụ thể)
+    defaultCategory.value = category ?? (categoryFilter.value !== 'all' ? categoryFilter.value : null);
     defaultStatus.value = status;
     showFormModal.value = true;
 };
@@ -142,6 +143,8 @@ const closeModal = (savedDate) => {
     defaultCategory.value = null;
     defaultStatus.value = null;
     if (savedDate) {
+        // Reset filter về 'all' để output mới luôn hiển thị
+        categoryFilter.value = 'all';
         nextTick(() => {
             const el = document.getElementById(`day-${savedDate}`);
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
