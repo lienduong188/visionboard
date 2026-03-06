@@ -2,33 +2,33 @@
 set -e
 APP="$HOME/www/visionboard2026"
 DB="$APP/database/database.sqlite"
-SQL="$HOME/restore.sql"
+BACKUP_DIR="$APP/storage/app/backups"
 
-# Debug: xem app đang dùng DB nào
-echo "=== DEBUG ==="
-echo "App path: $APP"
-echo "DB path: $DB"
-if [ -f "$APP/.env" ]; then
-  grep "DB_" "$APP/.env" | head -5
-fi
-echo "DB file exists: $(test -f $DB && echo YES || echo NO)"
-echo "============="
+echo "=== Available backups ==="
+ls -la "$BACKUP_DIR/" 2>/dev/null || echo "No backups dir found"
+echo "========================="
 
-if [ -f "$DB" ]; then
-  cp "$DB" "$HOME/db_backup_$(date +%Y%m%d_%H%M%S).sqlite"
-  echo "Backed up current DB"
+# Dùng backup mới nhất trong storage/app/backups/
+LATEST_BACKUP=$(ls -t "$BACKUP_DIR"/*.sqlite 2>/dev/null | head -1)
+
+if [ -z "$LATEST_BACKUP" ]; then
+  echo "ERROR: No backup files found in $BACKUP_DIR"
+  exit 1
 fi
 
-echo "Running restore..."
-sqlite3 "$DB" < "$SQL"
-rm "$SQL"
+echo "Restoring from: $LATEST_BACKUP"
+
+# Backup DB hiện tại trước
+cp "$DB" "$HOME/db_before_restore_$(date +%Y%m%d_%H%M%S).sqlite"
+echo "Backed up current DB"
+
+# Restore bằng cách copy backup file trực tiếp
+cp "$LATEST_BACKUP" "$DB"
 echo "Restore complete!"
 
-# Clear Laravel config cache để app đọc lại .env
+# Clear Laravel config cache
 cd "$APP"
 php artisan config:clear
-php artisan route:clear
-php artisan view:clear
 php artisan config:cache
 echo "Config cache refreshed"
 
