@@ -8,9 +8,10 @@ const props = defineProps({
 
 const summaryMode = ref('weekly'); // 'weekly' | 'monthly'
 const tableView = ref('table'); // 'table' | 'summary'
+const selectedType = ref('all'); // filter by movement_type
 
-// Flatten & filter movement outputs sorted desc
-const movementOutputs = computed(() => {
+// All movement outputs (done), sorted desc
+const allMovementOutputs = computed(() => {
     const list = [];
     for (const [date, dayOutputs] of Object.entries(props.outputs)) {
         for (const o of dayOutputs) {
@@ -20,6 +21,22 @@ const movementOutputs = computed(() => {
         }
     }
     return list.sort((a, b) => b._date.localeCompare(a._date));
+});
+
+// Filtered by selectedType
+const movementOutputs = computed(() => {
+    if (selectedType.value === 'all') return allMovementOutputs.value;
+    return allMovementOutputs.value.filter(o => (o.movement_type || 'other') === selectedType.value);
+});
+
+// Count per type for filter badges
+const typeCounts = computed(() => {
+    const counts = { all: allMovementOutputs.value.length };
+    for (const o of allMovementOutputs.value) {
+        const t = o.movement_type || 'other';
+        counts[t] = (counts[t] || 0) + 1;
+    }
+    return counts;
 });
 
 // Format date to Japanese style
@@ -140,6 +157,33 @@ const bucketPace = (bucket) => {
 
 <template>
     <div class="space-y-4">
+        <!-- Filter by movement type -->
+        <div class="flex flex-wrap gap-1.5">
+            <button
+                @click="selectedType = 'all'"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                :class="selectedType === 'all'
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30'"
+            >
+                All
+                <span class="opacity-70">{{ typeCounts.all || 0 }}</span>
+            </button>
+            <button
+                v-for="(info, key) in movementTypes"
+                :key="key"
+                @click="selectedType = key"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                :class="selectedType === key
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-900/30'"
+                v-show="typeCounts[key]"
+            >
+                {{ info.icon }} {{ info.ja }}
+                <span class="opacity-70">{{ typeCounts[key] || 0 }}</span>
+            </button>
+        </div>
+
         <!-- Toggle: Table / Summary -->
         <div class="flex items-center justify-between flex-wrap gap-2">
             <h2 class="text-base font-semibold text-gray-800 dark:text-gray-200">🏃 Movement Log</h2>
