@@ -227,6 +227,13 @@ jobs:
             exit 1
           fi
 
+          # Setup cron job for Laravel scheduler (idempotent)
+          echo "Setting up Laravel scheduler cron..."
+          SITE_DIR="$HOME/www/visionboard2026"
+          CRON_LINE="* * * * * cd $SITE_DIR && php artisan schedule:run >> /dev/null 2>&1"
+          ( crontab -l 2>/dev/null | grep -v "visionboard2026.*schedule:run" ; echo "$CRON_LINE" ) | crontab -
+          echo "✅ Cron job setup: $CRON_LINE"
+
           # Cleanup deploy script
           rm -f ~/deploy.sh
 
