@@ -4,11 +4,17 @@ import { computed, ref } from 'vue';
 const props = defineProps({
     outputs: { type: Object, default: () => ({}) }, // grouped by date
     movementTypes: { type: Object, default: () => ({}) },
+    selectedType: { type: String, default: 'all' },
 });
+
+const emit = defineEmits(['update:selectedType']);
 
 const summaryMode = ref('weekly'); // 'weekly' | 'monthly'
 const tableView = ref('table'); // 'table' | 'summary'
-const selectedType = ref('all'); // filter by movement_type
+const selectedType = computed({
+    get: () => props.selectedType,
+    set: (val) => emit('update:selectedType', val),
+});
 
 // All movement outputs (done), sorted desc
 const allMovementOutputs = computed(() => {

@@ -9,7 +9,7 @@ import SpinWheel from '@/Components/TrackingOutput/SpinWheel.vue';
 import MovementLogTable from '@/Components/TrackingOutput/MovementLogTable.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import ThemeSwitcher from '@/Components/ThemeSwitcher.vue';
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 
 const props = defineProps({
     outputs: Object,
@@ -35,7 +35,11 @@ const defaultTitle = ref(null);
 const defaultCategory = ref(null);
 const defaultStatus = ref(null);
 const categoryFilter = ref('all');
+const movementTypeFilter = ref('all');
 const showSpinWheel = ref(false);
+
+// Reset movement filter khi đổi category
+watch(categoryFilter, () => { movementTypeFilter.value = 'all'; });
 
 // Get sorted dates (desc) from outputs
 const sortedDates = computed(() => {
@@ -65,9 +69,14 @@ const displayDates = computed(() => {
     if (categoryFilter.value !== 'all') {
         const dates = new Set();
         for (const [date, dayOutputs] of Object.entries(props.outputs || {})) {
-            if (dayOutputs.some(o => o.category === categoryFilter.value)) {
-                dates.add(date);
-            }
+            const matches = dayOutputs.filter(o => {
+                if (o.category !== categoryFilter.value) return false;
+                if (categoryFilter.value === 'movement' && movementTypeFilter.value !== 'all') {
+                    return (o.movement_type || 'other') === movementTypeFilter.value;
+                }
+                return true;
+            });
+            if (matches.length > 0) dates.add(date);
         }
         return [...dates]
             .filter(d => d >= trackingStart && d <= trackingEnd)
@@ -101,8 +110,41 @@ const displayDates = computed(() => {
 const getOutputsForDate = (date) => {
     const outputs = props.outputs?.[date] || [];
     if (categoryFilter.value === 'all') return outputs;
-    return outputs.filter(o => o.category === categoryFilter.value);
+    return outputs.filter(o => {
+        if (o.category !== categoryFilter.value) return false;
+        if (categoryFilter.value === 'movement' && movementTypeFilter.value !== 'all') {
+            return (o.movement_type || 'other') === movementTypeFilter.value;
+        }
+        return true;
+    });
 };
+
+// Heatmap filtered theo movement_type (khi filter movement)
+const filteredHeatmap = computed(() => {
+    if (categoryFilter.value !== 'movement' || movementTypeFilter.value === 'all') {
+        return props.heatmap;
+    }
+    // Tính lại count/duration từ outputs theo movement_type
+    const byDate = {};
+    for (const [date, dayOutputs] of Object.entries(props.outputs || {})) {
+        const matches = dayOutputs.filter(o =>
+            o.category === 'movement' &&
+            o.status === 'done' &&
+            (o.movement_type || 'other') === movementTypeFilter.value
+        );
+        if (matches.length > 0) {
+            byDate[date] = {
+                count: matches.length,
+                duration: matches.reduce((s, o) => s + (o.duration || 0), 0),
+            };
+        }
+    }
+    return props.heatmap.map(day => ({
+        ...day,
+        count: byDate[day.date]?.count ?? 0,
+        duration: byDate[day.date]?.duration ?? 0,
+    }));
+});
 
 const isToday = (date) => date === today;
 const isTomorrow = (date) => date === tomorrow;
@@ -340,13 +382,13 @@ const switchView = (view) => {
 
                     <CalendarHeatmap
                         v-if="calendarSubMode === 'heatmap'"
-                        :heatmap="heatmap"
+                        :heatmap="filteredHeatmap"
                         :rest-days="restDays"
                         @select-date="selectDateFromCalendar"
                     />
                     <MonthlyCalendar
                         v-else
-                        :heatmap="heatmap"
+                        :heatmap="filteredHeatmap"
                         :rest-days="restDays"
                         @select-date="selectDateFromCalendar"
                     />
@@ -357,6 +399,7 @@ const switchView = (view) => {
                     <MovementLogTable
                         :outputs="outputs"
                         :movement-types="movementTypes"
+                        v-model:selected-type="movementTypeFilter"
                     />
                 </div>
 
