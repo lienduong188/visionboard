@@ -14,7 +14,8 @@ class DailyOutput extends Model
     // compound: Khả năng tích lũy theo thời gian (1-10)
     // flywheel = impact × compound (max 100)
     const CATEGORIES = [
-        'writing'  => ['icon' => '✍️', 'label' => 'Writing',  'impact' => 8, 'compound' => 9, 'tooltip' => 'Viết blog, caption, scripting'],
+        'blog_vi'  => ['icon' => '🇻🇳', 'label' => 'Blog VI',  'impact' => 8, 'compound' => 9, 'tooltip' => 'Viết blog tiếng Việt'],
+        'writing'  => ['icon' => '✍️', 'label' => 'Blog JP',  'impact' => 8, 'compound' => 9, 'tooltip' => 'Viết blog tiếng Nhật, caption, scripting'],
         'capture'  => ['icon' => '📸', 'label' => 'Capture',  'impact' => 7, 'compound' => 7, 'tooltip' => 'Quay vlog, chụp ảnh (raw, chưa edit)'],
         'edit'     => ['icon' => '🎬', 'label' => 'Edit',     'impact' => 8, 'compound' => 8, 'tooltip' => 'Edit video, audio mixing, post-production'],
         'art'      => ['icon' => '🖌️', 'label' => 'Art',      'impact' => 7, 'compound' => 7, 'tooltip' => 'Vẽ tranh, design Adobe (Illustrator, Photoshop...)'],
