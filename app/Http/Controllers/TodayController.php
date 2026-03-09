@@ -33,10 +33,13 @@ class TodayController extends Controller
             ->get()
             ->map(fn($m) => $this->formatMilestone($m, $today));
 
-        // 2. Reminders due today or upcoming (active, within 7 days, goal not completed)
+        // 2. Reminders due today or upcoming (active, within 7 days, goal is in_progress and started)
         $reminders = Reminder::with(['goal.category'])
             ->whereIn('goal_id', $goalIds)
-            ->whereHas('goal', fn($q) => $q->where('status', '!=', 'completed'))
+            ->whereHas('goal', fn($q) => $q
+                ->where('status', 'in_progress')
+                ->where(fn($q2) => $q2->whereNull('start_date')->orWhere('start_date', '<=', $today))
+            )
             ->where('is_active', true)
             ->whereNotNull('next_send_at')
             ->where('next_send_at', '<=', $endOfWeek->endOfDay())
