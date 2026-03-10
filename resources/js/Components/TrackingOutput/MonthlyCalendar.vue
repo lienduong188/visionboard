@@ -12,7 +12,7 @@ const props = defineProps({
 const MOVEMENT_TYPE_COLORS = {
     running:       { light: 'bg-orange-200 dark:bg-orange-700 text-orange-800 dark:text-orange-100', strong: 'bg-orange-500 dark:bg-orange-500 text-white' },
     trail_running: { light: 'bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200', strong: 'bg-purple-500 dark:bg-purple-500 text-white' },
-    gym:           { light: 'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200',             strong: 'bg-red-500 dark:bg-red-500 text-white' },
+    gym:           { light: 'bg-yellow-200 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-100', strong: 'bg-yellow-400 dark:bg-yellow-500 text-gray-800' },
     hiking:        { light: 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200',         strong: 'bg-blue-500 dark:bg-blue-500 text-white' },
     other:         { light: 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200',         strong: 'bg-gray-500 dark:bg-gray-400 text-white' },
 };
@@ -23,7 +23,7 @@ const isMovementMode = computed(() => props.categoryFilter === 'movement');
 const TYPE_DOT_COLORS = {
     running:       '#f97316',
     trail_running: '#a855f7',
-    gym:           '#ef4444',
+    gym:           '#eab308',
     hiking:        '#3b82f6',
     other:         '#6b7280',
 };
