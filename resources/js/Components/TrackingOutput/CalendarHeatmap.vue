@@ -199,12 +199,8 @@ const getCellClass = (day) => {
     if (day.date > today) return 'bg-gray-100 dark:bg-gray-800 opacity-50';
     if (day.count === 0) return 'bg-gray-200 dark:bg-gray-700';
 
-    // Movement mode: dùng màu theo type
-    if (isMovementMode.value && day.dominantType) {
-        const colors = MOVEMENT_TYPE_COLORS[day.dominantType] || MOVEMENT_TYPE_COLORS.other;
-        // Nếu nhiều types: luôn dùng light để dots nổi bật
-        return (day.types?.length > 1) ? colors.light : (day.count === 1 ? colors.light : colors.strong);
-    }
+    // Movement mode: segments handle the background
+    if (isMovementMode.value && day.dominantType) return '';
 
     if (day.count === 1) return 'bg-green-300 dark:bg-green-700';
     if (day.count === 2) return 'bg-green-400 dark:bg-green-600';
@@ -277,16 +273,15 @@ const isToday = (day) => day && day.date === today;
                                 :title="getTooltip(day)"
                                 @click="day && emit('select-date', day.date)"
                             >
-                                <!-- Dots cho movement types (hiện khi có output) -->
+                                <!-- Horizontal color segments cho movement types -->
                                 <div
                                     v-if="isMovementMode && day?.types?.length"
-                                    class="absolute bottom-0 left-0 right-0 flex justify-center items-end gap-[1px] pb-[1px]"
+                                    class="absolute inset-0 flex"
                                 >
                                     <div
-                                        v-for="t in day.types.slice(0, 4)"
+                                        v-for="t in day.types"
                                         :key="t"
-                                        class="rounded-full flex-shrink-0"
-                                        style="width: 3px; height: 3px;"
+                                        class="flex-1 h-full"
                                         :style="{ backgroundColor: TYPE_DOT_COLORS[t] || '#6b7280' }"
                                     />
                                 </div>
