@@ -10,10 +10,10 @@ const props = defineProps({
 
 // Màu sắc cho từng movement type
 const MOVEMENT_TYPE_COLORS = {
-    running:       { light: 'bg-orange-200 dark:bg-orange-800', strong: 'bg-orange-400 dark:bg-orange-500', ring: 'ring-orange-400' },
-    trail_running: { light: 'bg-amber-200 dark:bg-amber-800',   strong: 'bg-amber-500 dark:bg-amber-600',   ring: 'ring-amber-400' },
-    gym:           { light: 'bg-purple-200 dark:bg-purple-800', strong: 'bg-purple-500 dark:bg-purple-600', ring: 'ring-purple-400' },
-    hiking:        { light: 'bg-teal-200 dark:bg-teal-800',     strong: 'bg-teal-500 dark:bg-teal-600',     ring: 'ring-teal-400' },
+    running:       { light: 'bg-orange-200 dark:bg-orange-700', strong: 'bg-orange-500 dark:bg-orange-500', ring: 'ring-orange-400' },
+    trail_running: { light: 'bg-purple-200 dark:bg-purple-800', strong: 'bg-purple-500 dark:bg-purple-500', ring: 'ring-purple-400' },
+    gym:           { light: 'bg-red-200 dark:bg-red-800',       strong: 'bg-red-500 dark:bg-red-500',       ring: 'ring-red-400' },
+    hiking:        { light: 'bg-blue-200 dark:bg-blue-800',     strong: 'bg-blue-500 dark:bg-blue-500',     ring: 'ring-blue-400' },
     other:         { light: 'bg-gray-300 dark:bg-gray-600',     strong: 'bg-gray-500 dark:bg-gray-400',     ring: 'ring-gray-400' },
 };
 

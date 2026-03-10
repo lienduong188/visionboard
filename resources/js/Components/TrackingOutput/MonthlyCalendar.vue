@@ -10,10 +10,10 @@ const props = defineProps({
 
 // Màu sắc cho từng movement type
 const MOVEMENT_TYPE_COLORS = {
-    running:       { light: 'bg-orange-200 dark:bg-orange-800 text-orange-800 dark:text-orange-200', strong: 'bg-orange-400 dark:bg-orange-500 text-white' },
-    trail_running: { light: 'bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200',     strong: 'bg-amber-500 dark:bg-amber-600 text-white' },
-    gym:           { light: 'bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200', strong: 'bg-purple-500 dark:bg-purple-600 text-white' },
-    hiking:        { light: 'bg-teal-200 dark:bg-teal-800 text-teal-800 dark:text-teal-200',         strong: 'bg-teal-500 dark:bg-teal-600 text-white' },
+    running:       { light: 'bg-orange-200 dark:bg-orange-700 text-orange-800 dark:text-orange-100', strong: 'bg-orange-500 dark:bg-orange-500 text-white' },
+    trail_running: { light: 'bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200', strong: 'bg-purple-500 dark:bg-purple-500 text-white' },
+    gym:           { light: 'bg-red-200 dark:bg-red-800 text-red-800 dark:text-red-200',             strong: 'bg-red-500 dark:bg-red-500 text-white' },
+    hiking:        { light: 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200',         strong: 'bg-blue-500 dark:bg-blue-500 text-white' },
     other:         { light: 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200',         strong: 'bg-gray-500 dark:bg-gray-400 text-white' },
 };
 
