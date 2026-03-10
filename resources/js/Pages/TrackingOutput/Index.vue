@@ -135,20 +135,23 @@ const filteredHeatmap = computed(() => {
             return true;
         });
         if (matches.length > 0) {
-            // Tìm movement type xuất hiện nhiều nhất trong ngày
+            // Tìm movement types trong ngày (sorted by frequency)
             let dominantType = null;
+            let types = null;
             if (categoryFilter.value === 'movement') {
                 const typeCounts = {};
                 for (const o of matches) {
                     const t = o.movement_type || 'other';
                     typeCounts[t] = (typeCounts[t] || 0) + 1;
                 }
-                dominantType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'other';
+                types = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]).map(([t]) => t);
+                dominantType = types[0] || 'other';
             }
             byDate[date] = {
                 count: matches.length,
                 duration: matches.reduce((s, o) => s + (o.duration || 0), 0),
                 dominantType,
+                types,
             };
         }
     }
@@ -157,6 +160,7 @@ const filteredHeatmap = computed(() => {
         count: byDate[day.date]?.count ?? 0,
         duration: byDate[day.date]?.duration ?? 0,
         dominantType: byDate[day.date]?.dominantType ?? null,
+        types: byDate[day.date]?.types ?? null,
     }));
 });
 

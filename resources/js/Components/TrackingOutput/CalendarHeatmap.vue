@@ -19,6 +19,15 @@ const MOVEMENT_TYPE_COLORS = {
 
 const isMovementMode = computed(() => props.categoryFilter === 'movement');
 
+// Màu hex cho dots (dùng style binding, tránh Tailwind purge)
+const TYPE_DOT_COLORS = {
+    running:       '#f97316', // orange-500
+    trail_running: '#a855f7', // purple-500
+    gym:           '#ef4444', // red-500
+    hiking:        '#3b82f6', // blue-500
+    other:         '#6b7280', // gray-500
+};
+
 const emit = defineEmits(['select-date']);
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -193,7 +202,8 @@ const getCellClass = (day) => {
     // Movement mode: dùng màu theo type
     if (isMovementMode.value && day.dominantType) {
         const colors = MOVEMENT_TYPE_COLORS[day.dominantType] || MOVEMENT_TYPE_COLORS.other;
-        return day.count === 1 ? colors.light : colors.strong;
+        // Nếu nhiều types: luôn dùng light để dots nổi bật
+        return (day.types?.length > 1) ? colors.light : (day.count === 1 ? colors.light : colors.strong);
     }
 
     if (day.count === 1) return 'bg-green-300 dark:bg-green-700';
@@ -258,7 +268,7 @@ const isToday = (day) => day && day.date === today;
                             <div
                                 v-for="(day, dIdx) in week"
                                 :key="dIdx"
-                                class="w-full rounded-sm cursor-pointer transition-all hover:ring-1 hover:ring-indigo-400"
+                                class="w-full rounded-sm cursor-pointer transition-all hover:ring-1 hover:ring-indigo-400 relative overflow-hidden"
                                 :class="[
                                     getCellClass(day),
                                     isToday(day) ? 'ring-2 ring-indigo-500' : '',
@@ -266,7 +276,21 @@ const isToday = (day) => day && day.date === today;
                                 style="aspect-ratio: 1;"
                                 :title="getTooltip(day)"
                                 @click="day && emit('select-date', day.date)"
-                            />
+                            >
+                                <!-- Dots cho movement types (hiện khi có output) -->
+                                <div
+                                    v-if="isMovementMode && day?.types?.length"
+                                    class="absolute bottom-0 left-0 right-0 flex justify-center items-end gap-[1px] pb-[1px]"
+                                >
+                                    <div
+                                        v-for="t in day.types.slice(0, 4)"
+                                        :key="t"
+                                        class="rounded-full flex-shrink-0"
+                                        style="width: 3px; height: 3px;"
+                                        :style="{ backgroundColor: TYPE_DOT_COLORS[t] || '#6b7280' }"
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

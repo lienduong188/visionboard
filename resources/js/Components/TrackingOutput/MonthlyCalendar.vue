@@ -19,6 +19,15 @@ const MOVEMENT_TYPE_COLORS = {
 
 const isMovementMode = computed(() => props.categoryFilter === 'movement');
 
+// Màu hex cho dots
+const TYPE_DOT_COLORS = {
+    running:       '#f97316',
+    trail_running: '#a855f7',
+    gym:           '#ef4444',
+    hiking:        '#3b82f6',
+    other:         '#6b7280',
+};
+
 const emit = defineEmits(['select-date']);
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -109,7 +118,9 @@ const getCellClass = (dateStr) => {
     // Movement mode: dùng màu theo type
     if (isMovementMode.value && data.dominantType) {
         const colors = MOVEMENT_TYPE_COLORS[data.dominantType] || MOVEMENT_TYPE_COLORS.other;
-        return (data.count === 1 ? colors.light : colors.strong) + ' cursor-pointer hover:ring-1 hover:ring-offset-0';
+        // Nếu nhiều types: luôn dùng light để dots nổi bật
+        const colorClass = (data.types?.length > 1) ? colors.light : (data.count === 1 ? colors.light : colors.strong);
+        return colorClass + ' cursor-pointer hover:ring-1 hover:ring-offset-0';
     }
 
     if (data.count === 1) return 'bg-green-200 dark:bg-green-900/60 text-green-800 dark:text-green-200 cursor-pointer hover:ring-1 hover:ring-green-400';
@@ -169,15 +180,29 @@ const getTooltip = (dateStr) => {
                         <div
                             v-for="(dateStr, dIdx) in week"
                             :key="dIdx"
-                            class="aspect-square flex items-center justify-center rounded text-[11px] font-medium transition-all"
+                            class="aspect-square flex flex-col items-center justify-center rounded font-medium transition-all"
                             :class="[
                                 dateStr ? getCellClass(dateStr) : '',
                                 isToday(dateStr) ? 'ring-2 ring-indigo-500 font-bold' : '',
+                                (isMovementMode && heatmapMap[dateStr]?.types?.length) ? 'text-[9px]' : 'text-[11px]',
                             ]"
                             :title="getTooltip(dateStr)"
                             @click="dateStr && isInRange(dateStr) && emit('select-date', dateStr)"
                         >
                             <span v-if="dateStr">{{ parseInt(dateStr.split('-')[2]) }}</span>
+                            <!-- Dots cho movement types -->
+                            <div
+                                v-if="isMovementMode && heatmapMap[dateStr]?.types?.length"
+                                class="flex gap-[2px] mt-[1px]"
+                            >
+                                <div
+                                    v-for="t in heatmapMap[dateStr].types.slice(0, 3)"
+                                    :key="t"
+                                    class="rounded-full flex-shrink-0"
+                                    style="width: 4px; height: 4px;"
+                                    :style="{ backgroundColor: TYPE_DOT_COLORS[t] || '#6b7280' }"
+                                />
+                            </div>
                         </div>
                     </template>
                 </div>
