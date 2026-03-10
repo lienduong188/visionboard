@@ -119,23 +119,36 @@ const getOutputsForDate = (date) => {
     });
 };
 
-// Heatmap filtered theo movement_type (khi filter movement)
+// Heatmap filtered theo category + movement_type
 const filteredHeatmap = computed(() => {
-    if (categoryFilter.value !== 'movement' || movementTypeFilter.value === 'all') {
-        return props.heatmap;
-    }
-    // Tính lại count/duration từ outputs theo movement_type
+    if (categoryFilter.value === 'all') return props.heatmap;
+
+    // Tính lại count/duration từ outputs filtered theo category (+movement_type nếu có)
     const byDate = {};
     for (const [date, dayOutputs] of Object.entries(props.outputs || {})) {
-        const matches = dayOutputs.filter(o =>
-            o.category === 'movement' &&
-            o.status === 'done' &&
-            (o.movement_type || 'other') === movementTypeFilter.value
-        );
+        const matches = dayOutputs.filter(o => {
+            if (o.status !== 'done') return false;
+            if (o.category !== categoryFilter.value) return false;
+            if (categoryFilter.value === 'movement' && movementTypeFilter.value !== 'all') {
+                return (o.movement_type || 'other') === movementTypeFilter.value;
+            }
+            return true;
+        });
         if (matches.length > 0) {
+            // Tìm movement type xuất hiện nhiều nhất trong ngày
+            let dominantType = null;
+            if (categoryFilter.value === 'movement') {
+                const typeCounts = {};
+                for (const o of matches) {
+                    const t = o.movement_type || 'other';
+                    typeCounts[t] = (typeCounts[t] || 0) + 1;
+                }
+                dominantType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'other';
+            }
             byDate[date] = {
                 count: matches.length,
                 duration: matches.reduce((s, o) => s + (o.duration || 0), 0),
+                dominantType,
             };
         }
     }
@@ -143,6 +156,7 @@ const filteredHeatmap = computed(() => {
         ...day,
         count: byDate[day.date]?.count ?? 0,
         duration: byDate[day.date]?.duration ?? 0,
+        dominantType: byDate[day.date]?.dominantType ?? null,
     }));
 });
 
@@ -384,12 +398,16 @@ const switchView = (view) => {
                         v-if="calendarSubMode === 'heatmap'"
                         :heatmap="filteredHeatmap"
                         :rest-days="restDays"
+                        :category-filter="categoryFilter"
+                        :movement-types="movementTypes"
                         @select-date="selectDateFromCalendar"
                     />
                     <MonthlyCalendar
                         v-else
                         :heatmap="filteredHeatmap"
                         :rest-days="restDays"
+                        :category-filter="categoryFilter"
+                        :movement-types="movementTypes"
                         @select-date="selectDateFromCalendar"
                     />
                 </div>

@@ -4,7 +4,20 @@ import { computed } from 'vue';
 const props = defineProps({
     heatmap: Array,
     restDays: Array,
+    categoryFilter: { type: String, default: 'all' },
+    movementTypes: { type: Object, default: () => ({}) },
 });
+
+// Màu sắc cho từng movement type
+const MOVEMENT_TYPE_COLORS = {
+    running:       { light: 'bg-orange-200 dark:bg-orange-800 text-orange-800 dark:text-orange-200', strong: 'bg-orange-400 dark:bg-orange-500 text-white' },
+    trail_running: { light: 'bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200',     strong: 'bg-amber-500 dark:bg-amber-600 text-white' },
+    gym:           { light: 'bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200', strong: 'bg-purple-500 dark:bg-purple-600 text-white' },
+    hiking:        { light: 'bg-teal-200 dark:bg-teal-800 text-teal-800 dark:text-teal-200',         strong: 'bg-teal-500 dark:bg-teal-600 text-white' },
+    other:         { light: 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200',         strong: 'bg-gray-500 dark:bg-gray-400 text-white' },
+};
+
+const isMovementMode = computed(() => props.categoryFilter === 'movement');
 
 const emit = defineEmits(['select-date']);
 
@@ -92,6 +105,13 @@ const getCellClass = (dateStr) => {
     if (data?.is_rest_day) return 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 cursor-pointer hover:ring-1 hover:ring-blue-400';
     if (dateStr > today) return 'bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20';
     if (!data || data.count === 0) return 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/20';
+
+    // Movement mode: dùng màu theo type
+    if (isMovementMode.value && data.dominantType) {
+        const colors = MOVEMENT_TYPE_COLORS[data.dominantType] || MOVEMENT_TYPE_COLORS.other;
+        return (data.count === 1 ? colors.light : colors.strong) + ' cursor-pointer hover:ring-1 hover:ring-offset-0';
+    }
+
     if (data.count === 1) return 'bg-green-200 dark:bg-green-900/60 text-green-800 dark:text-green-200 cursor-pointer hover:ring-1 hover:ring-green-400';
     if (data.count === 2) return 'bg-green-300 dark:bg-green-700/70 text-green-800 dark:text-green-100 cursor-pointer hover:ring-1 hover:ring-green-400';
     return 'bg-green-500 dark:bg-green-600 text-white cursor-pointer hover:ring-1 hover:ring-green-400';
@@ -188,15 +208,27 @@ const getTooltip = (dateStr) => {
         </div>
 
         <!-- Legend -->
-        <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-            <span>Less</span>
-            <div class="flex gap-1">
+        <div class="flex items-center flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+            <!-- Movement type legend -->
+            <template v-if="isMovementMode">
                 <div class="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700"></div>
-                <div class="w-4 h-4 rounded bg-green-200 dark:bg-green-900/60"></div>
-                <div class="w-4 h-4 rounded bg-green-300 dark:bg-green-700/70"></div>
-                <div class="w-4 h-4 rounded bg-green-500 dark:bg-green-600"></div>
-            </div>
-            <span>More</span>
+                <span>None</span>
+                <template v-for="(info, key) in movementTypes" :key="key">
+                    <div class="w-4 h-4 rounded" :class="MOVEMENT_TYPE_COLORS[key]?.strong || 'bg-gray-400 text-white'"></div>
+                    <span>{{ info.icon }} {{ info.ja }}</span>
+                </template>
+            </template>
+            <!-- Default green legend -->
+            <template v-else>
+                <span>Less</span>
+                <div class="flex gap-1">
+                    <div class="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700"></div>
+                    <div class="w-4 h-4 rounded bg-green-200 dark:bg-green-900/60"></div>
+                    <div class="w-4 h-4 rounded bg-green-300 dark:bg-green-700/70"></div>
+                    <div class="w-4 h-4 rounded bg-green-500 dark:bg-green-600"></div>
+                </div>
+                <span>More</span>
+            </template>
             <div class="w-4 h-4 rounded bg-blue-100 dark:bg-blue-900/50 ml-2"></div>
             <span>Rest</span>
             <div class="w-4 h-4 rounded ring-2 ring-indigo-500 ml-2"></div>

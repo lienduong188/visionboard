@@ -4,7 +4,20 @@ import { computed } from 'vue';
 const props = defineProps({
     heatmap: Array,
     restDays: Array,
+    categoryFilter: { type: String, default: 'all' },
+    movementTypes: { type: Object, default: () => ({}) },
 });
+
+// Màu sắc cho từng movement type
+const MOVEMENT_TYPE_COLORS = {
+    running:       { light: 'bg-orange-200 dark:bg-orange-800', strong: 'bg-orange-400 dark:bg-orange-500', ring: 'ring-orange-400' },
+    trail_running: { light: 'bg-amber-200 dark:bg-amber-800',   strong: 'bg-amber-500 dark:bg-amber-600',   ring: 'ring-amber-400' },
+    gym:           { light: 'bg-purple-200 dark:bg-purple-800', strong: 'bg-purple-500 dark:bg-purple-600', ring: 'ring-purple-400' },
+    hiking:        { light: 'bg-teal-200 dark:bg-teal-800',     strong: 'bg-teal-500 dark:bg-teal-600',     ring: 'ring-teal-400' },
+    other:         { light: 'bg-gray-300 dark:bg-gray-600',     strong: 'bg-gray-500 dark:bg-gray-400',     ring: 'ring-gray-400' },
+};
+
+const isMovementMode = computed(() => props.categoryFilter === 'movement');
 
 const emit = defineEmits(['select-date']);
 
@@ -176,6 +189,13 @@ const getCellClass = (day) => {
     if (day.is_rest_day) return 'bg-blue-200 dark:bg-blue-800';
     if (day.date > today) return 'bg-gray-100 dark:bg-gray-800 opacity-50';
     if (day.count === 0) return 'bg-gray-200 dark:bg-gray-700';
+
+    // Movement mode: dùng màu theo type
+    if (isMovementMode.value && day.dominantType) {
+        const colors = MOVEMENT_TYPE_COLORS[day.dominantType] || MOVEMENT_TYPE_COLORS.other;
+        return day.count === 1 ? colors.light : colors.strong;
+    }
+
     if (day.count === 1) return 'bg-green-300 dark:bg-green-700';
     if (day.count === 2) return 'bg-green-400 dark:bg-green-600';
     return 'bg-green-600 dark:bg-green-500';
@@ -254,15 +274,27 @@ const isToday = (day) => day && day.date === today;
         </div>
 
         <!-- Legend -->
-        <div class="flex items-center gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
-            <span>Less</span>
-            <div class="flex gap-1">
+        <div class="flex items-center flex-wrap gap-3 mt-4 text-xs text-gray-500 dark:text-gray-400">
+            <!-- Movement type legend -->
+            <template v-if="isMovementMode">
                 <div class="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700"></div>
-                <div class="w-3 h-3 rounded-sm bg-green-300 dark:bg-green-700"></div>
-                <div class="w-3 h-3 rounded-sm bg-green-400 dark:bg-green-600"></div>
-                <div class="w-3 h-3 rounded-sm bg-green-600 dark:bg-green-500"></div>
-            </div>
-            <span>More</span>
+                <span>None</span>
+                <template v-for="(info, key) in movementTypes" :key="key">
+                    <div class="w-3 h-3 rounded-sm" :class="MOVEMENT_TYPE_COLORS[key]?.strong || 'bg-gray-400'"></div>
+                    <span>{{ info.icon }} {{ info.ja }}</span>
+                </template>
+            </template>
+            <!-- Default green legend -->
+            <template v-else>
+                <span>Less</span>
+                <div class="flex gap-1">
+                    <div class="w-3 h-3 rounded-sm bg-gray-200 dark:bg-gray-700"></div>
+                    <div class="w-3 h-3 rounded-sm bg-green-300 dark:bg-green-700"></div>
+                    <div class="w-3 h-3 rounded-sm bg-green-400 dark:bg-green-600"></div>
+                    <div class="w-3 h-3 rounded-sm bg-green-600 dark:bg-green-500"></div>
+                </div>
+                <span>More</span>
+            </template>
             <div class="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800 ml-2"></div>
             <span>Rest</span>
         </div>
