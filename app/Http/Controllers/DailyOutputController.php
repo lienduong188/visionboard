@@ -203,8 +203,11 @@ class DailyOutputController extends Controller
         $currentImages = $dailyOutput->images ?? [];
         $removedImages = $validated['removed_images'] ?? [];
         foreach ($removedImages as $path) {
-            Storage::disk('public')->delete($path);
-            $currentImages = array_values(array_filter($currentImages, fn($p) => $p !== $path));
+            // Only delete if path actually belongs to this output (prevent arbitrary file deletion)
+            if (in_array($path, $currentImages)) {
+                Storage::disk('public')->delete($path);
+                $currentImages = array_values(array_filter($currentImages, fn($p) => $p !== $path));
+            }
         }
 
         // Add new uploaded images

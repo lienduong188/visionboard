@@ -241,6 +241,11 @@ onUnmounted(() => {
     if (animationId) {
         cancelAnimationFrame(animationId);
     }
+    // Clean up drag listeners in case component unmounts mid-drag
+    document.removeEventListener('mousemove', onDrag);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchmove', onDrag);
+    document.removeEventListener('touchend', endDrag);
 });
 
 // Hover state for goals
