@@ -220,9 +220,12 @@ const closeModal = (savedDate) => {
     if (savedDate) {
         // Reset filter về 'all' để output mới luôn hiển thị
         categoryFilter.value = 'all';
+        // nextTick (microtask) → then RAF ensures our scroll runs AFTER Inertia's RAF scroll restoration
         nextTick(() => {
-            const el = document.getElementById(`day-${savedDate}`);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            window.requestAnimationFrame(() => {
+                const el = document.getElementById(`day-${savedDate}`);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         });
     }
 };

@@ -98,7 +98,8 @@ const closeGoalModal = () => {
 };
 
 const onGoalSaved = () => {
-    router.reload({ preserveScroll: true });
+    // Data already refreshed by InfoTab's router.post() with preserveScroll: true
+    // No reload needed
 };
 
 const onGoalDeleted = () => {
