@@ -125,6 +125,7 @@ const submitMilestone = () => {
         });
     } else {
         milestoneForm.post(route('milestones.store', props.goal.id), {
+            preserveScroll: true,
             onSuccess: () => {
                 showMilestoneModal.value = false;
                 milestoneForm.reset();

@@ -117,6 +117,7 @@ const submitReminder = () => {
         reminderForm.transform(() => formData).put(
             route('reminders.update', [props.goal.id, editingReminder.value.id]),
             {
+                preserveScroll: true,
                 onSuccess: () => {
                     showReminderModal.value = false;
                     reminderForm.reset();
@@ -127,6 +128,7 @@ const submitReminder = () => {
         reminderForm.transform(() => formData).post(
             route('reminders.store', props.goal.id),
             {
+                preserveScroll: true,
                 onSuccess: () => {
                     showReminderModal.value = false;
                     reminderForm.reset();

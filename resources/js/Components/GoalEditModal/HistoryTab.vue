@@ -89,6 +89,7 @@ const submitProgressLog = () => {
 
     if (editingProgressLog.value) {
         progressLogForm.put(route('progress-logs.update', [props.goal.id, editingProgressLog.value.id]), {
+            preserveScroll: true,
             onSuccess: () => {
                 showProgressLogModal.value = false;
                 progressLogForm.reset();
@@ -96,6 +97,7 @@ const submitProgressLog = () => {
         });
     } else {
         progressLogForm.post(route('progress-logs.store', props.goal.id), {
+            preserveScroll: true,
             onSuccess: () => {
                 showProgressLogModal.value = false;
                 progressLogForm.reset();
