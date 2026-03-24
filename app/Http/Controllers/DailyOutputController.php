@@ -291,7 +291,7 @@ class DailyOutputController extends Controller
             return back()->with('success', 'Rest day marked! (Earned)');
         }
 
-        return back()->with('error', 'Rest day marked but NOT earned - this will reset your streak!');
+        return back()->with('success', 'Rest day marked! (Not earned - no rest days available)');
     }
 
     public function analytics(Request $request)
