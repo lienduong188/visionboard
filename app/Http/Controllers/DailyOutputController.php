@@ -149,13 +149,13 @@ class DailyOutputController extends Controller
             ->count();
 
         if (isset($validated['goal_id'])) {
-            $goal = $request->user()->goals()->find($validated['goal_id']);
+            $goal = $request->user()->goals()->active()->find($validated['goal_id']);
             if (!$goal) $validated['goal_id'] = null;
         }
 
         DailyOutput::create($validated);
 
-        return back()->with('success', 'Output added!');
+        return redirect()->route('tracking-output.index')->with('success', 'Output added!');
     }
 
     public function update(Request $request, DailyOutput $dailyOutput)
@@ -221,7 +221,7 @@ class DailyOutputController extends Controller
 
         $dailyOutput->update($validated);
 
-        return back()->with('success', 'Output updated!');
+        return redirect()->route('tracking-output.index')->with('success', 'Output updated!');
     }
 
     public function destroy(Request $request, DailyOutput $dailyOutput)

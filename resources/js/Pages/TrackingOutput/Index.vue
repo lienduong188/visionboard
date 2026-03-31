@@ -187,6 +187,13 @@ const isMissed = (date) => {
     return !outputs.some(o => o.status === 'done');
 };
 
+// Reload goals khi modal mở để đảm bảo goals luôn fresh (tránh completed goals xuất hiện)
+watch(showFormModal, (val) => {
+    if (val && !props.isPublic) {
+        router.reload({ only: ['goals'], preserveScroll: true, preserveState: true });
+    }
+});
+
 // Modal handlers
 const openAddModal = (date, title = null, category = null, status = null) => {
     editingOutput.value = null;
