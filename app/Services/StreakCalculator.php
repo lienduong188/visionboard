@@ -60,7 +60,7 @@ class StreakCalculator
         $tempStreak = 0;
         $consecutiveForEarn = 0;
         $earnedRestDays = 0;
-        $usedRestDays = $restDays->count();
+        $usedRestDays = $restDays->filter(fn($r) => $r->is_earned)->count();
 
         // Only count up to yesterday for streak breaks.
         // Today is still in progress, so don't penalize missing output yet.
