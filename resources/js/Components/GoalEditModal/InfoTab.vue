@@ -260,7 +260,8 @@ const submit = () => {
 
     router.post(route('goals.update', props.goal.id), data, {
         forceFormData: true,
-        preserveScroll: true,
+        preserveScroll: false,
+        preserveState: false,
         onSuccess: () => {
             processing.value = false;
             emit('saved');

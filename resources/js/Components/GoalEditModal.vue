@@ -73,7 +73,7 @@ const cancelClose = () => {
 // Handle save from InfoTab
 const onSaved = () => {
     emit('saved');
-    // Do NOT close modal — keep it open so user sees updated data immediately
+    confirmClose();
 };
 
 // Handle delete from InfoTab
