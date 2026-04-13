@@ -1,274 +1,71 @@
-name: Deploy to Sakura Server
+name: Deploy to DigitalOcean
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # Cho phép trigger thủ công
+  workflow_dispatch:
 
-# Chỉ cho 1 deploy chạy tại 1 thời điểm, cancel deploy cũ nếu có push mới
 concurrency:
   group: production-deploy
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build Assets
+  deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🐘 Setup PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, pdo, pdo_mysql, pdo_sqlite
+          extensions: mbstring, pdo, pdo_sqlite
           tools: composer:v2
 
-      - name: 📦 Install PHP dependencies
+      - name: Install PHP dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: 📦 Install Node dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: 🏗️ Build assets
-        run: npm run build
-
-      - name: 📤 Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: built-assets
-          path: |
-            public/build/
-            vendor/
-          retention-days: 1
-
-  deploy:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📥 Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: built-assets
-
-      - name: 📦 Create deployment package and deploy script
+      - name: Install Node dependencies and build
         run: |
-          mkdir -p deploy
-          cp -r app bootstrap config database public resources routes storage vendor artisan composer.json composer.lock .htaccess index.php deploy/
-          cd deploy && tar -czf ../deploy.tar.gz .
-          cd ..
+          npm ci --legacy-peer-deps
+          npm run build
 
-          # Create deploy script (runs with bash on server)
-          cat > deploy.sh << 'SCRIPT'
-          #!/bin/bash
-          set -e
-          cd ~
+      - name: Deploy via rsync
+        uses: burnett01/rsync-deployments@6.0.0
+        with:
+          switches: -avzr --checksum --delete --exclude='.git' --exclude='node_modules' --exclude='.env' --exclude='database/*.sqlite' --exclude='storage/app/public/*' --exclude='storage/logs/*' --exclude='storage/framework/cache/*' --exclude='storage/framework/sessions/*' --exclude='storage/framework/views/*' --exclude='public/storage'
+          path: ./
+          remote_path: /var/www/visionboard/
+          remote_host: 165.232.161.229
+          remote_user: root
+          remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-          # Verify deployment package exists
-          if [ ! -f "deploy.tar.gz" ]; then
-            echo "❌ ERROR: deploy.tar.gz not found! Aborting."
-            exit 1
-          fi
-
-          # Extract to temp directory
-          echo "Extracting files..."
-          mkdir -p www/visionboard2026_new
-          tar -xzf deploy.tar.gz -C www/visionboard2026_new/
-          rm deploy.tar.gz
-
-          # Verify extraction succeeded
-          if [ ! -f "www/visionboard2026_new/artisan" ]; then
-            echo "❌ ERROR: Extraction failed - artisan not found! Aborting."
-            rm -rf www/visionboard2026_new
-            exit 1
-          fi
-
-          # Preserve .env and storage from current deployment (vendor comes fresh from CI)
-          # NOTE: Do NOT fall back to www/ - it may be the portfolio or another project!
-          CURRENT_DIR=""
-          if [ -d "www/visionboard2026" ] && [ -f "www/visionboard2026/artisan" ]; then
-            CURRENT_DIR="www/visionboard2026"
-          elif [ -d "www/visionboard2026_backup" ] && [ -f "www/visionboard2026_backup/artisan" ]; then
-            echo "⚠️ Main deployment missing, falling back to backup for .env and storage"
-            CURRENT_DIR="www/visionboard2026_backup"
-          fi
-
-          if [ -n "$CURRENT_DIR" ]; then
-            echo "Found current deployment at ~/$CURRENT_DIR"
-
-            if [ -f "$CURRENT_DIR/.env" ]; then
-              # Verify it's actually visionboard's .env (not portfolio or other project)
-              if grep -q "visionboard\|DB_CONNECTION=sqlite" "$CURRENT_DIR/.env" 2>/dev/null; then
-                echo "Preserving .env file..."
-                cp "$CURRENT_DIR/.env" www/visionboard2026_new/.env
-                # Ensure APP_TIMEZONE is set to Asia/Tokyo (FreeBSD sed requires -i '')
-                grep -q "APP_TIMEZONE" www/visionboard2026_new/.env \
-                  && sed -i '' 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Asia\/Tokyo/' www/visionboard2026_new/.env \
-                  || echo "APP_TIMEZONE=Asia/Tokyo" >> www/visionboard2026_new/.env
-                echo "Ensured APP_TIMEZONE=Asia/Tokyo in .env"
-                # Ensure APP_URL is correct (prevent wrong domain for image URLs)
-                grep -q "APP_URL" www/visionboard2026_new/.env \
-                  && sed -i '' 's|^APP_URL=.*|APP_URL=https://visionboard.duonglien.com|' www/visionboard2026_new/.env \
-                  || echo "APP_URL=https://visionboard.duonglien.com" >> www/visionboard2026_new/.env
-                # Remove ASSET_URL if set (should inherit from APP_URL)
-                sed -i '' '/^ASSET_URL=/d' www/visionboard2026_new/.env 2>/dev/null || true
-                echo "Ensured APP_URL=https://visionboard.duonglien.com in .env"
-              else
-                echo "⚠️ .env at $CURRENT_DIR doesn't look like visionboard's (skipping to avoid wrong APP_KEY)"
-              fi
-            fi
-
-            if [ -d "$CURRENT_DIR/storage/app" ]; then
-              echo "Preserving storage uploads..."
-              rm -rf www/visionboard2026_new/storage/app
-              cp -r "$CURRENT_DIR/storage/app" www/visionboard2026_new/storage/app
-            fi
-
-            # Preserve SQLite database (critical - do not wipe user data!)
-            if [ -f "$CURRENT_DIR/database/database.sqlite" ]; then
-              echo "Preserving SQLite database..."
-              cp "$CURRENT_DIR/database/database.sqlite" www/visionboard2026_new/database/database.sqlite
-            fi
-          else
-            echo "⚠️ No current deployment found, deploying fresh"
-          fi
-
-          # Backup current deployment if exists
-          if [ -d "www/visionboard2026" ]; then
-            echo "Backing up current deployment..."
-            rm -rf www/visionboard2026_backup
-            mv www/visionboard2026 www/visionboard2026_backup
-          fi
-
-          # Move new deployment to production
-          echo "Activating new deployment..."
-          mv www/visionboard2026_new www/visionboard2026
-
-          cd www/visionboard2026
-
-          # Remove .env.production to prevent it from overriding .env
-          rm -f .env.production
-
-          # Disaster recovery: generate minimal .env if none was preserved
-          if [ ! -f ".env" ]; then
-            echo "⚠️ No .env found! Generating minimal .env for disaster recovery..."
-            echo 'APP_NAME="VisionBoard 2026"' > .env
-            echo 'APP_ENV=production' >> .env
-            echo 'APP_KEY=' >> .env
-            echo 'APP_DEBUG=false' >> .env
-            echo 'APP_URL=https://visionboard.duonglien.com' >> .env
-            echo 'APP_TIMEZONE=Asia/Tokyo' >> .env
-            echo 'LOG_CHANNEL=stack' >> .env
-            echo 'LOG_LEVEL=error' >> .env
-            echo 'DB_CONNECTION=sqlite' >> .env
-            echo 'DB_DATABASE=database/database.sqlite' >> .env
-            echo 'CACHE_DRIVER=file' >> .env
-            echo 'FILESYSTEM_DISK=local' >> .env
-            echo 'QUEUE_CONNECTION=sync' >> .env
-            echo 'SESSION_DRIVER=file' >> .env
-            echo 'SESSION_LIFETIME=120' >> .env
-            echo 'SESSION_PATH=/' >> .env
-            php artisan key:generate --force
-            echo "✅ Generated fresh APP_KEY. Users will need to re-login."
-          fi
-
-          # Create storage dirs if missing
-          mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
-
-          # Set permissions
-          echo "Setting permissions..."
-          chmod -R 755 .
-          chmod -R 775 storage bootstrap/cache
-
-          # Run Laravel commands
-          echo "Running migrations..."
-          php artisan migrate --force
-
-          # NOTE: restore.sql is NOT auto-run in deploy to prevent accidental data wipe.
-          # If manual restore is needed, SSH to server and run manually:
-          #   sqlite3 ~/www/visionboard2026/database/database.sqlite < ~/restore.sql
-
-          echo "Setting up storage link..."
-          mkdir -p storage/app/public
-          rm -f public/storage
-          STORAGE_ABS="$(pwd)/storage/app/public"
-          ln -sf "$STORAGE_ABS" public/storage
-          echo "Storage link: public/storage -> $STORAGE_ABS"
-          ls -la public/storage || echo "WARNING: storage link may have failed"
-
-          echo "Caching configurations..."
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
-          php artisan cache:clear
-
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-
-          # Verify config cache has correct APP_KEY
-          CACHED_KEY=$(grep "'key'" bootstrap/cache/config.php 2>/dev/null | head -1)
-          if echo "$CACHED_KEY" | grep -q "YOUR_APP_KEY_HERE"; then
-            echo "❌ ERROR: Config cache has placeholder APP_KEY! Check .env file."
-            exit 1
-          fi
-
-          # Setup cron job for Laravel scheduler (idempotent)
-          echo "Setting up Laravel scheduler cron..."
-          SITE_DIR="$HOME/www/visionboard2026"
-          CRON_LINE="* * * * * cd $SITE_DIR && php artisan schedule:run >> /dev/null 2>&1"
-          ( crontab -l 2>/dev/null | grep -v "visionboard2026.*schedule:run" ; echo "$CRON_LINE" ) | crontab -
-          echo "✅ Cron job setup: $CRON_LINE"
-
-          # Cleanup deploy script
-          rm -f ~/deploy.sh
-
-          echo "✅ Deployment completed successfully!"
-          SCRIPT
-
-      - name: 📤 Upload files to server
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > deploy_key
-          chmod 600 deploy_key
-          scp -i deploy_key -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
-            deploy.tar.gz deploy.sh ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~/
-          rm deploy_key
-
-      - name: ⚙️ Run deploy script
+      - name: Setup database and cache
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
+          host: 165.232.161.229
+          username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: bash ~/deploy.sh
+          script: |
+            cd /var/www/visionboard
+            chown -R www-data:www-data storage bootstrap/cache
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
 
-      - name: 🔍 Health Check
-        if: success()
+      - name: Health Check
         run: |
-          echo "Waiting 5s for server to stabilize..."
           sleep 5
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://visionboard.duonglien.com/login)
-          if [ "$HTTP_STATUS" -eq 200 ]; then
-            echo "✅ Health check passed! HTTP $HTTP_STATUS"
-          else
-            echo "⚠️ Health check returned HTTP $HTTP_STATUS - site may need manual check"
-          fi
-
-      - name: ✅ Deployment Status
-        if: success()
-        run: echo "🎉 Deployment to https://visionboard.duonglien.com/ completed!"
+          echo "Health check: HTTP $HTTP_STATUS"
