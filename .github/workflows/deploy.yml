@@ -58,7 +58,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/visionboard
-            chown -R www-data:www-data storage bootstrap/cache
+            chown -R www-data:www-data .
+            find . -type f -name "*.sqlite" -exec chmod 664 {} \;
+            find . -type d -name "database" -exec chmod 775 {} \;
+            chmod -R 775 storage bootstrap/cache
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
