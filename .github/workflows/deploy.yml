@@ -67,6 +67,10 @@ jobs:
             php artisan route:cache
             php artisan view:cache
 
+            # Ensure Laravel scheduler cron is set up for www-data
+            CRON_JOB="* * * * * cd /var/www/visionboard && php artisan schedule:run >> /dev/null 2>&1"
+            ( crontab -u www-data -l 2>/dev/null | grep -v 'schedule:run'; echo "$CRON_JOB" ) | crontab -u www-data -
+
       - name: Health Check
         run: |
           sleep 5
