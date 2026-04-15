@@ -32,60 +32,45 @@ npm run build
 npm run dev
 ```
 
+## Server (DigitalOcean)
+- **Droplet**: Ubuntu 24.04, 1 vCPU, 2GB RAM, IP: 165.232.161.229
+- **Web root**: `/var/www/visionboard/`
+- **Domain**: https://visionboard.duonglien.com
+- **PHP**: 8.2 FPM (ondemand mode)
+- **Web server**: Nginx với SSL (Let's Encrypt, auto-renew)
+- **Database**: SQLite tại `/var/www/visionboard/database/database.sqlite`
+- **SSH**: `ssh root@165.232.161.229`
+- **Deploy key**: `/root/.ssh/github_actions_deploy` (GitHub Actions dùng secret `SSH_PRIVATE_KEY`)
+- **Swap**: 2GB tại `/swapfile`, swappiness=10
+
 ## ⚠️ Quy tắc Deploy & Database (QUAN TRỌNG - đọc trước khi deploy)
 
-### Database production là SQLite trên Sakura server
-- File: `~/www/visionboard2026/database/database.sqlite`
+### Database production là SQLite trên DigitalOcean
+- File: `/var/www/visionboard/database/database.sqlite`
 - **KHÔNG BAO GIỜ** commit `database/restore.sql` vào git — dù chỉ "tạm thời"
   - File này được gitignore, nếu cần force-add thì phải xóa ngay sau khi dùng xong
   - Một khi đã commit vào git → mỗi lần deploy sẽ tự động wipe sạch data production
 - **KHÔNG** thêm bước auto-run restore.sql vào `deploy.yml` — đã từng làm và gây mất data nhiều lần
-- Deploy an toàn: script tự copy sqlite từ deployment cũ sang mới, data được preserve
 
-### Khi cần restore data production
-- Dùng workflow **"Restore Database (Manual)"** trên GitHub Actions (trigger thủ công)
-- Workflow dùng backup mới nhất từ `storage/app/backups/` trên server (backup tự động hàng ngày 2AM)
-- Server Sakura dùng **FreeBSD/tcsh** — script phải chạy qua `sh` (không dùng bash syntax)
-- Không dùng `appleboy/ssh-action` cho script phức tạp — dùng raw SSH: `ssh ... "sh ~/script.sh"`
+### LƯU Ý quan trọng: rsync ownership
+- rsync từ GitHub Actions runner (uid 1001) làm toàn bộ file ownership thành uid 1001
+- SQLite sẽ bị **readonly** → PHP-FPM (www-data) không ghi được → data reset!
+- Fix: post-deploy script luôn chạy `chown -R www-data:www-data .`
+- Đã có trong workflow hiện tại — **đừng xóa bước này**
 
 ### Backup system
 - Tự động backup hàng ngày lúc 2:00 AM (Asia/Tokyo), giữ 7 bản gần nhất
 - Backup lưu tại `storage/app/backups/` trên server
 - Có thể backup thủ công tại `/settings/backup`
 
-## Production Deployment
-
-### 🚀 GitHub Actions Auto-Deploy (Khuyên dùng)
-Xem chi tiết trong [GITHUB_ACTIONS_SETUP.md](GITHUB_ACTIONS_SETUP.md)
-
-**Setup một lần:**
-1. Add GitHub Secrets (FTP, SSH credentials)
-2. Upload code lần đầu lên server
-3. Push workflow file lên GitHub
-
-**Sử dụng:**
-```bash
-git push origin main
-# → GitHub Actions tự động build & deploy! 🎉
-```
-
-### 📦 Manual Deploy
-Xem chi tiết trong [DEPLOYMENT.md](DEPLOYMENT.md) và [UPLOAD_GUIDE.md](UPLOAD_GUIDE.md)
-
-**Quick checklist:**
-1. Upload code lên server tại `/home/username/www/visionboard2026/`
-2. Tạo `.env` production (copy từ `.env.production.example`)
-3. Set permissions: `chmod -R 775 storage bootstrap/cache`
-4. Run migrations: `php artisan migrate --force`
-5. Link storage: `php artisan storage:link`
-6. Cache config: `php artisan config:cache && php artisan route:cache`
-7. Setup cron cho reminders: `* * * * * cd /path && php artisan schedule:run`
-8. Test: https://visionboard.duonglien.com/
+## Deploy (GitHub Actions)
+- Push lên `main` → GitHub Actions tự động build & rsync lên DO
+- Workflow: `.github/workflows/deploy.yml`
+- Post-deploy: chown fix ownership, php artisan migrate/cache
 
 **⚠️ Important:**
 - `APP_URL=https://visionboard.duonglien.com`
 - `SESSION_PATH=/`
-- `ASSET_URL=https://visionboard.duonglien.com`
 
 ## Database
 ```bash
