@@ -43,7 +43,7 @@ jobs:
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@6.0.0
         with:
-          switches: -avzr --checksum --delete --exclude='.git' --exclude='node_modules' --exclude='.env' --exclude='database/*.sqlite' --exclude='storage/app/public/*' --exclude='storage/logs/*' --exclude='storage/framework/cache/*' --exclude='storage/framework/sessions/*' --exclude='storage/framework/views/*' --exclude='public/storage'
+          switches: -avzr --checksum --delete --exclude='.git' --exclude='node_modules' --exclude='.env' --exclude='database/*.sqlite' --exclude='storage/app/public/*' --exclude='storage/app/backups' --exclude='storage/app/backup_status.json' --exclude='storage/logs/*' --exclude='storage/framework/cache/*' --exclude='storage/framework/sessions/*' --exclude='storage/framework/views/*' --exclude='public/storage'
           path: ./
           remote_path: /var/www/visionboard/
           remote_host: 165.232.161.229
